@@ -18,22 +18,16 @@
 
 這套配置另外處理一個長期問題：**如何把開發過程中反覆出現的問題、決策與驗證結果，沉澱成可重複使用的工程規則。**
 
-```text
-開發事件
-   ↓
-Lesson / Evidence
-   ↓
-規則候選
-   ↓
-Ablation 驗證
-   ↓
-常駐規則
+```mermaid
+flowchart LR
+    A["開發事件<br/>實際撞到的問題"]
+    B["Lesson / Evidence<br/>docs/lessons/"]
+    C["規則候選"]
+    D["Ablation 驗證<br/>.claude/ABLATION.md"]
+    E["常駐規則<br/>.claude/rules/"]
 
-實際案例          docs/lessons/
-                      ↓
-              .claude/ABLATION.md
-                      ↓
-               .claude/rules/
+    A --> B --> C --> D --> E
+    D -. "無 Failure Evidence<br/>則退回或丟棄" .-> C
 ```
 
 `docs/lessons/` 保存案例與決策背景，`.claude/rules/` 保存已經值得常駐的工程規則，而 `ABLATION.md` 負責記錄這些規則存在的失敗證據與移除條件。
@@ -76,7 +70,7 @@ Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\temp
 CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設執行節奏
 .claude/
 ├── CLAUDE.md              # 元件責任與 8 條維護契約
-├── EXECUTION_MODEL.md     # 任務分解：Process / Thread / Coroutine / Pool / 同步原語
+├── EXECUTION_MODEL.md     # 任務分解、執行派發與平行協調的完整定義
 ├── WORKFLOW.md            # 執行層級、角色分工、Context 邊界與驗證流程
 ├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
@@ -111,22 +105,36 @@ docs/
 
 執行單元只有三層，沒有第四種：
 
-```text
-Workload
- └─ Process        可獨立派發、獨立驗證的執行單元（完整 Context 隔離）
-     ├─ Thread     Process 內可平行的更小單元（唯讀，或寫入範圍不相交）
-     └─ Coroutine  同一 Context 內載入的方法（無隔離、無平行）
+```mermaid
+flowchart TD
+    W["Workload<br/>一輪工作"]
+
+    W --> P1["Process<br/>完整 Context 隔離"]
+    W --> P2["Process<br/>與左側互不相依"]
+
+    P1 --> T["Thread<br/>唯讀，或寫入範圍不相交"]
+    P1 --> C["Coroutine<br/>同 Context，無隔離"]
+
+    P2 --> T2["Thread"]
+
+    classDef proc fill:#1f6feb,stroke:#1f6feb,color:#fff
+    classDef thr fill:#238636,stroke:#238636,color:#fff
+    classDef cor fill:#8957e5,stroke:#8957e5,color:#fff
+    class P1,P2 proc
+    class T,T2 thr
+    class C cor
 ```
 
 一個 Process 必須同時滿足四條：**完整**（端到端可觀察）· **可獨立驗證** · **裝得進一個新 Process** · **接縫已定**。
+
 裝不進就往下拆，無法獨立驗證就往上合併。
 
-| 執行單位           | 隔離程度             | 使用情境                         |
-| -------------- | ---------------- | ---------------------------- |
-| **Coroutine**  | 無，同一 Context     | 只需要一套方法或能力，不需要隔離。**預設執行單位**  |
-| **Thread**     | 獨立 Context，共享工作樹 | 唯讀 fan-out、搜尋、審查、第二意見        |
-| **Process**    | 完整隔離             | 獨立 Process、垂直切片、規劃 → 實作邊界  |
-| **Connection** | 外部資源             | CLI、MCP、瀏覽器、DB、API quota、GPU |
+| 執行單位 | 隔離程度 | 使用情境 |
+| --- | --- | --- |
+| **Coroutine** | 無，同一 Context | 只需要一套方法或能力，不需要隔離。**預設執行單位** |
+| **Thread** | 獨立 Context，共享工作樹 | 唯讀 fan-out、搜尋、審查、第二意見 |
+| **Process** | 完整隔離 | 獨立工作單元、垂直切片、規劃 → 實作邊界 |
+| **Connection** | 外部資源 | CLI、MCP、瀏覽器、DB、API quota、GPU |
 
 ### Pool
 
@@ -150,19 +158,41 @@ Workload
 
 ### 元件對應
 
-```text
-rules/          → Kernel
-skills/         → Coroutine Library
-agents/         → Thread / Process Templates
-HANDOFF         → IPC Message
-CONTEXT.md      → Shared Memory
-Context Window  → Working Memory
-Compact         → Swap
-```
+| 配置元件 | 執行模型 |
+| --- | --- |
+| `rules/` | Kernel |
+| `skills/` | Coroutine Library |
+| `agents/` | Thread / Process Templates |
+| `HANDOFF` | IPC Message |
+| `CONTEXT.md` | Shared Memory |
+| Context Window | Working Memory |
+| Compact | Swap |
 
 其中最重要的一個區分是：
 
 **寫入衝突屬於 Mutual Exclusion，不等於 Dependency。**
+
+```mermaid
+flowchart TB
+    subgraph WRONG ["標成 Dependency（錯）"]
+        direction TB
+        A1["Process A"] --> A2["Process B 必須等 A"]
+        A2 --> A3["→ 假的 Critical Path"]
+    end
+
+    subgraph RIGHT ["標成 Mutex（對）"]
+        direction TB
+        M(("Mutex<br/>src/auth/**"))
+        B1["Process A"] --- M
+        B2["Process B"] --- M
+        M --- B3["→ 順序自由，只是不能同時"]
+    end
+
+    classDef bad fill:#da3633,stroke:#da3633,color:#fff
+    classDef good fill:#238636,stroke:#238636,color:#fff
+    class A3 bad
+    class B3 good
+```
 
 如果兩個工作只是不能同時修改同一區域，應使用 `Mutex / Critical Section` 描述，而不是標成 `Depends on`。
 
@@ -176,11 +206,11 @@ Compact         → Swap
 
 ## 三個執行角色
 
-| 角色               | 執行位置                  | 責任                              | 不負責                        |
-| ---------------- | --------------------- | ------------------------------- | -------------------------- |
-| **Scheduler** | 主 Process             | 任務分解、執行派發、同步、驗證、結果整合            | 不執行 Worker 級實作             |
-| **Supervisor**      | 高能力唯讀 Thread          | 在關鍵 Decision Boundary 提供分析與第二意見 | **不直接修改工作樹**               |
-| **Worker**       | Thread / Process Pool | 執行被派發的 Process                | 不自行核准結果、不自行取得下一個 Process |
+| 角色 | 執行位置 | 責任 | 不負責 |
+| --- | --- | --- | --- |
+| **Scheduler** | 主 Process | 任務分解、執行派發、同步、驗證、結果整合 | 不執行 Worker 級實作 |
+| **Supervisor** | 高能力唯讀 Thread | 在關鍵 Decision Boundary 提供分析與第二意見 | **不直接修改工作樹** |
+| **Worker** | Thread / Process Pool | 執行被派發的 Process | 不自行核准結果、不自行取得下一個 Process |
 
 核心原則：
 
@@ -190,14 +220,14 @@ Compact         → Swap
 
 ## 常駐規則（6 條）
 
-| 規則                    | 核心                                                           |
-| --------------------- | ------------------------------------------------------------ |
-| **core-rules**      | 來源優先、可追溯、保護使用者工作、以證據宣告完成、最小變更、保存可重用經驗                        |
-| **evidence-grades**   | 每個結論帶證據等級：`已確認`／`推論`／`候選`／`未知`／`未驗證`                         |
-| **dispatch**          | 預設 Coroutine、獨立切片使用 Process、平行執行前確認寫入衝突與同步需求                 |
-| **git-workflow**      | 分支隔離、Critical Section 前建立 backup tag、commit → push → PR 保持連續 |
-| **thinking-boundary** | 區分快速執行與深度分析；原型階段避免過早治理；資源超支必須顯式回報                            |
-| **register**          | 文件 L1／L2／L3 分級，以及對話何時升級到 Decision Layer                      |
+| 規則 | 核心 |
+| --- | --- |
+| **core-rules** | 來源優先、可追溯、保護使用者工作、以證據宣告完成、最小變更、保存可重用經驗 |
+| **evidence-grades** | 每個結論帶證據等級：`已確認`／`推論`／`候選`／`未知`／`未驗證` |
+| **dispatch** | 預設 Coroutine、獨立切片使用 Process、平行執行前確認寫入衝突與同步需求 |
+| **git-workflow** | 分支隔離、Critical Section 前建立 backup tag、commit → push → PR 保持連續 |
+| **thinking-boundary** | 區分快速執行與深度分析；原型階段避免過早治理；資源超支必須顯式回報 |
+| **register** | 文件 L1／L2／L3 分級，以及對話何時升級到 Decision Layer |
 
 新增常駐規則前，先檢查：
 
@@ -211,29 +241,29 @@ Compact         → Swap
 
 ### 通用能力
 
-| 執行情境                          | 載入                     |
-| ----------------------------- | ---------------------- |
-| 需求仍模糊，需要探索問題空間與系統邊界           | `se-design`            |
-| 問題空間過大，需要定位下一個可回答問題           | `se-discovery`           |
-| 需要壓力測試假設、找出缺漏或取得外部決策          | `se-clarify`             |
-| 需要先判斷技術或產品可行性                 | `se-feasibility`       |
-| 專案術語、Domain Language 或命名不一致   | `se-context-language`  |
-| 進入程式實作                        | `se-minimal-change`       |
-| Debug、定位 Root Cause           | `se-debug`             |
-| 變更完成，需要 Spec / Standards 雙軸審查 | `se-two-axis-review`   |
-| **要做任務分解、執行派發與平行協調**          | **`se-scheduling`**   |
-| 外部工具、MCP、CLI 或環境能力不確定         | `se-preflight` |
-| 建立分支、完成變更並準備 PR               | `se-branch-lifecycle`  |
-| 輸出需要聚焦、壓縮或重新組織                | `se-focus`             |
-| 本輪產生值得保留的工程經驗                 | `se-epiphany`          |
-| 新增或修改 Skill                   | `se-skill-authoring`   |
+| 執行情境 | 載入 |
+| --- | --- |
+| 需求仍模糊，需要探索問題空間與系統邊界 | `se-design` |
+| 問題空間過大，需要定位下一個可回答問題 | `se-discovery` |
+| 需要壓力測試假設、找出缺漏或取得外部決策 | `se-clarify` |
+| 需要先判斷技術或產品可行性 | `se-feasibility` |
+| 專案術語、Domain Language 或命名不一致 | `se-context-language` |
+| 進入程式實作 | `se-minimal-change` |
+| Debug、定位 Root Cause | `se-debug` |
+| 變更完成，需要 Spec / Standards 雙軸審查 | `se-two-axis-review` |
+| **要做任務分解、執行派發與平行協調** | **`se-scheduling`** |
+| 外部工具、MCP、CLI 或環境能力不確定 | `se-preflight` |
+| 建立分支、完成變更並準備 PR | `se-branch-lifecycle` |
+| 輸出需要聚焦、壓縮或重新組織 | `se-focus` |
+| 本輪產生值得保留的工程經驗 | `se-epiphany` |
+| 新增或修改 Skill | `se-skill-authoring` |
 
 ### 領域能力
 
-| 執行情境                                              | 載入                     |
-| ------------------------------------------------- | ---------------------- |
-| 系統設計、PRD → Architecture、容量估算、瓶頸與 Trade-off 分析     | **`se-system-design`** |
-| ML 專案、資料切分、Leakage、Pipeline、Evaluation、Deployment | **`se-ml-lifecycle`**  |
+| 執行情境 | 載入 |
+| --- | --- |
+| 系統設計、PRD → Architecture、容量估算、瓶頸與 Trade-off 分析 | **`se-system-design`** |
+| ML 專案、資料切分、Leakage、Pipeline、Evaluation、Deployment | **`se-ml-lifecycle`** |
 
 完整路由與選擇條件：
 
@@ -247,17 +277,17 @@ Agent 名稱直接表示：
 
 **Execution Unit + Responsibility**
 
-| Agent                         | 型別                | 使用情境                                                               |
-| ----------------------------- | ----------------- | ------------------------------------------------------------------ |
-| `thread-scout`                | Thread            | 廣度搜尋與資訊蒐集，只回傳結論與證據                                                 |
-| `thread-supervisor`              | Thread（高能力模型）     | 結果矛盾、驗證連續失敗、計畫需要結構性調整                                              |
-| `thread-reviewer-spec`        | Thread            | Spec Review：確認是否實作正確需求                                             |
-| `thread-reviewer-standards`   | Thread            | Standards Review：確認實作品質與工程規範                                       |
-| `thread-security`             | Thread            | Authentication、Input、Secret、External Interface、Deployment Security |
-| `process-worker`              | Process           | 一個 **Process** 的完整實作與驗證                                          |
-| **`thread-system-architect`** | **Thread（高能力模型）** | **系統設計：估算 → 瓶頸 → 深入分析 → Trade-off**                                |
-| **`process-ml-engineer`**     | **Process**       | **ML Lifecycle：定義 → Split → Pipeline → Evaluation → Deployment**   |
-| **`thread-ml-auditor`**       | **Thread（高能力模型）** | **既有 ML Pipeline 與 Evaluation Validity 稽核**                        |
+| Agent | 型別 | 使用情境 |
+| --- | --- | --- |
+| `thread-scout` | Thread | 廣度搜尋與資訊蒐集，只回傳結論與證據 |
+| `thread-supervisor` | Thread（高能力模型） | 結果矛盾、驗證連續失敗、計畫需要結構性調整 |
+| `thread-reviewer-spec` | Thread | Spec Review：確認是否實作正確需求 |
+| `thread-reviewer-standards` | Thread | Standards Review：確認實作品質與工程規範 |
+| `thread-security` | Thread | Authentication、Input、Secret、External Interface、Deployment Security |
+| `process-worker` | Process | 一個 **Process** 的完整實作與驗證 |
+| **`thread-system-architect`** | **Thread（高能力模型）** | **系統設計：估算 → 瓶頸 → 深入分析 → Trade-off** |
+| **`process-ml-engineer`** | **Process** | **ML Lifecycle：定義 → Split → Pipeline → Evaluation → Deployment** |
+| **`thread-ml-auditor`** | **Thread（高能力模型）** | **既有 ML Pipeline 與 Evaluation Validity 稽核** |
 
 ---
 
@@ -265,58 +295,70 @@ Agent 名稱直接表示：
 
 典型的多 Agent 執行流程：
 
-```text
-Request
-   ↓
-Scheduler
-   ↓
-Task Decomposition
-   ↓
-Ready Queue
-   ↓
-Dispatch
-   ├── Coroutine
-   ├── Thread
-   └── Process
-        ↓
-   Process Execution
-        ↓
-Synchronization
-Barrier / Mutex / Join
-        ↓
-Verification
-        ↓
-Integration
-        ↓
-Result
+```mermaid
+flowchart TD
+    R["Request"] --> S["Scheduler"]
+    S --> D["Task Decomposition"]
+    D --> Q["Ready Queue<br/>Depends on 已清空<br/>且鎖可取得"]
+    Q --> DP{"Dispatch<br/>需要隔離嗎？"}
+
+    DP -->|"不需要"| CO["Coroutine"]
+    DP -->|"唯讀"| TH["Thread"]
+    DP -->|"要寫工作樹"| PR["Process"]
+
+    CO --> SY
+    TH --> SY
+    PR --> SY
+
+    SY["Synchronization<br/>Barrier / Mutex / Join"] --> V{"Verification"}
+
+    V -->|"PASS"| I["Integration"]
+    V -->|"FIX"| Q
+    V -->|"ESCALATE"| SUP["Supervisor"]
+    SUP --> S
+
+    I --> RES["Result"]
+
+    classDef dec fill:#bf8700,stroke:#bf8700,color:#fff
+    class DP,V dec
 ```
 
 當任務可以平行化時：
 
-```text
-                    ┌─ Thread A ─┐
-Request → Fork ─────┼─ Thread B ─┼─ Barrier → Join → Verify
-                    └─ Thread C ─┘
+```mermaid
+flowchart LR
+    R["Request"] --> F(("Fork"))
+    F --> TA["Thread A"]
+    F --> TB["Thread B"]
+    F --> TC["Thread C"]
+    TA --> B(("Barrier"))
+    TB --> B
+    TC --> B
+    B --> J["Join"] --> V["Verify"]
 ```
 
 當工作需要完整隔離時：
 
-```text
-Scheduler
-     ↓
-Task Decomposition
-     ↓
-┌───────────────┐
-│ Process Pool  │
-├───────────────┤
-│ Process A   │
-│ Process B   │
-│ Process C   │
-└───────────────┘
-     ↓
-Barrier
-     ↓
-Integration
+```mermaid
+flowchart TD
+    S["Scheduler"] --> D["Task Decomposition"]
+
+    subgraph POOL ["Process Pool"]
+        direction LR
+        PA["Process A"]
+        PB["Process B"]
+        PC["Process C"]
+    end
+
+    D --> PA
+    D --> PB
+    D --> PC
+
+    PA --> B(("Barrier"))
+    PB --> B
+    PC --> B
+
+    B --> I["Integration"]
 ```
 
 ---
@@ -369,16 +411,22 @@ Integration
 
 這些項目應優先接受消融檢查：
 
-```text
-Rule
- ↓
-對應哪個 Failure Case？
- ↓
-移除後是否重新出現問題？
- ↓
-是否值得支付永久 Context Cost？
- ↓
-Keep / Rewrite / Remove
+```mermaid
+flowchart TD
+    R["Rule"] --> Q1{"對應哪個<br/>Failure Case？"}
+    Q1 -->|"說不出來"| REMOVE["Remove"]
+    Q1 -->|"說得出來"| Q2{"移除後是否<br/>重新出現問題？"}
+    Q2 -->|"沒有"| REMOVE
+    Q2 -->|"有"| Q3{"是否值得支付<br/>永久 Context Cost？"}
+    Q3 -->|"不值得"| REWRITE["Rewrite<br/>降級成 Skill"]
+    Q3 -->|"值得"| KEEP["Keep<br/>登記 Evidence"]
+
+    classDef dec fill:#bf8700,stroke:#bf8700,color:#fff
+    classDef bad fill:#da3633,stroke:#da3633,color:#fff
+    classDef good fill:#238636,stroke:#238636,color:#fff
+    class Q1,Q2,Q3 dec
+    class REMOVE bad
+    class KEEP good
 ```
 
 流程：
@@ -389,7 +437,7 @@ Keep / Rewrite / Remove
 
 [docs/lessons/0001](docs/lessons/0001-ablation-first-run.md)
 
-`PLAYBOOK` 與 `ABLATION` 都不是固定規格，而是會隨實際執行結果持續修正的工程文件。
+`RUNBOOK` 與 `ABLATION` 都不是固定規格，而是會隨實際執行結果持續修正的工程文件。
 
 每次修改都應留下對應的 Evidence 或 Lesson。
 
