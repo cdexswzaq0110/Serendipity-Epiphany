@@ -2,9 +2,10 @@
 
 # Serendipity — Epiphany
 
-**A practical Claude Code development framework.**
+**Turn development experience into reusable workflows.**
 
-一套可持續演進的 Claude Code 開發配置。
+把開發過程中的經驗，沉澱成可重複使用的工作流。
+
 </div>
 
 ---
