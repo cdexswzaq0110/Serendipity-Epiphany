@@ -1,0 +1,16 @@
+# 本機專屬設定（可能含路徑、權限例外、實驗性 hook）
+.claude/settings.local.json
+
+# 領悟帳本的本機草稿（正式 Lesson 要 commit）
+docs/lessons/*.draft.md
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 編輯器
+.vscode/
+.idea/
+*.swp
+*~

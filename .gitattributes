@@ -1,0 +1,6 @@
+# repo 內一律 LF，避免跨平台產生整片假變更
+* text=auto eol=lf
+
+*.md   text eol=lf
+*.json text eol=lf
+LICENSE text eol=lf
