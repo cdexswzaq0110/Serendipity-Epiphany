@@ -63,7 +63,7 @@ description: 撰寫與修改 Agent 會讀的文件——SKILL.md、CLAUDE.md、A
 
 自創詞在你定義清楚時可行，但**自創的詞徵召不到任何先驗**——你用定義的 token 去買一個既有詞免費送你的東西。**先找既有的詞。**
 
-> 這正是本 harness 把任務切分整套借用 process／thread／mutex／ready queue 的理由：你已經知道兩個 thread 同時寫同一塊記憶體會出事，那份直覺不用重新教。
+> 這正是本配置 把任務切分整套借用 process／thread／mutex／ready queue 的理由：你已經知道兩個 thread 同時寫同一塊記憶體會出事，那份直覺不用重新教。
 
 它錨定兩次。在正文是**執行**：每次那個詞出現，Agent 伸手拿同一套行為。在指標是**調用**：當同一個詞活在你的提示、你的文件、你的 codebase 裡，Agent 更可靠地把那份共享語言連到材料上。
 
@@ -95,7 +95,7 @@ description: 撰寫與修改 Agent 會讀的文件——SKILL.md、CLAUDE.md、A
 
 **使用者調用的 skill 可以呼叫模型可調用的 skill，但不得呼叫另一個使用者調用的 skill。**
 
-依賴用 `/skill` 式的散文呼叫（「載入 `se-lazy-ladder`」），**不要**深層的 `../other-skill/FILE.md` 交叉引用。共用的參考文件住在擁有它的那個 skill 裡面，別的 skill 用調用它來取得材料。
+依賴用 `/skill` 式的散文呼叫（「載入 `se-minimal-change`」），**不要**深層的 `../other-skill/FILE.md` 交叉引用。共用的參考文件住在擁有它的那個 skill 裡面，別的 skill 用調用它來取得材料。
 
 ---
 

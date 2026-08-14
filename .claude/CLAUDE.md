@@ -1,6 +1,6 @@
-# Harness 元件責任與維護契約
+# 配置元件責任與維護契約
 
-本檔管**元件責任與維護契約**——這套 harness 由哪些元件組成、改動它時不能破壞什麼。
+本檔管**元件責任與維護契約**——這套配置 由哪些元件組成、改動它時不能破壞什麼。
 
 入口敘述（這是什麼、怎麼開始、預設節奏）在根目錄 [`CLAUDE.md`](../CLAUDE.md)，不在這裡重複。
 
@@ -15,10 +15,10 @@
 - `skills/`：**Coroutine 庫**——按需載入的能力資料庫；路由見 [`skills/INDEX.md`](skills/INDEX.md)。
 - `agents/`：**Thread／Process 模板**——需要獨立 context、權限邊界、平行處理或第二意見時才使用。派發規則見 [EXECUTION_MODEL.md](EXECUTION_MODEL.md)。
 - `templates/`：文件與交付物模板。**依需要取用，不強制填滿**。
-- `../docs/lessons/`：領悟帳本。這套 harness 的長期記憶，由 `se-epiphany` 維護。
+- `../docs/lessons/`：領悟帳本。這套配置的長期記憶，由 `se-epiphany` 維護。
 - `.out-of-scope/`：已審視並拒絕的機制與理由；重新提案前先讀對應檔。
 
-## 維護契約（改動本 harness 時必須重新滿足的不變量）
+## 維護契約（改動本配置 時必須重新滿足的不變量）
 
 1. **Router 不說謊**：新增、改名、刪除 skill 或改變其定位時，必須同步更新 `skills/INDEX.md`。索引漏列新 skill、或仍導向已刪 skill，視為缺陷而非疏漏。
 2. **Frontmatter 與現實一致**：Skill 的 `description` 不得引用已退役的模板或檔名。

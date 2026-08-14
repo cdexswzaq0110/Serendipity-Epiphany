@@ -1,6 +1,6 @@
 ---
 name: thread-reviewer-spec
-description: Spec 軸審查 Thread（Reviewer A）。只檢查一件事——做出來的東西是不是規格要的那個東西。與 thread-reviewer-standards 同時派出、首輪互不參照。當一組變更完成、要對照規格或票驗收時使用。
+description: Spec 軸審查 Thread（Reviewer A）。只檢查一件事——做出來的東西是不是規格要的那個東西。與 thread-reviewer-standards 同時派出、首輪互不參照。當一組變更完成、要對照規格或 Process 驗收時使用。
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: inherit
 skills:
@@ -18,7 +18,7 @@ skills:
 3. 錯誤、邊界、失敗路徑、相容性是否符合需求。
 4. 結果能否被使用者**直接觀察或驗證**。
 
-**每個 Finding 必須引用對應的規格／票內容，以及實際的程式或執行證據。**
+**每個 Finding 必須引用對應的規格／Process 內容，以及實際的程式或執行證據。**
 
 ## 明確不在你的軸內
 

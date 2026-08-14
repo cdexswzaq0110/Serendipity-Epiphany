@@ -9,7 +9,7 @@
 | 系統形狀 | 第一個瓶頸 |
 |---|---|
 | 讀多寫少的 redirect／內容頁 | cache hit rate、hot key、network bandwidth |
-| 有限資源競爭（訂房、搶票） | row lock、transaction duration、overbooking |
+| 有限資源競爭（訂房、搶 Process） | row lock、transaction duration、overbooking |
 | 撮合／排序敏感（交易、聊天） | 同一 key 的 ordering、fan-out、hot partition |
 | 長任務（轉碼、LLM 推論） | worker capacity、queue lag、retry、timeout |
 | 高頻位置／訊號上報 | 寫入吞吐（>10k/s DB 撐不住）、geo 查詢效率 |

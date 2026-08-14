@@ -16,14 +16,14 @@
 目前 SHA：<sha>
 
 規格：<實際路徑>
-Tickets（依建議順序）：<全部實際路徑>
+Processes（依建議順序）：<全部實際路徑>
 共享語言：<CONTEXT.md 路徑，若有>
 
 已完成：
-- <Ticket 編號> — <成果一句話> — <主要驗證與退出碼>
+- <Process 編號> — <成果一句話> — <主要驗證與退出碼>
 
 未完成：
-- <Ticket 編號> — <Blocked by 判定或原因>
+- <Process 編號> — <Depends on 判定或原因>
 
 目前工作樹：
 <實際 git status --short 或 diff --stat 輸出>

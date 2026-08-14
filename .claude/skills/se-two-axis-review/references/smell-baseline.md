@@ -17,7 +17,7 @@ Standards 軸永遠附帶這份基線，**即使 repo 什麼規範都沒寫**。
 | **Feature Envy** | 一個方法伸進別的物件的資料，比用自己的還多 | 把方法搬到它羨慕的那份資料上 |
 | **Data Clumps** | 同樣幾個欄位或參數老是一起旅行（一個型別想被生出來） | 把它們包成一個型別，傳那個 |
 | **Primitive Obsession** | 用 primitive 或字串代替一個該有自己型別的領域概念 | 給那個概念一個自己的小型別 |
-| **Repeated Switches** | 對同一個型別的 `switch`／`if` 串在變更裡重複出現 | 換成多型，或一張兩邊共用的 map |
+| **Repeated Switches** | 對同一個型別的 `switch`／`if` 串在變更裡重複出現 | 換成多型，或一個兩邊共用的 map |
 | **Shotgun Surgery** | 一個邏輯改動逼你在 diff 裡動很多檔案 | 把一起改的東西收進同一個模組 |
 | **Divergent Change** | 一個檔案或模組因為好幾個不相干的理由被改 | 拆開，讓每個模組只因一個理由而變 |
 | **Speculative Generality** | 為了規格沒要求的需要而加的抽象、參數或 hook | 刪掉；內聯回去直到真的有需求 |

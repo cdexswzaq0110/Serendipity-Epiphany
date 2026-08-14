@@ -2,22 +2,22 @@
 
 Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常駐。
 
-流程結構見 [../WORKFLOW.md](../WORKFLOW.md)；實際走查見 [../PLAYBOOK.md](../PLAYBOOK.md)；派發語彙見 [../EXECUTION_MODEL.md](../EXECUTION_MODEL.md)。
+流程結構見 [../WORKFLOW.md](../WORKFLOW.md)；實際走查見 [../RUNBOOK.md](../RUNBOOK.md)；派發語彙見 [../EXECUTION_MODEL.md](../EXECUTION_MODEL.md)。
 
 ## 情境路由
 
 | 你在做什麼 | 載入 | 別選錯 |
 |---|---|---|
 | 需求還模糊，要探索方案並定接縫 | `se-design` | 不是直接開寫——探索沒做完的實作會重寫 |
-| 想法太大、**連要問什麼都不確定** | `se-wayfind` | 不是 `se-design`——後者探索一個你握得住的問題；wayfind 給你握不住的那種，而且只產決策不產方案 |
-| 要被逼問到想清楚／想法要先被戳破／答案在別人身上 | `se-grill` | 不是 `se-design`——grill 只問不做，產的是共識不是計畫 |
-| 不確定值不值得做 | `se-feasibility` | 不是 `se-grill`——後者釐清「要什麼」，前者判斷「做不做得到、划不划算」 |
+| 想法太大、**連要問什麼都不確定** | `se-discovery` | 不是 `se-design`——後者探索一個你握得住的問題；discovery 給你握不住的那種，而且只產決策不產方案 |
+| 要被逼問到想清楚／想法要先被戳破／答案在別人身上 | `se-clarify` | 不是 `se-design`——clarify 只問不做，產的是共識不是計畫 |
+| 不確定值不值得做 | `se-feasibility` | 不是 `se-clarify`——後者釐清「要什麼」，前者判斷「做不做得到、划不划算」 |
 | 專案詞彙混亂、AI 一直用錯名詞 | `se-context-language` | 只是「讀 CONTEXT.md 拿詞彙」不需要載入它，那是一行提示 |
-| 要寫程式 | `se-lazy-ladder` | |
+| 要寫程式 | `se-minimal-change` | |
 | 有 bug、測試失敗、行為異常 | `se-debug` | 不是先猜著改——先要可重現的失敗 |
-| 變更完成要審查 | `se-two-axis-review` | 不是 `se-lazy-ladder` 的過度工程審查——後者只管複雜度，正確性與安全明確在它範圍外 |
-| 要拆票、派工、管平行、處理卡住的並行 | `se-orchestrate` | 不是 `se-design`——design 產切片，orchestrate 派切片 |
-| 外部 CLI／MCP／API 不確定能不能用 | `se-capability-doctor` | |
+| 變更完成要審查 | `se-two-axis-review` | 不是 `se-minimal-change` 的過度工程審查——後者只管複雜度，正確性與安全明確在它範圍外 |
+| 要任務分解、派發、管平行、處理卡住的並行 | `se-scheduling` | 不是 `se-design`——design 產切片，scheduling 派切片 |
+| 外部 CLI／MCP／API 不確定能不能用 | `se-preflight` | |
 | 開分支、worktree、收尾開 PR、救亂掉的歷史 | `se-branch-lifecycle` | |
 | 回答太長太散 | `se-focus` | |
 | 這一輪學到東西了／要召回舊教訓／帳本該回顧了 | `se-epiphany` | |
@@ -39,15 +39,15 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 類別 | Skill | 使用時機 |
 |---|---|---|
 | 探索與設計 | `se-design` | 模糊問題、方案探索、接縫選擇、垂直切片 |
-| 撥霧 | `se-wayfind` | 太大又太模糊、一個 Process 裝不下的工作 |
-| 盤問 | `se-grill` | 設計樹／施壓／問卷三模式 |
+| 未知探索 | `se-discovery` | 太大又太模糊、一個 Process 裝不下的工作 |
+| 需求釐清 | `se-clarify` | 設計樹／施壓／問卷三模式 |
 | 可行性 | `se-feasibility` | 投入前的技術、成本、時間、風險評估 |
 | 共享語言 | `se-context-language` | 建立與維護 `CONTEXT.md` |
-| 實作 | `se-lazy-ladder` | 懶惰階梯、過度工程審查、`lazy:` 債務帳 |
+| 最小變更 | `se-minimal-change` | 最小實作階梯、過度工程審查、`DEBT:` 債務帳 |
 | 除錯 | `se-debug` | 紅→縮→猜→測→修→綠 |
 | 審查 | `se-two-axis-review` | Spec 軸與 Standards 軸雙軌 |
-| 編排 | `se-orchestrate` | 切片、Ready Queue、寫入鎖、派發與驗證 |
-| 能力體檢 | `se-capability-doctor` | Connection Pool 的取得程序 |
+| 排程 | `se-scheduling` | 切片、Ready Queue、寫入鎖、派發與驗證 |
+| 前置檢查 | `se-preflight` | Connection Pool 的取得程序 |
 | 分支 | `se-branch-lifecycle` | worktree、commit、PR、歷史恢復 |
 | 輸出治理 | `se-focus` | 密度與收斂 |
 | 長期記憶 | `se-epiphany` | 捕捉／召回／回顧領悟帳本 |
@@ -74,8 +74,8 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 |---|---|
 | `se-focus` 要 `file:line`，`register.md` 要「用動作講機制」 | `register.md`「何時不可以白話」第一條：使用者要**定位**時不白話 |
 | `se-focus` 要簡短，`evidence-grades` 要標等級 | 等級不可省。省的是路徑、行號、推導過程 |
-| `se-lazy-ladder` 要最短 diff，`golden-rules` 4 要驗證證據 | ladder 本身：非平凡邏輯必須留一個可跑的檢查 |
-| `se-orchestrate` 要用滿並行，鎖規則要序列化 | 鎖優先。用滿的是**無衝突**的部分 |
+| `se-minimal-change` 要最短 diff，`core-rules` 4 要驗證證據 | 階梯本身：非平凡邏輯必須留一個可跑的檢查 |
+| `se-scheduling` 要用滿並行，鎖規則要序列化 | 鎖優先。用滿的是**無衝突**的部分 |
 
 ## 責任檢查（新增內容前先判斷）
 

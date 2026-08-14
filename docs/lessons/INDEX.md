@@ -8,7 +8,7 @@
 
 | ID | 一句話 | tags | outcome | hits |
 |---|---|---|---|---|
-| [L0001](0001-example-harness-bootstrap.md) | 新 harness 第一輪要跑消融，不要相信繼承來的常駐規則 | harness, ablation | useful | 0 |
+| [L0001](0001-ablation-first-run.md) | 常駐規則只會單向長大，要有機制才刪得掉 | ablation, rules, prompt | useful | 0 |
 
 ## 已升級（`outcome: promoted`）
 

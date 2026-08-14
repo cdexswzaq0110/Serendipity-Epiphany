@@ -209,9 +209,9 @@ High-Level Design **只要能跑就往下走**，不要在這裡追求完美。
 
 ## 與其他能力的關係
 
-- 需求本身還模糊 → 先 `se-grill` 設計樹模式，再回來走 Stage 0。
+- 需求本身還模糊 → 先 `se-clarify` 設計樹模式，再回來走 Stage 0。
 - 這個系統做不做得出來、划不划算 → `se-feasibility`。
-- 設計定案後要拆成可執行的票 → `se-design` 定接縫 → `se-orchestrate` 派工。
+- 設計定案後要拆成可執行的 Process → `se-design` 定接縫 → `se-scheduling` 派發。
 - 每個結論帶證據等級（`rules/evidence-grades.md`）：估算是**推論**，實測數字才是**已確認**。
 
 ## 完成條件

@@ -167,7 +167,7 @@ project/
 - 固定 Python 與套件版本；**seed 只保證部分可重現**，仍要記錄硬體與 library。
 - 設定檔管理 folds、seed、feature set、model params；token/API key **只放環境變數**。
 - **原始資料只讀**；任何清洗都由程式重建，不手動覆蓋 CSV。
-- 先用函式與標準 Pipeline；需求穩定後才增加額外抽象（`se-lazy-ladder`）。
+- 先用函式與標準 Pipeline；需求穩定後才增加額外抽象（`se-minimal-change`）。
 
 **Gate 1A**：新環境可依 README 安裝、讀 sample data、跑一個 smoke test；`git status` 不含 raw data、token、模型大檔與本機資料庫。
 

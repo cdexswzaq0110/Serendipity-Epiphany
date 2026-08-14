@@ -60,8 +60,8 @@ skills:
 
 - 不寫程式、不改設定、不執行部署。
 - 不決定要不要做這個專案（那是 `se-feasibility`）。
-- 不拆票、不派工（那是 `se-design` → `se-orchestrate`）。
-- 不在需求還沒收斂時就畫架構圖——需求模糊先回報，建議走 `se-grill`。
+- 不任務分解、不派發（那是 `se-design` → `se-scheduling`）。
+- 不在需求還沒收斂時就畫架構圖——需求模糊先回報，建議走 `se-clarify`。
 - 不把 secrets、API key、真實 endpoint、個資寫進文件。
 
 ## 回報

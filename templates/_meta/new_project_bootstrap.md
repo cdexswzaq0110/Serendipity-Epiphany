@@ -1,6 +1,6 @@
 # 新專案啟動（Bootstrap）
 
-> 把這套 harness 帶進**新專案**時的起步順序。本檔**不常駐**——開新專案時才讀。
+> 把這套配置 帶進**新專案**時的起步順序。本檔**不常駐**——開新專案時才讀。
 >
 > Serendipity 這個 repo 自己的入口是根目錄的 `CLAUDE.md`，不是這一份。
 
@@ -31,11 +31,11 @@
 7. 成功標準：怎麼衡量成功？
 ```
 
-答不出來的題目，載入 `se-grill` 設計樹模式。不要猜著填。
+答不出來的題目，載入 `se-clarify` 設計樹模式。不要猜著填。
 
-## Phase 3 — 能力體檢
+## Phase 3 — 前置檢查
 
-跑一次 `se-capability-doctor`：這台機器上有什麼 CLI、什麼 MCP、什麼 API key、平台並行數多少。
+跑一次 `se-preflight`：這台機器上有什麼 CLI、什麼 MCP、什麼 API key、平台並行數多少。
 
 **在寫第一行程式碼之前做完**，不要邊做邊發現缺工具。
 
@@ -55,7 +55,7 @@
 沒有寫死的命令序列。能力按需載入，路由見 `.claude/skills/INDEX.md`；
 任務怎麼切、派給誰見 `.claude/EXECUTION_MODEL.md`。
 
-預設節奏：確認分支 → 爬懶惰階梯 → 做出最小可動的東西 → 跑起來看 → 留 Lesson。
+預設節奏：確認分支 → 爬最小實作階梯 → 做出最小可動的東西 → 跑起來看 → 留 Lesson。
 
 ## 共享語言
 
@@ -94,7 +94,7 @@
 - [ ] `.claude/` 已複製，`rules/` 六條都在
 - [ ] 專案的 `CLAUDE.md` 已產出，且**只放環境查不到的東西**
 - [ ] `CONTEXT.md` 有三到五個真的會用到的詞
-- [ ] 能力體檢跑過，缺的都已記錄
+- [ ] 前置檢查跑過，缺的都已記錄
 - [ ] `docs/lessons/` 已建立
 - [ ] `.gitignore` 已含 `.claude/settings.local.json`
 - [ ] 新專案裡用不到的 templates 已刪掉
@@ -103,6 +103,6 @@
 
 ## 第一輪之後要做的事
 
-**跑一次消融。** 繼承來的 `rules/` 裡有一部分是在補一個已經不存在的模型缺陷——見 [`docs/lessons/0001`](../../docs/lessons/0001-example-harness-bootstrap.md)。
+**跑一次消融。** 繼承來的 `rules/` 裡有一部分是在補一個已經不存在的模型缺陷——見 [`docs/lessons/0001`](../../docs/lessons/0001-ablation-first-run.md)。
 
 流程在 `.claude/ABLATION.md`。

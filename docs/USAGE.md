@@ -49,7 +49,7 @@ ln -s "$(pwd)/.claude/skills/se-focus"    ~/.claude/skills/se-focus
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epiphany" -Target "$PWD\.claude\skills\se-epiphany"
 ```
 
-**建議全域共用的**：`se-epiphany`（領悟帳本要跨專案累積）、`se-focus`（輸出密度）、`se-lazy-ladder`。
+**建議全域共用的**：`se-epiphany`（領悟帳本要跨專案累積）、`se-focus`（輸出密度）、`se-minimal-change`。
 **建議留在專案內的**：其餘的——它們會被專案的實際情況改寫，改一處全域同步反而危險。
 
 ### 驗證裝好了
@@ -81,7 +81,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 |---|---|---|
 | 1 | 基礎資訊四題 | 專案定位、階段（雛型 or production） |
 | 2 | 七問澄清 | 核心問題、功能、約束、規模、成功標準 |
-| 3 | 能力體檢 | 這台機器有什麼 CLI、MCP、API key、並行數 |
+| 3 | 前置檢查 | 這台機器有什麼 CLI、MCP、API key、並行數 |
 | 4 | 產出三份檔案 | 專案的 `CLAUDE.md`、`CONTEXT.md`、`docs/lessons/INDEX.md` |
 
 **Phase 1 第 4 題最重要**：雛型還是 production。它決定後面所有的深度。**不確定就填雛型**——用 production 的標準卡住雛型是最常見的浪費。
@@ -128,7 +128,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 ### A：直接做
 
 ```
-開分支 → 爬懶惰階梯 → 做最小可動的東西 → 跑起來看 → 打掉或往下
+開分支 → 爬最小實作階梯 → 做最小可動的東西 → 跑起來看 → 打掉或往下
 ```
 
 **不能省的只有三件**：先開分支、回不了頭的決策寫 ADR、收尾判斷有沒有 Lesson。
@@ -164,10 +164,10 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | **定接縫** | 沿用既有 > 新開；用**能觀測到行為的最高**接縫；越少越好。**先確認再寫第一個測試** |
 | **切片** | 縱切穿過所有層。四判準：完整、可獨立驗證、**塞得進一個新 Process**、接縫已定 |
 
-切完票接著：
+任務分解完成後接著：
 
 ```
-載入 se-orchestrate，建 Ready Queue 與寫入鎖。
+載入 se-scheduling，建 Ready Queue 與寫入鎖。
 ```
 
 **這一輪結束時不要開始實作。** 這是 context 邊界，不是儀式——實作細節會污染後面每一片的推導。
@@ -177,7 +177,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 每片開新 session，貼交接文字（`templates/HANDOFF.md` 的格式）：
 
 ```
-新 context → 讀這片的計畫 → 爬懶惰階梯 → 在已確認接縫寫測試 → 跑 → commit
+新 context → 讀這片的計畫 → 爬最小實作階梯 → 在已確認接縫寫測試 → 跑 → commit
 ```
 
 #### ▸ 收尾
@@ -197,19 +197,19 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 用在「連要問什麼都不確定」的時候。
 
 ```
-載入 se-wayfind。我想做 <一個很大的東西>，但我講不出做完長什麼樣。
+載入 se-discovery。我想做 <一個很大的東西>，但我講不出做完長什麼樣。
 ```
 
 ```
-▸ 1     命名終點 → 廣度掃描 → 建決策票 → 派 Thread Pool 蒐證 → 停
-▸ 2..N  一個 Process 解一張 → 寫答案 → 更新地圖
+▸ 1     命名終點 → 廣度掃描 → 建決策節點 → 派 Thread Pool 蒐證 → 停
+▸ 2..N  一個 Process 解一個 → 寫答案 → 更新地圖
 ▸ 清楚了 交棒 se-design
 ```
 
 **兩個最容易搞錯的**：
 
 1. 把霧預先切成 ticket 大小。判準是「現在能不能把問題**講精準**」，不是能不能回答。
-2. 一個 session 想解好幾張。狀態活在地圖裡（`docs/maps/`），不活在 context 裡。
+2. 一個 session 想解好幾個。狀態活在地圖裡（`docs/maps/`），不活在 context 裡。
 
 **想直接動手的衝動 = 已走到地圖邊界、該交棒**，不是可以加速。
 
@@ -235,15 +235,15 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | 你講的話 | 觸發 |
 |---|---|
 | 「需求還很模糊」「這個功能要怎麼做」 | `se-design` |
-| 「這個太大了我不知道從哪開始」 | `se-wayfind` |
-| 「幫我想清楚」「戳破這個想法」「這要問誰」 | `se-grill` |
+| 「這個太大了我不知道從哪開始」 | `se-discovery` |
+| 「幫我想清楚」「戳破這個想法」「這要問誰」 | `se-clarify` |
 | 「這做得出來嗎」「值不值得」「要多久」「大概多少錢」 | `se-feasibility` |
 | 「這個東西我們叫什麼」「名詞好亂」 | `se-context-language` |
-| 「幫我實作」「加一個功能」 | `se-lazy-ladder` |
+| 「幫我實作」「加一個功能」 | `se-minimal-change` |
 | 「這裡有 bug」「測試掛了」「行為怪怪的」 | `se-debug` |
 | 「review 一下」「這樣可以嗎」「要開 PR 了」 | `se-two-axis-review` |
-| 「拆成幾張票」「可以平行嗎」「卡住了」 | `se-orchestrate` |
-| 「這個工具能用嗎」「環境好像有問題」 | `se-capability-doctor` |
+| 「拆成幾個 Process」「可以平行嗎」「卡住了」 | `se-scheduling` |
+| 「這個工具能用嗎」「環境好像有問題」 | `se-preflight` |
 | 「commit」「推上去」「開 PR」 | `se-branch-lifecycle` |
 | 「太長」「講重點」「所以我要幹嘛」 | `se-focus` |
 | 「記下來」「上次是怎麼解的」「這個好像遇過」 | `se-epiphany` |
@@ -260,9 +260,9 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 
 ### 一次只套一個流程型 Skill
 
-`se-design`、`se-wayfind`、`se-system-design`、`se-ml-lifecycle` 是**流程型**的，同一件事不要同時套兩個。
+`se-design`、`se-discovery`、`se-system-design`、`se-ml-lifecycle` 是**流程型**的，同一件事不要同時套兩個。
 
-方法型的（`se-lazy-ladder`、`se-focus`、`se-epiphany`）可以疊加。
+方法型的（`se-minimal-change`、`se-focus`、`se-epiphany`）可以疊加。
 
 ---
 
@@ -287,10 +287,10 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | Agent | 派它的訊號 |
 |---|---|
 | `thread-scout` | 「這個東西在哪」而答案要掃過很多檔案 |
-| `thread-advisor` | 兩個結果矛盾／同一件事失敗兩次／計畫要結構性改變 |
+| `thread-supervisor` | 兩個結果矛盾／同一件事失敗兩次／計畫要結構性改變 |
 | `thread-reviewer-spec` + `thread-reviewer-standards` | 變更完成要審查（**兩個一起派，首輪不互看**） |
 | `thread-security` | 碰到 auth、使用者輸入、憑證、對外介面、檔案路徑、部署設定 |
-| `process-worker` | 一張票有明確交付成果、驗收條件與寫入鎖 |
+| `process-worker` | 一個 Process 有明確交付成果、驗收條件與寫入鎖 |
 | `thread-system-architect` | 系統設計、架構評估 |
 | `process-ml-engineer` | ML 實作 |
 | `thread-ml-auditor` | 既有 ML 專案要接手或分數可疑 |
@@ -301,7 +301,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 
 同一檔案或模組寫入 · Schema · Migration · Lockfile · 同分支 git 寫操作 · 正式資料 · GPU · 全專案測試
 
-**紅線二：寫入衝突是鎖，不是依賴。** 兩張票都要改同一個檔案 → 標同一把鎖讓它們序列化，**不要串成 `Blocked by`**。串成依賴會憑空製造一條假的關鍵路徑。
+**紅線二：寫入衝突是鎖，不是依賴。** 兩個 Process 都要改同一個檔案 → 標同一把鎖讓它們序列化，**不要串成 `Depends on`**。串成依賴會憑空製造一條假的關鍵路徑。
 
 ### 驗證派出去的結果
 
@@ -354,7 +354,7 @@ grep 一下 README、測一個相鄰的東西、印出 `True` 然後 exit 0—�
 | 每個元件都講一點，沒有一個講深 | Stage 6 強制挑 2–3 個 |
 | 「用 cache 就快了」不講代價 | 每個 Stage 的產出都要求寫出取捨 |
 
-**設計定案之後**才交給 `se-design` 定接縫、`se-orchestrate` 拆票。這兩個是不同層次的工作。
+**設計定案之後**才交給 `se-design` 定接縫、`se-scheduling` 任務分解。這兩個是不同層次的工作。
 
 ---
 
@@ -392,7 +392,7 @@ Baseline + CV/OOF → Gate 3  改善跨 folds / seeds / segments 穩定
 
 **Gate 沒過不進下一階段。** 你說「幫我調參」但 Gate 1 沒過 → 它會回報這件事，先修驗證可信度。
 
-**優先順序（最重要的一張表）：**
+**優先順序（最重要的一個表）：**
 
 ```
 正確的 split ＞ 防 leakage ＞ metric 對齊 ＞ 資料語意 ＞ baseline
@@ -474,14 +474,14 @@ anchor 的最後改動晚於 Lesson 的 `date` → 標記「**程式已變動，
 | 情況 | 動作 |
 |---|---|
 | 這個要求可能有兩種讀法 | 只問會改變產出的缺口（上限 3 個），其餘宣告假設往下做 |
-| 講不出「做完長什麼樣」 | `se-wayfind`，別開工 |
+| 講不出「做完長什麼樣」 | `se-discovery`，別開工 |
 | 「該長什麼樣」爭不出來 | 做丟棄式原型；決策折回真碼，原型丟掉 |
 | 一片塞不進一個 Process | 切太粗，回去重切 |
 | 要在計畫外的位置寫測試 | 那是新接縫，先確認 |
 | 規劃逼近 ~120k | 寫下結論、開新 Process，不要硬撐 |
 | 工作樹有不認得的變更 | **停**，問人（race condition） |
-| 兩張票互相等對方 | deadlock：拆依賴或合併成一張 |
-| 某張票永遠排不到 | starvation：拆小它的寫入範圍 |
+| 兩個 Process 互相等對方 | deadlock：拆依賴或合併成一個 |
+| 某個 Process 永遠排不到 | starvation：拆小它的寫入範圍 |
 | **同一個 bug 修第三次** | **停止改 code**，命名可能錯的那個假設，**寫 Lesson** |
 | 想開 ADR | 三條件缺一就不寫（難以逆轉 ∧ 沒背景會困惑 ∧ 真實取捨） |
 | 模型分數突然變很好 | 先懷疑 leakage，派 `thread-ml-auditor` |
@@ -495,9 +495,9 @@ anchor 的最後改動晚於 Lesson 的 `date` → 標記「**程式已變動，
 | 為了看起來專業而派 Thread | 不需要隔離就 Coroutine |
 | 跳過接縫確認直接寫測試 | 接縫是規劃階段的產出 |
 | 橫切（先做完 schema 層再做 API 層） | 縱切，每片穿過所有層 |
-| 依編號或「可能會衝突」建 `Blocked by` | 那是鎖不是依賴 |
+| 依編號或「可能會衝突」建 `Depends on` | 那是鎖不是依賴 |
 | 驗證時 grep 一下就說通過 | 跑真正的指令，讀真正的輸出 |
-| 兩個結果矛盾就取平均 | 顯式解決，或升級 Advisor |
+| 兩個結果矛盾就取平均 | 顯式解決，或升級 Supervisor |
 | 預載整個 skill 庫求「完整」 | 只載當前步驟要的 |
 | 小改動也跑完整規劃 | 走 A |
 | 兩軸 review 合成一份排名 | 分開報，不排名 |
@@ -535,7 +535,7 @@ anchor 的最後改動晚於 Lesson 的 `date` → 標記「**程式已變動，
 常駐面 339 行，其中四條標著「未登記」——連我自己都填不出它為什麼存在。
 
 ```
-1. rules/ 暫時只留 golden-rules.md
+1. rules/ 暫時只留 core-rules.md
 2. 跑三個最常做的任務
 3. 只記反覆出現的同一種失敗（一次性失誤不算）
 4. 一次加回一行，在 ABLATION.md 登記證據
@@ -544,8 +544,8 @@ anchor 的最後改動晚於 Lesson 的 `date` → 標記「**程式已變動，
 
 **不要憑感覺刪，要全部拿掉再逐條加回來。** 憑感覺刪會保留最順眼的，而不是最有用的。
 
-流程在 [.claude/ABLATION.md](../.claude/ABLATION.md)，理由在 [lessons/0001](lessons/0001-example-harness-bootstrap.md)。
+流程在 [.claude/ABLATION.md](../.claude/ABLATION.md)，理由在 [lessons/0001](lessons/0001-ablation-first-run.md)。
 
 ### 一句話
 
-**這套配置本來就該被實戰改寫。** PLAYBOOK 的判準是估的、預算的形狀是估的、切片大小的判準是估的。跑完第一輪回來改它們——改完記得寫 Lesson。
+**這套配置本來就該被實戰改寫。** RUNBOOK 的判準是估的、預算的形狀是估的、切片大小的判準是估的。跑完第一輪回來改它們——改完記得寫 Lesson。

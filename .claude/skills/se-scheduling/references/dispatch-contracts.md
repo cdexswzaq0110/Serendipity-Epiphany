@@ -4,11 +4,11 @@
 
 ## 派發資料（每次都附完整，不留佔位符）
 
-- 實際專案位置、專案指令、與這張票直接相關的程式碼
-- 核准的規格、這張票、`CONTEXT.md`、相關 ADR
+- 實際專案位置、專案指令、與這個 Process 直接相關的程式碼
+- 核准的規格、這個 Process、`CONTEXT.md`、相關 ADR
 - 實際 branch、SHA
 - 交付成果、驗收條件、測試接縫、必跑指令
-- **這張票持有的寫入鎖**與已知並行衝突
+- **這個 Process 持有的寫入鎖**與已知並行衝突
 
 寫入鎖**不是檔案白名單**，是邊界宣告：它告訴 Worker「這些位置歸你，超出這個範圍要先回報」，不是「你只能碰這幾個檔案」。
 
@@ -17,19 +17,19 @@
 派 Process 或 Thread 執行實作時，逐字附上：
 
 ```text
-你是本 Ticket 的臨時 Worker，只負責完成這一張。
+你是本 Process 的臨時 Worker，只負責完成這一個。
 
-使用 Orchestrator 選定的執行配置，不自行切換。開始前爬懶惰階梯
-（se-lazy-ladder）。適用時走 TDD；遇到非預期錯誤才載入 se-debug。
+使用 Scheduler 選定的執行配置，不自行切換。開始前爬最小實作階梯
+（se-minimal-change）。適用時走 TDD；遇到非預期錯誤才載入 se-debug。
 
 在核准範圍內自行完成必要技術判斷。公開介面、資料模型、架構可以依核准
-內容修改，但不得超出核准結果。需要碰觸其他 Ticket 的鎖、改變需求或處理
-不可逆風險時，停止並回報 Orchestrator。
+內容修改，但不得超出核准結果。需要碰觸其他 Process 的鎖、改變需求或處理
+不可逆風險時，停止並回報 Scheduler。
 
 完成最小且完整的實作，以及與風險相稱的驗證。非平凡的邏輯留下一個可跑的
-檢查。刻意切角的地方留 `lazy: <天花板>，升級：<觸發>` 標記。
+檢查。刻意切角的地方留 `DEBT: <天花板>，升級：<觸發>` 標記。
 
-不得派 Reviewer、自我核准、接下一張 Ticket，或在沒有明確授權時
+不得派 Reviewer、自我核准、接下一個 Process，或在沒有明確授權時
 Commit／Push／Merge／Rebase。保留工作樹中既有的使用者變更。
 
 完成後回報：基準、Review revision、Diff、檔案列表、變更摘要、
@@ -44,9 +44,9 @@ Commit／Push／Merge／Rebase。保留工作樹中既有的使用者變更。
 
 ## Reviewer 契約
 
-見 `se-two-axis-review` 的 Phase 3。Orchestrator 只負責：**把同一個固定 Snapshot 分別交給 Reviewer A 與 Reviewer B，並確保首輪互不參照。**
+見 `se-two-axis-review` 的 Phase 3。Scheduler 只負責：**把同一個固定 Snapshot 分別交給 Reviewer A 與 Reviewer B，並確保首輪互不參照。**
 
-## 記錄派發（`golden-rules` 第 4 條）
+## 記錄派發（`core-rules` 第 4 條）
 
 每次派發**前**記錄：
 
@@ -54,7 +54,7 @@ Commit／Push／Merge／Rebase。保留工作樹中既有的使用者變更。
 |---|---|
 | 派發單位 | Coroutine／Thread／Process |
 | 設定來源 | 預設路由，或設定檔的實際路徑 |
-| 角色 | Worker／Reviewer A／Reviewer B／Advisor |
+| 角色 | Worker／Reviewer A／Reviewer B／Supervisor |
 | 實際 Agent／CLI | 真的用到哪一個 |
 | 實際模型 | |
 | 實際推理強度 | |
@@ -72,7 +72,7 @@ Commit／Push／Merge／Rebase。保留工作樹中既有的使用者變更。
 
 Reviewer **不依難度換模型**——用實際 Reviewer 後端的預設值。理由：難度路由是為了省成本，而審查的成本省錯地方會讓整條流程的保證失效。
 
-使用者明確指定模型時**不套用**難度選模。首次派工前可簡短提醒「移除模型設定可恢復自動難度分派」，但**不等待回覆**，仍依使用者設定繼續。
+使用者明確指定模型時**不套用**難度選模。首次派發前可簡短提醒「移除模型設定可恢復自動難度分派」，但**不等待回覆**，仍依使用者設定繼續。
 
 只固定 CLI 不會關閉難度選模——CLI 與模型是兩條獨立的路由。
 
@@ -80,7 +80,7 @@ Reviewer **不依難度換模型**——用實際 Reviewer 後端的預設值。
 
 | 情況 | 動作 |
 |---|---|
-| Worker 提出**可重現的**能力不足證據 | 換更強配置的新 Worker，交付同一張票與既有證據 |
+| Worker 提出**可重現的**能力不足證據 | 換更強配置的新 Worker，交付同一個 Process 與既有證據 |
 | 核心實作方法被有效 Finding 證明不可行 | 同上 |
 | 同一個有效 Finding 修正後仍無法解決 | 同上 |
 | 已是最強配置仍受阻 | 依實際阻擋繼續查證，或交給 GIL（問人） |
@@ -91,7 +91,7 @@ Reviewer **不依難度換模型**——用實際 Reviewer 後端的預設值。
 某個角色完全沒有可用路徑時：
 
 1. 說清楚怎麼設定它。
-2. 提供降級：由 Orchestrator 暫代該角色，**同樣預算**。
+2. 提供降級：由 Scheduler 暫代該角色，**同樣預算**。
 3. 受影響的段落與最終結果標記 `[降級: <角色>]`，並註明 **context 隔離已失效**。
 
 降級**最多涵蓋一個角色**。兩個以上不可用時就沒有團隊了——直說，然後當普通單模型工作繼續。

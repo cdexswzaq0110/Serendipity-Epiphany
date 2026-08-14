@@ -25,7 +25,7 @@ git branch --show-current && git status --short
 git worktree add ../<repo>-<slice> -b feat/<slice>
 ```
 
-單一切片、或切片之間是序列的 → 不需要 worktree，多開一個目錄只是多一份要同步的狀態。
+單一切片、或 Process 之間是序列的 → 不需要 worktree，多開一個目錄只是多一份要同步的狀態。
 
 收工：`git worktree remove ../<repo>-<slice>`。**不要留孤兒 worktree**——那是 Connection 洩漏的一種。
 
@@ -72,7 +72,7 @@ git diff <base>...HEAD --stat      # 2. 動到的範圍符合預期嗎
 git status --short                 # 5. 沒有該進去卻沒進去的檔案
 ```
 
-第 3 項是 `golden-rules` 第 4 條的落地：**沒實際跑過的檢查不得描述為通過。**
+第 3 項是 `core-rules` 第 4 條的落地：**沒實際跑過的檢查不得描述為通過。**
 
 ## PR Body 四段
 
@@ -87,7 +87,7 @@ git status --short                 # 5. 沒有該進去卻沒進去的檔案
 <Reviewer 可以照做的步驟或指令，含預期結果>
 
 ## 已知限制
-<沒做的、留給後續的、有 `lazy:` 標記的地方。沒有就寫「無」>
+<沒做的、留給後續的、有 `DEBT:` 標記的地方。沒有就寫「無」>
 ```
 
 第四段最常被跳過，而它最省 review 的來回——**Reviewer 最想知道的是你知不知道自己沒做什麼。**

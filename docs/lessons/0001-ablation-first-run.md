@@ -2,7 +2,7 @@
 id: L0001
 date: 2026-08-14
 outcome: useful
-tags: [harness, ablation, prompt]
+tags: [配置, ablation, prompt]
 anchors:
   - .claude/ABLATION.md
   - .claude/rules/
@@ -46,7 +46,7 @@ hits: 0
 
 消融流程（每個模型大版本或滿六個月）：
 
-1. `rules/` 暫時只留 `golden-rules.md`
+1. `rules/` 暫時只留 `core-rules.md`
 2. 跑三個最常做的任務
 3. 只記**反覆出現**的同一種失敗（一次性失誤不算）
 4. 一次加回一行，在 `.claude/ABLATION.md` 登記證據

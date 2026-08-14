@@ -5,7 +5,7 @@ tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: inherit
 skills:
   - se-ml-lifecycle
-  - se-lazy-ladder
+  - se-minimal-change
   - se-debug
 ---
 

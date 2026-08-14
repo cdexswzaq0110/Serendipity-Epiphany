@@ -14,16 +14,16 @@ Thread 與 Process 都有啟動成本：重建 context、重讀檔案、結果�
 | 髒 context 隔離、唯讀第二意見、廣度 fan-out | **Thread** |
 | 乾淨 context、要寫工作樹、跨切片邊界 | **Process** |
 
-## 2. 一個 Process 一個切片，切片之間必須換 Process
+## 2. 一個 Process 一個切片，Process 之間必須換 Process
 
 - **探索 → 規劃 → 切片：全程同一個 Process，不中斷、不 compact。** 這幾步互為前提，中途 swap 會讓切片建立在摘要過的推導上。
-- **切片之間：斷開。** 上一片的實作細節對下一片是雜訊。
+- **Process 之間：斷開。** 上一片的實作細節對下一片是雜訊。
 - 跨 Process 靠**落地產出**接續（計畫檔、測試、commit、handoff 文字），不靠對話摘要。
 - 規劃逼近 ~120k 就寫下結論、開新 Process，不硬撐。
 
 ## 3. 平行前先確認鎖
 
-Ready Queue = `Blocked by` 已全數完成的 Ticket。**能平行就全部立即派發，用滿平台並行數，不自行保守限制。**
+Ready Queue = `Depends on` 已全數完成的 Process。**能平行就全部立即派發，用滿平台並行數，不自行保守限制。**
 
 但先確認沒有共用鎖。以下同時只能有一個持有者：
 
@@ -33,7 +33,7 @@ Ready Queue = `Blocked by` 已全數完成的 Ticket。**能平行就全部立�
 
 出現以下任一警訊就 **STOP 並詢問**：工作樹有不認得的變更、同 subject 不同 SHA 的 commit、分支 tip 與上次所見不同、出現未追蹤的 backup tag 或 sibling branch、HEAD 指向不認得的 commit。
 
-寫入衝突**不是依賴**——標明衝突範圍讓排程器序列化，不要把它們串成 `Blocked by` 鏈。
+寫入衝突**不是依賴**——標明衝突範圍讓排程器序列化，不要把它們串成 `Depends on` 鏈。
 
 ## 4. GIL：一次只問一個決策
 

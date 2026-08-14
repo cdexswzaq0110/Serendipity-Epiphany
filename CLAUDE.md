@@ -10,24 +10,24 @@
 
 | 要知道什麼 | 去哪 |
 |---|---|
-| 實際怎麼跑一輪：A 直接做／B 規劃一輪／C 先撥霧／D 先蒐證 | [.claude/PLAYBOOK.md](.claude/PLAYBOOK.md) |
+| 實際怎麼跑一輪：A 直接做／B 規劃一輪／C 先撥霧／D 先蒐證 | [.claude/RUNBOOK.md](.claude/RUNBOOK.md) |
 | 任務怎麼切、派給誰、怎麼同步（Process／Thread／Coroutine／Pool） | [.claude/EXECUTION_MODEL.md](.claude/EXECUTION_MODEL.md) |
 | Rules／Skills／Agents 三層怎麼一起運作 | [.claude/WORKFLOW.md](.claude/WORKFLOW.md) |
 | 哪個 Skill 何時載入、相似入口怎麼區辨 | [.claude/skills/INDEX.md](.claude/skills/INDEX.md) |
-| 改動這套 harness 本身時不能破壞什麼 | [.claude/CLAUDE.md](.claude/CLAUDE.md) |
+| 改動這套配置 本身時不能破壞什麼 | [.claude/CLAUDE.md](.claude/CLAUDE.md) |
 | 這套配置的每一條規則為什麼存在 | [docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md) |
 
 ## 預設節奏
 
 1. **先確認分支再動 code**——在 main 上、有未提交變更、或使用者沒指定分支就要改，停下來問。
-2. **寫程式前先爬懶惰階梯**——不用寫 > 已經有 > 標準庫 > 平台原生 > 已裝依賴 > 一行 > 最小可動（`se-lazy-ladder`）。
+2. **寫程式前先爬最小實作階梯**——不用寫 > 已經有 > 標準庫 > 平台原生 > 已裝依賴 > 一行 > 最小可動（`se-minimal-change`）。
 3. **有適用的 Skill 先載入再行動**；同一件事不同時套多個流程型 Skill。
 4. **每個結論帶證據等級**——`已確認`／`推論`／`候選`／`未知`／`未驗證`，五選一，不留裸主張（`rules/evidence-grades.md`）。
 5. **派發前先選單位**——不需要隔離就 Coroutine（載 skill）；唯讀 fan-out 用 Thread；要寫工作樹或要乾淨 context 用 Process（`rules/dispatch.md`）。
 6. **雛型期走 happy path**——先能動、能驗證，不前置法規、權限、邊界案的窮舉。
 7. **收尾留一則 Lesson**——這一輪學到、而且下一輪會再用到的東西，寫進 `docs/lessons/`（`se-epiphany`）。
 
-先雛形 → 打掉 → 重構迭代是正常路徑，不是缺陷。衝突時，使用者直接要求的結果與 `.claude/rules/golden-rules.md` 優先。
+先雛形 → 打掉 → 重構迭代是正常路徑，不是缺陷。衝突時，使用者直接要求的結果與 `.claude/rules/core-rules.md` 優先。
 
 ## 帶進新專案
 

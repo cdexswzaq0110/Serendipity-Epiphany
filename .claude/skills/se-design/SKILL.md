@@ -14,9 +14,9 @@ description: 從模糊需求走到可派發的垂直切片——探索意圖、�
 不是「他要什麼功能」，是「**做完長什麼樣**」。
 
 1. **先讀，再問。** 既有程式碼、測試、`CONTEXT.md`、相關 ADR。能自己查的事實自己查。
-2. 講不清楚 → 載入 `se-grill` 設計樹模式。
+2. 講不清楚 → 載入 `se-clarify` 設計樹模式。
 3. 不確定值不值得做 → 載入 `se-feasibility`。
-4. 太大到連要問什麼都不確定 → 停下來，交棒 `se-wayfind`。
+4. 太大到連要問什麼都不確定 → 停下來，交棒 `se-discovery`。
 
 **Phase 1 的產出是一句話**：做完之後，使用者能觀察到什麼變化。寫不出這句話就不要往下走。
 
@@ -71,7 +71,7 @@ description: 從模糊需求走到可派發的垂直切片——探索意圖、�
 
 **縱切，穿過所有層。** 不要橫切（先做完 schema 層再做 API 層）——橫切的每一層都不能獨立驗證。
 
-四判準（`se-orchestrate` 也用同一組）：
+四判準（`se-scheduling` 也用同一組）：
 
 1. **完整** — 端到端可觀察的結果
 2. **可獨立驗證** — 有可重現的驗收條件
@@ -96,7 +96,7 @@ expand（新舊並存，加不刪） → migrate（分批搬呼叫端） → con
 
 ## 交棒
 
-Phase 3 完成 → 交給 `se-orchestrate` 建 Ready Queue 與寫入鎖，然後每片開新 Process。
+Phase 3 完成 → 交給 `se-scheduling` 建 Ready Queue 與寫入鎖，然後每片開新 Process。
 
 **規劃 Process 不實作。** 這是 context 邊界，不是儀式。
 
@@ -104,6 +104,6 @@ Phase 3 完成 → 交給 `se-orchestrate` 建 Ready Queue 與寫入鎖，然後
 
 - 「做完長什麼樣」有一句可觀察的描述。
 - 接縫已選定並**經人確認**，選擇理由可追溯到四條規則。
-- 切片全部通過四判準，`Blocked by` 只含真依賴。
+- 切片全部通過四判準，`Depends on` 只含真依賴。
 - 爆炸半徑大的變更已拆成 expand／migrate／contract。
 - 本 Process 沒有開始實作。

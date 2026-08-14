@@ -9,7 +9,7 @@ description: 機器學習專案端到端流程，六階段五道 Gate——問�
 
 適用：表格型監督式學習（regression / classification）。時間序列、ranking、影像、文字、RL 可沿用治理與驗證原則，但**切分、特徵與模型必須另行設計**。
 
-## 優先順序（最重要的一張表）
+## 優先順序（最重要的一個表）
 
 ```
 正確的 split ＞ 防 leakage ＞ metric 對齊 ＞ 資料語意 ＞ baseline
@@ -198,8 +198,8 @@ Imputer、scaler、encoder、feature selection、target encoding、PCA、rare po
 
 - 每個結論帶證據等級（`rules/evidence-grades.md`）：CV 分數是**推論**（對未來資料的估計），frozen holdout 才更接近**已確認**。
 - 目標值不值得做 → `se-feasibility`。
-- 問題定義答不出七問 → `se-grill` 設計樹模式。
-- 實驗要平行跑 → `se-orchestrate`，注意 GPU 與資料集是 **Connection Pool** 資源，同時只能一個持有。
+- 問題定義答不出七問 → `se-clarify` 設計樹模式。
+- 實驗要平行跑 → `se-scheduling`，注意 GPU 與資料集是 **Connection Pool** 資源，同時只能一個持有。
 - 撞到坑 → `se-epiphany` 寫 Lesson，尤其是 `dead_end`（試過 A、因為 B 不行）。
 
 ## 完成條件

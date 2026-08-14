@@ -50,7 +50,7 @@ Imputer · scaler · encoder · feature selection · target encoding · PCA · r
 
 ---
 
-## 4. EDA：每一張圖都要導向一個決策
+## 4. EDA：每一個圖都要導向一個決策
 
 | 圖／分析 | 要回答的問題 | 可能決策 |
 |---|---|---|
@@ -63,7 +63,7 @@ Imputer · scaler · encoder · feature selection · target encoding · PCA · r
 | Train/valid/test drift | 缺失率、分布、類別比例是否改變？ | 重切資料、sample weighting、監控 |
 | Segment metric | 哪個區域、價位、客群最差？ | 新特徵、分群模型、風險揭露 |
 
-- 每張圖旁寫 **Observation → Hypothesis → Action**，不只寫「有相關」。
+- 每個圖旁寫 **Observation → Hypothesis → Action**，不只寫「有相關」。
 - target 變換要以 metric 與殘差分布證明，不是因為圖比較漂亮。
 - correlation 不代表因果；one-hot 後的重要性也不能直接轉成商業因果。
 - **test 沒有 label 時只能檢查 covariate drift**，不能宣稱 performance 沒有 drift。

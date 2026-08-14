@@ -23,7 +23,7 @@
 
 ## 消融流程（每個模型大版本或滿六個月）
 
-1. `rules/` 暫時只留 `golden-rules.md`
+1. `rules/` 暫時只留 `core-rules.md`
 2. 跑三個最常做的任務
 3. 只記**反覆出現**的同一種失敗（一次性失誤不算）
 4. 一次加回一行，登記證據
@@ -48,9 +48,9 @@
 | 根目錄 `CLAUDE.md` 入口與節奏 | 意圖 | — | 保留（只放入口；長出細節就是該下放的訊號） |
 | `.claude/CLAUDE.md` 元件責任 | 意圖 | — | 保留 |
 | `.claude/CLAUDE.md` 維護契約 | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔 | 保留 |
-| `golden-rules.md` 1–5 | 意圖 | — | 保留（他檔以「第 N 條」引用，編號須穩定） |
-| `golden-rules.md` 6 留下領悟 | 意圖 | — | 保留（這是這套配置存在的理由） |
-| `golden-rules.md` 3 部分結果不覆蓋 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |
+| `core-rules.md` 1–5 | 意圖 | — | 保留（他檔以「第 N 條」引用，編號須穩定） |
+| `core-rules.md` 6 留下領悟 | 意圖 | — | 保留（這是這套配置存在的理由） |
+| `core-rules.md` 3 部分結果不覆蓋 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |
 | `evidence-grades.md` | 補丁 | **核心賭注**：模型把推論寫成事實，讀者無法從措辭分辨「我跑過」與「我覺得應該」 | 保留，但第一輪要量它有沒有真的改變行為 |
 | `dispatch.md` 1 預設 Coroutine | 補丁 | 模型傾向為「分工感」派 subagent | ⚠ 重驗：base 提示可能已足夠 |
 | `dispatch.md` 2 切片換 Process | 意圖 | — | 保留 |
@@ -72,9 +72,9 @@
 | 張力 | 仲裁在哪 |
 |---|---|
 | `se-focus` 要 `file:line`，`register.md` 要「用動作講機制」 | `register.md`「何時不可以白話」第一條：使用者要定位時不白話 |
-| `se-lazy-ladder` 要最短 diff，`golden-rules` 4 要驗證證據 | ladder 本身：非平凡邏輯必須留一個可跑的檢查 |
+| `se-minimal-change` 要最短 diff，`core-rules` 4 要驗證證據 | 階梯本身：非平凡邏輯必須留一個可跑的檢查 |
 | `dispatch.md` 要用滿並行，鎖規則要序列化 | 鎖優先。用滿的是**無衝突**的部分 |
-| `thinking-boundary` 預算 vs `golden-rules` 4 以證據宣告完成 | 預算用完不等於完成。停下來報告，不降低完成標準 |
+| `thinking-boundary` 預算 vs `core-rules` 4 以證據宣告完成 | 預算用完不等於完成。停下來報告，不降低完成標準 |
 | `se-ml-lifecycle` 的 Gate vs `thinking-boundary` 雛型期走 happy path | ML 的 Gate 是**驗證可信度**的閘，不是治理的閘。雛型可以省文件，不能省 split 正確性 |
 
 ## 沿革
