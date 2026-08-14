@@ -4,9 +4,9 @@
 
 # Serendipity — Epiphany
 
-**機遇下，突然領悟學到的智慧。**
+**Turn development experience into reusable workflows.**
 
-我的 Claude Code 開發配置。
+把開發過程中的經驗，沉澱成可重複使用的工作流。
 
 </div>
 
@@ -14,15 +14,35 @@
 
 ## 這套配置在解什麼問題
 
-大部分的開發配置管「怎麼把事情做完」。這一套多管一件事：**怎麼把每次撞出來的領悟留下來，並且讓它有機會變成制度。**
+大部分的開發配置著重於「如何完成當前任務」。
 
-```
-機遇（撞到）  →  領悟（寫成 Lesson）  →  智慧（升級成常駐規則）
-   一次意外         docs/lessons/           .claude/rules/
-                                         ＋ ABLATION 的失敗證據
+這套配置另外處理一個長期問題：**如何把開發過程中反覆出現的問題、決策與驗證結果，沉澱成可重複使用的工程規則。**
+
+```text
+開發事件
+   ↓
+Lesson / Evidence
+   ↓
+規則候選
+   ↓
+Ablation 驗證
+   ↓
+常駐規則
+
+實際案例          docs/lessons/
+                      ↓
+              .claude/ABLATION.md
+                      ↓
+               .claude/rules/
 ```
 
-沒有升級路徑的帳本只是日記；沒有帳本的常駐規則沒有證據。這套配置把兩端接起來。
+`docs/lessons/` 保存案例與決策背景，`.claude/rules/` 保存已經值得常駐的工程規則，而 `ABLATION.md` 負責記錄這些規則存在的失敗證據與移除條件。
+
+目標不是累積筆記，而是建立一條：
+
+**Experience → Evidence → Rule → Workflow**
+
+的升級路徑。
 
 ---
 
@@ -33,7 +53,7 @@
 cp -r "Serendipity — Epiphany/.claude" your-project/.claude
 cp -r "Serendipity — Epiphany/templates" your-project/templates
 
-# 2. 在新專案裡走一次 bootstrap
+# 2. 執行新專案 bootstrap
 #    templates/_meta/new_project_bootstrap.md
 ```
 
@@ -44,171 +64,334 @@ Copy-Item ".\Serendipity — Epiphany\.claude" -Destination "your-project\.claud
 Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\templates" -Recurse
 ```
 
-完整的安裝、四條路線實際走法、每個能力何時觸發：**[docs/USAGE.md](docs/USAGE.md)**
+完整安裝方式、四種執行路徑與各能力的觸發條件：
+
+**[docs/USAGE.md](docs/USAGE.md)**
 
 ---
 
 ## 結構
 
-```
-CLAUDE.md                  # 常駐入口：這是什麼、怎麼開始、預設節奏
+```text
+CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設執行節奏
 .claude/
 ├── CLAUDE.md              # 元件責任與 8 條維護契約
-├── EXECUTION_MODEL.md     # 任務分解、執行派發與平行協調的完整定義
-├── WORKFLOW.md            # 三層＋三角色怎麼一起運作、context 邊界、驗證紀律
-├── RUNBOOK.md             # 四條路線走查（A 直接做／B 規劃／C 撥霧／D 蒐證）
-├── ABLATION.md            # 常駐面消融紀錄：每條規則的失敗證據
-├── rules/           (6)   # 常駐規則
-├── skills/         (16)   # Coroutine 庫，按需載入
-├── agents/          (9)   # Thread / Process 模板
-└── settings.json          # 最小權限基線 ＋ 敏感路徑 deny
+├── EXECUTION_MODEL.md     # 任務分解：Process / Thread / Coroutine / Pool / 同步原語
+├── WORKFLOW.md            # 執行層級、角色分工、Context 邊界與驗證流程
+├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
+├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
+├── rules/           (6)   # 常駐工程規則
+├── skills/         (16)   # Coroutine 能力庫，按需載入
+├── agents/          (9)   # Thread / Process 執行模板
+└── settings.json          # 最小權限基線＋敏感路徑 deny
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
 ├── USAGE.md               # 詳細使用說明
-├── DESIGN_RATIONALE.md    # 每條規則為什麼存在、刻意不做什麼
-└── lessons/               # 領悟帳本
+├── DESIGN_RATIONALE.md    # 設計決策、取捨與非目標
+└── lessons/               # 經驗、事件與決策紀錄
 ```
 
 ---
 
 ## 執行模型：任務分解、執行派發、平行協調
 
-三件事全部用**作業系統併發模型**命名。借用既有語彙，是因為我已經知道兩個 thread 同時寫同一塊記憶體會出事——那份直覺不用重新教。
+任務的**分解、派發、同步與資源控制**統一使用作業系統與併發模型的既有語彙。
 
-### 分解只有三層
+目的不是模擬作業系統，而是直接借用成熟的 concurrency mental model，處理 Agent 開發中相同類型的問題：
 
+* 執行隔離
+* 平行工作
+* 寫入衝突
+* 資源競爭
+* 相依關係
+* 同步點
+* Context 邊界
+
+### 分解階層
+
+執行單元只有三層，沒有第四種：
+
+```text
+Workload
+ └─ Process        可獨立派發、獨立驗證的執行單元（完整 Context 隔離）
+     ├─ Thread     Process 內可平行的更小單元（唯讀，或寫入範圍不相交）
+     └─ Coroutine  同一 Context 內載入的方法（無隔離、無平行）
 ```
-Workload（一輪工作）
-│
-├─ Process ──────── 可獨立派發、獨立驗證的執行單元（完整 context 隔離）
-│   ├─ Thread ───── Process 內可平行的更小單元（唯讀或無寫入衝突）
-│   └─ Coroutine ── 同 context 內載入的方法（無隔離、無平行）
-│
-└─ Process ──────── （與上一個互不相依，或只共用寫入鎖）
+
+一個 Process 必須同時滿足四條：**完整**（端到端可觀察）· **可獨立驗證** · **裝得進一個新 Process** · **接縫已定**。
+裝不進就往下拆，無法獨立驗證就往上合併。
+
+| 執行單位           | 隔離程度             | 使用情境                         |
+| -------------- | ---------------- | ---------------------------- |
+| **Coroutine**  | 無，同一 Context     | 只需要一套方法或能力，不需要隔離。**預設執行單位**  |
+| **Thread**     | 獨立 Context，共享工作樹 | 唯讀 fan-out、搜尋、審查、第二意見        |
+| **Process**    | 完整隔離             | 獨立 Process、垂直切片、規劃 → 實作邊界  |
+| **Connection** | 外部資源             | CLI、MCP、瀏覽器、DB、API quota、GPU |
+
+### Pool
+
+提供三種資源池：
+
+* **Thread Pool**：唯讀 fan-out
+* **Process Pool**：多個獨立 Process
+* **Connection Pool**：受限外部資源，可回收且不可洩漏
+
+### Synchronization
+
+使用既有同步原語描述執行約束：
+
+`Ready Queue` · `Mutex` · `Semaphore` · `Critical Section` · `Barrier` · `Fork/Join` · `Race Condition` · `Deadlock` · `Starvation`
+
+另外定義：
+
+**`GIL` = Human Decision Lock**
+
+當流程需要使用者做決策時，一次只提出一個需要阻塞流程的決策問題。
+
+### 元件對應
+
+```text
+rules/          → Kernel
+skills/         → Coroutine Library
+agents/         → Thread / Process Templates
+HANDOFF         → IPC Message
+CONTEXT.md      → Shared Memory
+Context Window  → Working Memory
+Compact         → Swap
 ```
 
-| 單位 | 隔離 | 何時用 |
-|---|---|---|
-| **Coroutine** | 無（同 context） | 需要一套方法，不需要隔離。**預設就是這個** |
-| **Thread** | 獨立 context 視窗，共享工作樹 | 唯讀 fan-out：搜尋、審查、第二意見 |
-| **Process** | 完整 | 一個垂直切片、規劃→實作的邊界 |
-| **Connection** | 外部資源 | CLI、MCP、瀏覽器、DB、API 配額、GPU |
+其中最重要的一個區分是：
 
-一個 Process 要同時滿足四條：**完整**（端到端可觀察）· **可獨立驗證** · **裝得進一個新 Process** · **接縫已定**。裝不進就往下拆，無法獨立驗證就往上合併。
+**寫入衝突屬於 Mutual Exclusion，不等於 Dependency。**
 
-Pool 三種：**Thread Pool**（唯讀 fan-out）· **Process Pool**（獨立切片）· **Connection Pool**（有上限、可回收、不洩漏）。
+如果兩個工作只是不能同時修改同一區域，應使用 `Mutex / Critical Section` 描述，而不是標成 `Depends on`。
 
-同步原語：`Ready Queue` · `Mutex（寫入鎖）` · `Semaphore` · `Critical Section` · `Barrier` · `Fork/Join` · `Race Condition` · `Deadlock` · `Starvation` · **`GIL`（＝我本人，一次只能問一個決策）**
+否則會產生不存在的 Dependency，進而製造假的 Critical Path。
 
-配置元件也對應上去：`rules/` = Kernel · `skills/` = Coroutine 庫 · `agents/` = Thread/Process 模板 · 交接文字 = IPC 訊息 · `CONTEXT.md` = 共享記憶體 · context window = 記憶體 · compact = swap。
+完整定義：
 
-**最重要的一個區分：寫入衝突是 Mutex，不是依賴。** 標成 `Depends on` 會憑空製造一條假的關鍵路徑。
-
-完整定義：[.claude/EXECUTION_MODEL.md](.claude/EXECUTION_MODEL.md)
+[.claude/EXECUTION_MODEL.md](.claude/EXECUTION_MODEL.md)
 
 ---
 
-## 三個角色
+## 三個執行角色
 
-| 角色 | 誰 | 做什麼 | 不做什麼 |
-|---|---|---|---|
-| **Scheduler** | 主 Process | 規劃、派發、驗證、收斂 | 不做 worker 級的工作 |
-| **Supervisor** | 最強模型的唯讀 Thread | 只在**承諾邊界**被諮詢 | **從不執行** |
-| **Worker** | Thread／Process Pool | 通過驗證的最便宜配置 | 不自我核准、不接下一個 Process |
+| 角色               | 執行位置                  | 責任                              | 不負責                        |
+| ---------------- | --------------------- | ------------------------------- | -------------------------- |
+| **Scheduler** | 主 Process             | 任務分解、執行派發、同步、驗證、結果整合            | 不執行 Worker 級實作             |
+| **Supervisor**      | 高能力唯讀 Thread          | 在關鍵 Decision Boundary 提供分析與第二意見 | **不直接修改工作樹**               |
+| **Worker**       | Thread / Process Pool | 執行被派發的 Process                | 不自行核准結果、不自行取得下一個 Process |
 
-**模型是旋鈕，層級才是不變的部分。**
+核心原則：
+
+**Model 是可替換的執行資源；Execution Role 才是穩定的系統介面。**
 
 ---
 
 ## 常駐規則（6 條）
 
-| 規則 | 核心 |
-|---|---|
-| **core-rules** | 來源優先、可追溯、保護使用者工作、以證據宣告完成、最小變更、**留下領悟** |
-| **evidence-grades** | 每個結論帶等級：`已確認`／`推論`／`候選`／`未知`／`未驗證`。不可升級也不可降級 |
-| **dispatch** | 預設 Coroutine、切片換 Process、平行前確認鎖、GIL 一次一問 |
-| **git-workflow** | 先開分支、Critical Section 先 backup tag、commit→push→PR 連貫 |
-| **thinking-boundary** | 速通／深思、雛型期不前置治理、**預算超支不得靜默** |
-| **register** | 文件 L1／L2／L3；對話何時翻到決策層 |
+| 規則                    | 核心                                                           |
+| --------------------- | ------------------------------------------------------------ |
+| **core-rules**      | 來源優先、可追溯、保護使用者工作、以證據宣告完成、最小變更、保存可重用經驗                        |
+| **evidence-grades**   | 每個結論帶證據等級：`已確認`／`推論`／`候選`／`未知`／`未驗證`                         |
+| **dispatch**          | 預設 Coroutine、獨立切片使用 Process、平行執行前確認寫入衝突與同步需求                 |
+| **git-workflow**      | 分支隔離、Critical Section 前建立 backup tag、commit → push → PR 保持連續 |
+| **thinking-boundary** | 區分快速執行與深度分析；原型階段避免過早治理；資源超支必須顯式回報                            |
+| **register**          | 文件 L1／L2／L3 分級，以及對話何時升級到 Decision Layer                      |
 
-新增常駐規則前先讀 [ABLATION.md](.claude/ABLATION.md)——**填不出「因為什麼失敗才存在」的規則，不該常駐。**
+新增常駐規則前，先檢查：
+
+[.claude/ABLATION.md](.claude/ABLATION.md)
+
+**無法指出具體 Failure Case、Evidence 或 Prevention Value 的規則，不應進入常駐層。**
 
 ---
 
 ## Skills（16 個 Coroutine）
 
-### 通用
+### 通用能力
 
-| 你在做什麼 | 載入 |
-|---|---|
-| 需求還模糊，要探索並定接縫 | `se-design` |
-| 想法太大，連要問什麼都不確定 | `se-discovery` |
-| 要被逼問／想法要被戳破／答案在別人身上 | `se-clarify` |
-| 不確定值不值得做 | `se-feasibility` |
-| 專案詞彙混亂 | `se-context-language` |
-| 要寫程式 | `se-minimal-change` |
-| 卡在 bug | `se-debug` |
-| 變更完成要審查 | `se-two-axis-review` |
-| 要任務分解、派發、管平行 | `se-scheduling` |
-| 外部工具不確定能不能用 | `se-preflight` |
-| 開分支、收尾開 PR | `se-branch-lifecycle` |
-| 回答太長太散 | `se-focus` |
-| **這一輪學到東西了** | **`se-epiphany`** |
-| 要新增或修改 skill | `se-skill-authoring` |
+| 執行情境                          | 載入                     |
+| ----------------------------- | ---------------------- |
+| 需求仍模糊，需要探索問題空間與系統邊界           | `se-design`            |
+| 問題空間過大，需要定位下一個可回答問題           | `se-discovery`           |
+| 需要壓力測試假設、找出缺漏或取得外部決策          | `se-clarify`             |
+| 需要先判斷技術或產品可行性                 | `se-feasibility`       |
+| 專案術語、Domain Language 或命名不一致   | `se-context-language`  |
+| 進入程式實作                        | `se-minimal-change`       |
+| Debug、定位 Root Cause           | `se-debug`             |
+| 變更完成，需要 Spec / Standards 雙軸審查 | `se-two-axis-review`   |
+| **要做任務分解、執行派發與平行協調**          | **`se-scheduling`**   |
+| 外部工具、MCP、CLI 或環境能力不確定         | `se-preflight` |
+| 建立分支、完成變更並準備 PR               | `se-branch-lifecycle`  |
+| 輸出需要聚焦、壓縮或重新組織                | `se-focus`             |
+| 本輪產生值得保留的工程經驗                 | `se-epiphany`          |
+| 新增或修改 Skill                   | `se-skill-authoring`   |
 
-### 特例領域（遇到相關問題才觸發）
+### 領域能力
 
-| 你在做什麼 | 載入 |
-|---|---|
-| 設計一個系統、拿到 PRD 要寫架構文件、評估既有架構瓶頸 | **`se-system-design`** |
-| 做 ML 專案、訓練模型、處理 split 與 leakage、要上線 | **`se-ml-lifecycle`** |
+| 執行情境                                              | 載入                     |
+| ------------------------------------------------- | ---------------------- |
+| 系統設計、PRD → Architecture、容量估算、瓶頸與 Trade-off 分析     | **`se-system-design`** |
+| ML 專案、資料切分、Leakage、Pipeline、Evaluation、Deployment | **`se-ml-lifecycle`**  |
 
-完整路由與「別選錯」欄：[.claude/skills/INDEX.md](.claude/skills/INDEX.md)
+完整路由與選擇條件：
 
----
-
-## Agents（9 個派發模板）
-
-名字就說出隔離等級與成本。
-
-| Agent | 型別 | 什麼時候派 |
-|---|---|---|
-| `thread-scout` | Thread | 廣度搜尋，只要結論不要檔案內容 |
-| `thread-supervisor` | Thread（最強模型） | 承諾邊界：結果矛盾、驗證失敗兩次、計畫要結構性改變 |
-| `thread-reviewer-spec` | Thread | Spec 軸審查：有沒有做對東西 |
-| `thread-reviewer-standards` | Thread | Standards 軸審查：有沒有做好 |
-| `thread-security` | Thread | 碰到 auth、輸入、秘密、對外介面、部署設定 |
-| `process-worker` | Process | 一個 Process 的完整實作 |
-| **`thread-system-architect`** | **Thread（最強模型）** | **系統設計九階段：估算 → 瓶頸 → 深挖 → 取捨總表** |
-| **`process-ml-engineer`** | **Process** | **ML 六階段五道 Gate：定義 → 切分 → Pipeline → 評估 → 上線** |
-| **`thread-ml-auditor`** | **Thread（最強模型）** | **既有 ML 專案稽核：這個分數可不可信** |
+[.claude/skills/INDEX.md](.claude/skills/INDEX.md)
 
 ---
 
-## 十條核心信念
+## Agents（9 個執行模板）
 
-1. **證據等級是第一公民。** 最貴的失敗是把推論寫得像事實。
-2. **確定性工程 × Agent。** 不能出錯的用程式或清單保證，動態決策才交給模型。
-3. **常駐面要有失敗證據。** 填不出「因為什麼錯誤才存在」就不該常駐。
-4. **先爬最小實作階梯再寫程式。** 但絕不省略理解、信任邊界、資料遺失處理、安全、無障礙。
-5. **Finding 是待驗證的主張，不是命令。** 提出者擁有它，被指出者可以反證。
-6. **兩軸不合併。** 「規範全過但做錯東西」是最貴的失敗。
-7. **共享語言先於程式碼。** `CONTEXT.md` 省的不只是 token。
-8. **借用既有語彙，不自創詞。** 併發模型的直覺不用重新教。
-9. **人的決策是全域鎖。** 一次只問一個。
-10. **每一輪留下可檢索的領悟，而且要有升級路徑。**
+Agent 名稱直接表示：
 
-每條信念背後的推導、以及**刻意不做的九件事**：[docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md)
+**Execution Unit + Responsibility**
+
+| Agent                         | 型別                | 使用情境                                                               |
+| ----------------------------- | ----------------- | ------------------------------------------------------------------ |
+| `thread-scout`                | Thread            | 廣度搜尋與資訊蒐集，只回傳結論與證據                                                 |
+| `thread-supervisor`              | Thread（高能力模型）     | 結果矛盾、驗證連續失敗、計畫需要結構性調整                                              |
+| `thread-reviewer-spec`        | Thread            | Spec Review：確認是否實作正確需求                                             |
+| `thread-reviewer-standards`   | Thread            | Standards Review：確認實作品質與工程規範                                       |
+| `thread-security`             | Thread            | Authentication、Input、Secret、External Interface、Deployment Security |
+| `process-worker`              | Process           | 一個 **Process** 的完整實作與驗證                                          |
+| **`thread-system-architect`** | **Thread（高能力模型）** | **系統設計：估算 → 瓶頸 → 深入分析 → Trade-off**                                |
+| **`process-ml-engineer`**     | **Process**       | **ML Lifecycle：定義 → Split → Pipeline → Evaluation → Deployment**   |
+| **`thread-ml-auditor`**       | **Thread（高能力模型）** | **既有 ML Pipeline 與 Evaluation Validity 稽核**                        |
 
 ---
 
-## 第一輪之後要做的事
+## Execution Flow
 
-**跑一次消融。** 常駐面 339 行，其中有四條標著「未登記」——連我自己都填不出它為什麼存在。那些是第一批刪除候選。
+典型的多 Agent 執行流程：
 
-流程在 [.claude/ABLATION.md](.claude/ABLATION.md)，理由在 [docs/lessons/0001](docs/lessons/0001-ablation-first-run.md)。
+```text
+Request
+   ↓
+Scheduler
+   ↓
+Task Decomposition
+   ↓
+Ready Queue
+   ↓
+Dispatch
+   ├── Coroutine
+   ├── Thread
+   └── Process
+        ↓
+   Process Execution
+        ↓
+Synchronization
+Barrier / Mutex / Join
+        ↓
+Verification
+        ↓
+Integration
+        ↓
+Result
+```
 
-> RUNBOOK 與 ABLATION 本來就該被實戰改寫。改完記得寫 Lesson。
+當任務可以平行化時：
+
+```text
+                    ┌─ Thread A ─┐
+Request → Fork ─────┼─ Thread B ─┼─ Barrier → Join → Verify
+                    └─ Thread C ─┘
+```
+
+當工作需要完整隔離時：
+
+```text
+Scheduler
+     ↓
+Task Decomposition
+     ↓
+┌───────────────┐
+│ Process Pool  │
+├───────────────┤
+│ Process A   │
+│ Process B   │
+│ Process C   │
+└───────────────┘
+     ↓
+Barrier
+     ↓
+Integration
+```
+
+---
+
+## 十條設計原則
+
+1. **Evidence is a first-class citizen.**
+   不把推論寫成事實；所有重要結論都應能追溯其證據狀態。
+
+2. **Deterministic Engineering × Agent.**
+   可以由程式、型別、測試或檢查清單保證的事情，不交給模型自由判斷。
+
+3. **Permanent Rules Require Failure Evidence.**
+   常駐規則必須能對應實際 Failure Case，否則只是額外 Context Cost。
+
+4. **Use the Lowest Sufficient Execution Cost.**
+   能用 Coroutine 解決就不建立 Process；需要隔離時才提高執行成本。
+
+5. **A Finding Is a Claim, Not a Command.**
+   Finding 必須可以被驗證、反證與重新分級。
+
+6. **Spec Review and Standards Review Stay Separate.**
+   「做錯東西」與「東西做得不好」是兩種不同 Failure Mode。
+
+7. **Shared Language Before Shared Code.**
+   先統一 Domain Language，再讓多個 Agent 同時修改系統。
+
+8. **Reuse Existing Engineering Vocabulary.**
+   優先使用 Process、Thread、Mutex、Barrier、Queue 等既有工程語彙，而不是建立新的抽象名稱。
+
+9. **Human Decisions Are Serialized.**
+   需要人的決策屬於共享稀缺資源，應避免同時提出多個阻塞問題。
+
+10. **Reusable Experience Must Have an Upgrade Path.**
+    一次性的經驗先保存為 Lesson；只有通過實戰與證據驗證後，才升級為常駐 Rule。
+
+每條原則背後的設計推導、Trade-off 與 Non-goals：
+
+[docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md)
+
+---
+
+## 首次使用後
+
+完成第一輪實際專案後，執行一次：
+
+**Rule Ablation Review**
+
+目前常駐面共 339 行，其中有四條仍標記為「未登記」，代表尚未建立足夠的 Failure Evidence。
+
+這些項目應優先接受消融檢查：
+
+```text
+Rule
+ ↓
+對應哪個 Failure Case？
+ ↓
+移除後是否重新出現問題？
+ ↓
+是否值得支付永久 Context Cost？
+ ↓
+Keep / Rewrite / Remove
+```
+
+流程：
+
+[.claude/ABLATION.md](.claude/ABLATION.md)
+
+範例：
+
+[docs/lessons/0001](docs/lessons/0001-ablation-first-run.md)
+
+`PLAYBOOK` 與 `ABLATION` 都不是固定規格，而是會隨實際執行結果持續修正的工程文件。
+
+每次修改都應留下對應的 Evidence 或 Lesson。
 
 ---
 
