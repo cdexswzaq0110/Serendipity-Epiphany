@@ -2,10 +2,9 @@
 
 # Serendipity — Epiphany
 
-**機遇下，突然領悟學到的智慧。**
+**A practical Claude Code development framework.**
 
-我的 Claude Code 開發配置。
-
+一套可持續演進的 Claude Code 開發配置。
 </div>
 
 ---
