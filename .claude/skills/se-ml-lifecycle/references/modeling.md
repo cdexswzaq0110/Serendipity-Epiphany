@@ -150,17 +150,14 @@ Gate 2D–3E 的細節。
 
 ## 8. 可解釋性與風險
 
-| 工具 | 回答什麼 | 注意 |
-|---|---|---|
-| Linear coefficients | 方向與相對權重 | 需處理 scale、one-hot baseline、共線性 |
-| Tree gain / split importance | 樹常用哪些特徵 | 偏好高基數/多切點，不可跨模型直接比 |
-| Permutation importance | 打亂後 performance 降多少 | 共線特徵會分散重要性；在 valid 上做 |
-| SHAP | local/global attribution | **不是因果**；背景資料與相關特徵影響解讀 |
-| PDP / ICE | 特徵與預測的反應 | 外插與強相關特徵可能產生不真實組合 |
-| Residual slices | 哪類資料系統性高估/低估 | **通常最能產生下一個工程假設** |
+**完整方法選型、十個陷阱、穩定性檢查與交付格式見 [`interpretability.md`](interpretability.md)。**
 
-- 跨 folds 計算 importance rank stability；只報單次模型容易誤導。
-- 檢查敏感群體、缺失程度、新舊資料、低 coverage 與 OOD 樣本。
-- **重要性是模型行為，不是因果證據。** 不可說「此特徵造成結果」。
+三條在這裡就要記住的：
 
-**Gate 3F**：能指出至少三種主要失敗模式、受影響 segment、風險緩解與不適用範圍；Model Card 已記錄。
+1. **在 validation／OOF 上算，不是 train。** 在 train 上算的是模型記住了什麼。
+2. **跨 folds／seeds 量 rank stability。** 不穩定的排序不是結論，是一張圖。
+3. **重要性是模型行為，不是因果證據。** 不可寫「此特徵造成結果」。
+
+前置條件：**Gate 1 未過就不要做這一步**——解釋一個有 leakage 的模型，解釋出來的就是那個洩漏源。
+
+**Gate 3F**：見 `interpretability.md` 的完整檢查表。核心是能指出至少三種主要失敗模式、受影響 segment 與樣本量，且報告中沒有未標記的因果措辭。

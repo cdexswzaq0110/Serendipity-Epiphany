@@ -48,3 +48,18 @@
 | 只存 `model.pkl` | train/serve skew | 完整 pipeline + schema + env |
 | 沒有 rollback | 服務故障難恢復 | versioned artifacts + 演練 |
 
+---
+
+## 優化迴圈的診斷優先序
+
+| 優先 | 診斷 | 下一步 |
+|---|---|---|
+| **P0** | leakage、split、schema、label 錯 | **停止優化**，先修正驗證可信度 |
+| P1 | underfit：train/valid 都差 | 特徵、容量、非線性、loss |
+| P1 | overfit：train 好、valid 差 | 正則化、簡化、更多資料、group/time split |
+| P1 | 特定 segment 差 | 資料品質、coverage、segment feature/模型 |
+| P2 | 大 residual 集中在 outlier | 查錯、robust loss、transform、規則邊界 |
+| P2 | 模型誤差互補 | 非負 blend / cross-fitted stacking |
+| P3 | 改善只在 1 個 seed 出現 | 增加 repeats、**拒絕不穩定改動** |
+
+**P0 出現時停止一切優化**——驗證不可信的話，下面每一項的結論都不成立。

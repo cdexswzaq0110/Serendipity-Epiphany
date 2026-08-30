@@ -31,8 +31,11 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 |---|---|---|
 | 設計一個系統、拿到 PRD 要寫架構文件、被問怎麼擴展／怎麼避免超賣、評估既有架構瓶頸 | `se-system-design` | 不是 `se-design`——後者規劃**一個功能怎麼實作**並定測試接縫；system-design 決定**整個系統長什麼樣**並產出取捨總表。設計定案後才交給 `se-design` 拆片 |
 | 做 ML 專案、訓練或改進模型、處理 split 與 leakage、選 metric、要上線 | `se-ml-lifecycle` | 不是 `se-debug`——模型分數不好不是 bug，先看 Gate 哪一道沒過。優先序：split ＞ leakage ＞ metric ＞ 語意 ＞ baseline ＞ 特徵 ＞ 模型 ＞ 調參 |
+| 要說明模型靠什麼決定、某一筆為什麼是這個結果、要 reason code 或公平性檢查 | `se-ml-lifecycle` Stage 6 | 不是 `thread-ml-auditor`——後者問「分數可不可信」，Stage 6 問「模型依賴什麼、在哪會錯」。**Gate 1 沒過不要做解釋**，解釋出來的會是 leakage |
 
-對應的 Agent：`thread-system-architect`（唯讀設計）· `process-ml-engineer`（實作）· `thread-ml-auditor`（稽核既有 ML 專案的分數可不可信）。
+對應的 Agent：`thread-system-architect`（唯讀設計）· `process-ml-engineer`（實作）· `thread-ml-auditor`（分數可不可信）· `thread-ml-interpreter`（模型依賴什麼、在哪會錯）。
+
+**兩個 ML 唯讀 Thread 不要搞混**：auditor 檢查**驗證設計**，interpreter 檢查**模型行為**。auditor 先跑——Gate 1 沒過的話，interpreter 解釋出來的是 leakage。
 
 ## 能力庫
 
@@ -53,7 +56,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 長期記憶 | `se-epiphany` | 捕捉／召回／回顧領悟帳本 |
 | Skill 作者工具 | `se-skill-authoring` | 寫給 Agent 看的文件、觸發測試、出貨門檻 |
 | **系統設計** | `se-system-design` | 九階段：估算 → 實體與不變量 → API → 瓶頸深挖 → 資料層 → 取捨總表 |
-| **ML 生命週期** | `se-ml-lifecycle` | 六階段五道 Gate：定義 → 切分 → Pipeline → 評估 → 上線與監控 |
+| **ML 生命週期** | `se-ml-lifecycle` | 七階段六道 Gate：定義 → 切分 → Pipeline → 評估 → **可解釋性** → 上線與監控 |
 
 **只載入當前步驟必要的能力**；不要為了「完整」一次預載全部。
 

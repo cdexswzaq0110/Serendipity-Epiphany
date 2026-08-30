@@ -19,6 +19,7 @@ Gate 4A–4C 的細節。
 | run summary | data / code / env / config / metrics / cost / decision |
 | OOF prediction | row id、fold、truth、prediction、segment |
 | feature manifest | 名稱、型別、公式、來源、online availability |
+| 可解釋性報告 | 方法與參數、Global/Local、stability、失敗模式、不適用範圍 |
 | inference contract | request/response schema、錯誤與缺失政策 |
 | model card | 用途、不適用範圍、風險、公平性、監控與 owner |
 
@@ -138,6 +139,7 @@ Gate 4A–4C 的細節。
 | Training data | 來源、期間、樣本、hash、label、清洗與 split |
 | Evaluation | metric、folds、frozen result、segments、uncertainty |
 | Features | 主要家族、敏感欄位、availability、leakage controls |
+| **Interpretability** | 解釋方法與參數、Global 前 10 與 rank stability、代表性 local 個案、受保護屬性代理檢查結果 |
 | **Limitations** | 已知失敗模式、偏誤、資料不足、外插 |
 | Operations | latency、threshold、monitor、retrain、fallback、rollback |
 | Governance | reviewer、promotion record、privacy/security/fairness |

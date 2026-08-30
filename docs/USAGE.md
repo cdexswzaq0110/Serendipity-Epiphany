@@ -249,6 +249,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | 「記下來」「上次是怎麼解的」「這個好像遇過」 | `se-epiphany` |
 | 「這系統怎麼設計」「怎麼擴展」「怎麼避免超賣」 | `se-system-design` |
 | 「訓練模型」「這個 CV 分數對嗎」「要上線了」 | `se-ml-lifecycle` |
+| 「模型為什麼這樣判」「哪些特徵重要」「這筆為什麼被拒」 | `se-ml-lifecycle` Stage 6 |
 
 ### 手動載入的時機
 
@@ -282,7 +283,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 
 「分工看起來比較專業」不是隔離買到的東西。
 
-### 九個 Agent 各自什麼時候用
+### 十個 Agent 各自什麼時候用
 
 | Agent | 派它的訊號 |
 |---|---|
@@ -294,6 +295,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | `thread-system-architect` | 系統設計、架構評估 |
 | `process-ml-engineer` | ML 實作 |
 | `thread-ml-auditor` | 既有 ML 專案要接手或分數可疑 |
+| `thread-ml-interpreter` | 要說明模型靠什麼決定、某一筆為什麼、reason code、公平性檢查 |
 
 ### 平行的兩條紅線
 
@@ -379,7 +381,7 @@ grep 一下 README、測一個相鄰的東西、印出 `True` 然後 exit 0—�
 
 **這是最有價值的一個入口。** 接手別人的 ML 專案時，第一件事不是看分數多高，是看那個分數是怎麼算出來的。
 
-**六階段五道 Gate**：
+**七階段六道 Gate**：
 
 ```
 問題定義          → Gate 0  target / prediction time / metric / owner 明確

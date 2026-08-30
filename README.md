@@ -76,7 +76,7 @@ CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
 ├── rules/           (6)   # 常駐工程規則
 ├── skills/         (16)   # Coroutine 能力庫，按需載入
-├── agents/          (9)   # Thread / Process 執行模板
+├── agents/         (10)   # Thread / Process 執行模板
 └── settings.json          # 最小權限基線＋敏感路徑 deny
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
@@ -263,7 +263,7 @@ flowchart TB
 | 執行情境 | 載入 |
 | --- | --- |
 | 系統設計、PRD → Architecture、容量估算、瓶頸與 Trade-off 分析 | **`se-system-design`** |
-| ML 專案、資料切分、Leakage、Pipeline、Evaluation、Deployment | **`se-ml-lifecycle`** |
+| ML 專案、資料切分、Leakage、Pipeline、Evaluation、**Interpretability**、Deployment | **`se-ml-lifecycle`** |
 
 完整路由與選擇條件：
 
@@ -271,7 +271,7 @@ flowchart TB
 
 ---
 
-## Agents（9 個執行模板）
+## Agents（10 個執行模板）
 
 Agent 名稱直接表示：
 
@@ -288,6 +288,7 @@ Agent 名稱直接表示：
 | **`thread-system-architect`** | **Thread（高能力模型）** | **系統設計：估算 → 瓶頸 → 深入分析 → Trade-off** |
 | **`process-ml-engineer`** | **Process** | **ML Lifecycle：定義 → Split → Pipeline → Evaluation → Deployment** |
 | **`thread-ml-auditor`** | **Thread（高能力模型）** | **既有 ML Pipeline 與 Evaluation Validity 稽核** |
+| **`thread-ml-interpreter`** | **Thread（高能力模型）** | **模型可解釋性：Global / Local、Stability、Failure Mode、Counterfactual** |
 
 ---
 
