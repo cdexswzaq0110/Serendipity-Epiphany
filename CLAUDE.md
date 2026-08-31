@@ -12,9 +12,10 @@
 |---|---|
 | 實際怎麼跑一輪：A 直接做／B 規劃一輪／C 先撥霧／D 先蒐證 | [.claude/RUNBOOK.md](.claude/RUNBOOK.md) |
 | 任務怎麼切、派給誰、怎麼同步（Process／Thread／Coroutine／Pool） | [.claude/EXECUTION_MODEL.md](.claude/EXECUTION_MODEL.md) |
+| 誰負責哪一層的正確性（PM／UX／SA／Architect／SD／DBA／Dev／QA／DevOps） | [.claude/ROLE_MODEL.md](.claude/ROLE_MODEL.md) |
 | Rules／Skills／Agents 三層怎麼一起運作 | [.claude/WORKFLOW.md](.claude/WORKFLOW.md) |
 | 哪個 Skill 何時載入、相似入口怎麼區辨 | [.claude/skills/INDEX.md](.claude/skills/INDEX.md) |
-| 改動這套配置 本身時不能破壞什麼 | [.claude/CLAUDE.md](.claude/CLAUDE.md) |
+| 改動這套配置本身時不能破壞什麼 | [.claude/CLAUDE.md](.claude/CLAUDE.md) |
 | 這套配置的每一條規則為什麼存在 | [docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md) |
 
 ## 預設節奏

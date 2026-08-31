@@ -248,6 +248,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | 「太長」「講重點」「所以我要幹嘛」 | `se-focus` |
 | 「記下來」「上次是怎麼解的」「這個好像遇過」 | `se-epiphany` |
 | 「這系統怎麼設計」「怎麼擴展」「怎麼避免超賣」 | `se-system-design` |
+| 「要從零開一個專案」「這件事該誰負責」「缺什麼沒定義」 | `se-sdlc` |
 | 「訓練模型」「這個 CV 分數對嗎」「要上線了」 | `se-ml-lifecycle` |
 | 「模型為什麼這樣判」「哪些特徵重要」「這筆為什麼被拒」 | `se-ml-lifecycle` Stage 6 |
 
@@ -283,7 +284,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 
 「分工看起來比較專業」不是隔離買到的東西。
 
-### 十個 Agent 各自什麼時候用
+### 十四個 Agent 各自什麼時候用
 
 | Agent | 派它的訊號 |
 |---|---|
@@ -296,6 +297,10 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | `process-ml-engineer` | ML 實作 |
 | `thread-ml-auditor` | 既有 ML 專案要接手或分數可疑 |
 | `thread-ml-interpreter` | 要說明模型靠什麼決定、某一筆為什麼、reason code、公平性檢查 |
+| `thread-ux` | 要定義使用者怎麼走、畫面有哪些狀態（含失敗與空狀態） |
+| `thread-sa` | 要定義系統依什麼判斷、規則的例外與衝突優先序 |
+| `thread-dba` | 要設計或審查資料模型、索引、遷移安全 |
+| `thread-devops` | 要規劃上線、監控告警、回滾路徑 |
 
 ### 平行的兩條紅線
 

@@ -13,12 +13,13 @@
 - 根目錄 `CLAUDE.md`：**常駐**入口。只放「這是什麼、怎麼開始、預設節奏」與路由連結；細節一律連結，不 paraphrase。
 - `rules/`：**常駐**規則。條件性細則一律下放到對應 skill 的 `references/`。消融紀錄見 [ABLATION.md](ABLATION.md)。
 - `skills/`：**Coroutine 庫**——按需載入的能力資料庫；路由見 [`skills/INDEX.md`](skills/INDEX.md)。
+- `ROLE_MODEL.md`：十個 SDLC 角色、四個抽象層、三道翻譯 Gate。角色管「負責哪一層的正確性」，與執行單位正交。
 - `agents/`：**Thread／Process 模板**——需要獨立 context、權限邊界、平行處理或第二意見時才使用。派發規則見 [EXECUTION_MODEL.md](EXECUTION_MODEL.md)。
 - `templates/`：文件與交付物模板。**依需要取用，不強制填滿**。
 - `../docs/lessons/`：領悟帳本。這套配置的長期記憶，由 `se-epiphany` 維護。
 - `.out-of-scope/`：已審視並拒絕的機制與理由；重新提案前先讀對應檔。
 
-## 維護契約（改動本配置 時必須重新滿足的不變量）
+## 維護契約（改動本配置時必須重新滿足的不變量）
 
 1. **Router 不說謊**：新增、改名、刪除 skill 或改變其定位時，必須同步更新 `skills/INDEX.md`。索引漏列新 skill、或仍導向已刪 skill，視為缺陷而非疏漏。
 2. **Frontmatter 與現實一致**：Skill 的 `description` 不得引用已退役的模板或檔名。

@@ -22,6 +22,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 回答太長太散 | `se-focus` | |
 | 這一輪學到東西了／要召回舊教訓／帳本該回顧了 | `se-epiphany` | |
 | 要新增或修改 skill、改常駐提示 | `se-skill-authoring` | |
+| **要從零啟動一個專案、盤點缺哪個角色的產出、決定某件事該誰負責** | **`se-sdlc`** | 不是 `se-scheduling`——sdlc 決定**由誰負責哪一層的正確性**，scheduling 決定**怎麼派**。先跑 sdlc 定角色，再用 scheduling 派工 |
 
 ## 特例領域（遇到相關問題才觸發）
 
@@ -36,6 +37,26 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 對應的 Agent：`thread-system-architect`（唯讀設計）· `process-ml-engineer`（實作）· `thread-ml-auditor`（分數可不可信）· `thread-ml-interpreter`（模型依賴什麼、在哪會錯）。
 
 **兩個 ML 唯讀 Thread 不要搞混**：auditor 檢查**驗證設計**，interpreter 檢查**模型行為**。auditor 先跑——Gate 1 沒過的話，interpreter 解釋出來的是 leakage。
+
+## 角色分工
+
+專案要跑完整流程時，十個角色各自負責一層的正確性——定義、層級與執行單位對照見 [`../ROLE_MODEL.md`](../ROLE_MODEL.md)，操作程序見 `se-sdlc`。
+
+| 角色 | 一句話 | 執行單位 |
+|---|---|---|
+| PM | 為什麼要做 | Scheduler 戴帽子 ＋ `se-clarify`／`se-feasibility` |
+| UX / UI | 使用者怎麼走、長什麼樣 | `thread-ux` |
+| SA | 系統怎麼判斷 | `thread-sa` |
+| Architect | 系統怎麼活下去 | `thread-system-architect` |
+| SD | 模組怎麼長 | Scheduler 戴帽子 ＋ `se-design` |
+| DBA | 資料怎麼存 | `thread-dba` |
+| Dev | 真的把它做出來 | `process-worker` |
+| QA | 確認沒壞 | `thread-reviewer-spec` ＋ `thread-reviewer-standards` |
+| DevOps / SRE | 活著 | `thread-devops` |
+
+**UX、SA、DBA、DevOps 的分析階段寫入範圍不相交，是同一個 Thread Pool。** Architect 必須在 Barrier 之後——它要看齊四份分析才能取捨。
+
+**不是每個專案都要十個角色。** 判準：這個角色不做，會由誰、在什麼時候、用什麼代價補？
 
 ## 能力庫
 
@@ -55,6 +76,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 輸出治理 | `se-focus` | 密度與收斂 |
 | 長期記憶 | `se-epiphany` | 捕捉／召回／回顧領悟帳本 |
 | Skill 作者工具 | `se-skill-authoring` | 寫給 Agent 看的文件、觸發測試、出貨門檻 |
+| **角色分工** | `se-sdlc` | 十角色三道翻譯 Gate：PM → UX/UI/SA → Architect/SD/DBA → Dev/QA/DevOps |
 | **系統設計** | `se-system-design` | 九階段：估算 → 實體與不變量 → API → 瓶頸深挖 → 資料層 → 取捨總表 |
 | **ML 生命週期** | `se-ml-lifecycle` | 七階段六道 Gate：定義 → 切分 → Pipeline → 評估 → **可解釋性** → 上線與監控 |
 

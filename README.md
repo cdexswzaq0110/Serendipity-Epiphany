@@ -72,11 +72,12 @@ CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設
 ├── CLAUDE.md              # 元件責任與 8 條維護契約
 ├── EXECUTION_MODEL.md     # 任務分解、執行派發與平行協調的完整定義
 ├── WORKFLOW.md            # 執行層級、角色分工、Context 邊界與驗證流程
+├── ROLE_MODEL.md          # 十個 SDLC 角色、四個抽象層、三道翻譯 Gate
 ├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
 ├── rules/           (6)   # 常駐工程規則
-├── skills/         (16)   # Coroutine 能力庫，按需載入
-├── agents/         (10)   # Thread / Process 執行模板
+├── skills/         (17)   # Coroutine 能力庫，按需載入
+├── agents/         (14)   # Thread / Process 執行模板
 └── settings.json          # 最小權限基線＋敏感路徑 deny
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
@@ -218,6 +219,57 @@ flowchart TB
 
 ---
 
+## 十個 SDLC 角色
+
+執行角色管**怎麼跑**；SDLC 角色管**負責哪一層的正確性**。兩者正交。
+
+```mermaid
+flowchart TD
+    L1["L1 商業價值<br/>PM"]
+    L2A["L2 使用者與業務邏輯<br/>UX / UI / SA"]
+    L2B["L2→L3 系統與資料<br/>Architect / SD / DBA"]
+    L3["L3 代碼與機器<br/>Dev / QA / DevOps"]
+
+    L1 -->|"翻譯 ①<br/>價值 → 行為"| L2A
+    L2A -->|"翻譯 ②<br/>行為 → 結構"| L2B
+    L2B -->|"翻譯 ③<br/>結構 → 執行"| L3
+
+    classDef abs fill:#8957e5,stroke:#8957e5,color:#fff
+    classDef mid fill:#1f6feb,stroke:#1f6feb,color:#fff
+    classDef con fill:#238636,stroke:#238636,color:#fff
+    class L1 abs
+    class L2A,L2B mid
+    class L3 con
+```
+
+**三個翻譯邊界就是三道 Gate。** 跳過任何一道，下游會拿到一份自己補完的假需求。
+
+| 角色 | 負責哪一層的正確性 | 執行單位 |
+| --- | --- | --- |
+| **PM** | 商業價值：為什麼要做 | Scheduler ＋ `se-clarify` / `se-feasibility` |
+| **UX / UI** | 使用者行為與視覺呈現 | `thread-ux` |
+| **SA** | 業務規則：系統怎麼判斷 | `thread-sa` |
+| **Architect** | 系統演進：怎麼活下去 | `thread-system-architect` |
+| **SD** | 開發落地：模組怎麼長 | Scheduler ＋ `se-design` |
+| **DBA** | 資料正確性：資料怎麼存 | `thread-dba` |
+| **Dev** | 實作正確性 | `process-worker` |
+| **QA** | 結果正確性 | `thread-reviewer-spec` ＋ `-standards` |
+| **DevOps / SRE** | 上線運行：活著 | `thread-devops` |
+
+UX、SA、DBA、DevOps 的分析**寫入範圍不相交**，是同一個 Thread Pool；**Architect 必須在 Barrier 之後**——它要看齊四份分析才能取捨。
+
+### AI 只改變了最下游兩層
+
+Dev 與 QA 被大幅改變；**其餘八層幾乎沒變，因為那些是「定義問題」與「控制複雜度」的工作。**
+
+實務結論不是上游變輕鬆，而是相反：Dev 層變便宜 → 瓶頸移到「有沒有定義清楚」；生成量變大 → 驗證成本上升；**上游一錯，下游高速產出錯的東西。**
+
+**這不是 AI 取代下游，是上游的錯誤被放大得更快。** 三道翻譯 Gate 的價值因此變高。
+
+完整定義：[.claude/ROLE_MODEL.md](.claude/ROLE_MODEL.md)
+
+---
+
 ## 常駐規則（6 條）
 
 | 規則 | 核心 |
@@ -237,7 +289,7 @@ flowchart TB
 
 ---
 
-## Skills（16 個 Coroutine）
+## Skills（17 個 Coroutine）
 
 ### 通用能力
 
@@ -252,6 +304,7 @@ flowchart TB
 | Debug、定位 Root Cause | `se-debug` |
 | 變更完成，需要 Spec / Standards 雙軸審查 | `se-two-axis-review` |
 | **要做任務分解、執行派發與平行協調** | **`se-scheduling`** |
+| **從零啟動專案、盤點缺哪個角色的產出** | **`se-sdlc`** |
 | 外部工具、MCP、CLI 或環境能力不確定 | `se-preflight` |
 | 建立分支、完成變更並準備 PR | `se-branch-lifecycle` |
 | 輸出需要聚焦、壓縮或重新組織 | `se-focus` |
@@ -271,7 +324,7 @@ flowchart TB
 
 ---
 
-## Agents（10 個執行模板）
+## Agents（14 個執行模板）
 
 Agent 名稱直接表示：
 
@@ -289,6 +342,10 @@ Agent 名稱直接表示：
 | **`process-ml-engineer`** | **Process** | **ML Lifecycle：定義 → Split → Pipeline → Evaluation → Deployment** |
 | **`thread-ml-auditor`** | **Thread（高能力模型）** | **既有 ML Pipeline 與 Evaluation Validity 稽核** |
 | **`thread-ml-interpreter`** | **Thread（高能力模型）** | **模型可解釋性：Global / Local、Stability、Failure Mode、Counterfactual** |
+| `thread-ux` | Thread | UX / UI：使用流程、關鍵路徑、失敗與空狀態、介面一致性 |
+| `thread-sa` | Thread | SA：業務規則表、判定條件、例外與邊界、不變量 |
+| `thread-dba` | Thread | DBA：Row grain、不變量保護、索引對齊、遷移安全 |
+| `thread-devops` | Thread | DevOps / SRE：部署、可觀測性、回滾、韌性 |
 
 ---
 
