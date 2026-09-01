@@ -49,6 +49,14 @@
 | `git-workflow.md` backup tag | `hooks/guard-critical.sh` | PreToolUse `Bash(git *)`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
 | 維護契約 #1 Router 不說謊 | `hooks/check-router.sh` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
 
+**Gate 要先被證明會擋，才能相信它的綠燈**——hook 寫壞的預設失敗模式是靜默放行（見 [`../docs/lessons/0002-hook-silent-failure-windows.md`](../docs/lessons/0002-hook-silent-failure-windows.md)）。自測：
+
+```bash
+bash .claude/hooks/selftest.sh
+```
+
+22 條案例（含 3 個誤判陷阱），2026-08-31 全數通過。改動任一支 hook 後必須重跑。
+
 **hook 不能取代規則文字的部分要留著**：hook 只回答「這一次擋不擋」，規則文字回答「為什麼」與「怎麼做才對」。已機械化的條目在下表標 `已機械化`，但仍保留最短的敘述句。
 
 **Windows 注意**：hook 一律用 shell form（`shell: "bash"`）＋ `bash "<path>"`，**不要**用 exec form 直接指向 `.sh`。官方文件明示 Windows 的 exec form 需要真正的 `.exe`；而且 `bash` 在 Windows PATH 上會解析到 `C:\Windows\system32\bash.exe`（WSL launcher），不是 Git Bash。【已確認：2026-08-31 於本機 `Get-Command bash`】

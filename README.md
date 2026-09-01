@@ -79,6 +79,7 @@ CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設
 ├── skills/         (17)   # Coroutine 能力庫，按需載入
 ├── agents/         (14)   # Thread / Process 執行模板
 ├── hooks/           (3)   # 確定性 Gate：分支保護、backup tag、Router 一致性
+│                          #   ＋ selftest.sh（22 條 Gate 自測）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
