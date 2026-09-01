@@ -12,13 +12,30 @@
 
 ## 怎麼跑
 
-1. **開一個乾淨 session**（不能沿用已經載入過 skill 的 session，前文會污染路由）。
-2. 逐條輸入 [`trigger-cases.md`](trigger-cases.md) 的「使用者說的話」，**一字不改**。
-3. 記錄模型實際載入了哪些 skill。
-4. 對照「該載入／不該載入」欄，判 PASS / FAIL。
-5. 在 `trigger-cases.md` 底部的執行紀錄新增一列，寫上日期、commit SHA、命中率。
+```bash
+python docs/eval/run_eval.py
+```
+
+每條開一個獨立的 headless session（`claude -p`），抽出實際的 `Skill` 呼叫，比對「該載入／不該載入」，結果寫進 `runs/<時間>-<sha>.json`。
+
+**前置：`claude` CLI 已安裝並登入。** 沒登入的話程式會偵測到並中止，不會把「未登入」誤算成 FAIL：
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude login
+```
+
+常用參數：`--list`（只看解析到的案例）· `--runs 1`（快速版）· `--only A`（只跑碰撞組）。
 
 **每條跑 2 次，兩次都對才算 PASS。** 這不是統計顯著，只是排除單次抖動。
+
+### 為什麼有這支程式
+
+原本的規劃刻意不建 eval 框架，維持手動。**改掉的理由是手動版沒被跑過**——16 個乾淨 session 逐條輸入的成本高到讓「先建量尺」變成永遠的下一步，而那正是 `ABLATION.md` 第一輪遲遲不發生的同一種失敗。
+
+`lessons/0001` 的失效條件也預告了這件事：「若未來有自動測量常駐面效果的機制，這則的手動流程該被那個機制取代」。
+
+手動流程仍然有效，當作 fallback：開乾淨 session、逐條輸入、記錄實際載入了什麼。
 
 ## 判定
 
