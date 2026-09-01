@@ -33,11 +33,31 @@
 >
 > 沒有這個機制，常駐面只會單向長大：加規則感覺安全，刪規則感覺有風險。
 
+## 機械化優先
+
+一條常駐規則在被登記證據之前，先問一個更前面的問題：
+
+**它能不能由 hook 強制？**
+
+能就寫成 hook，常駐面砍掉那幾行。hook 是確定性的，模型配不配合都會執行；常駐文字是機率性的，而且每輪都在花 token。這是設計原則 2（確定性工程 × Agent）在 git 與 router 這一層的落地。
+
+**判準一條**：判定條件寫得成 shell 的 → hook。需要語意理解的 → 留在 rules 或降級 skill。
+
+| 原規則 | Hook | 觸發 | 模式 |
+|---|---|---|---|
+| `git-workflow.md` 先開分支 | `hooks/guard-branch.sh` | PreToolUse `Edit\|Write\|NotebookEdit` ＋ `Bash(git commit*)` | **warn**（exit 1，提示不阻擋） |
+| `git-workflow.md` backup tag | `hooks/guard-critical.sh` | PreToolUse `Bash(git *)`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
+| 維護契約 #1 Router 不說謊 | `hooks/check-router.sh` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
+
+**hook 不能取代規則文字的部分要留著**：hook 只回答「這一次擋不擋」，規則文字回答「為什麼」與「怎麼做才對」。已機械化的條目在下表標 `已機械化`，但仍保留最短的敘述句。
+
+**Windows 注意**：hook 一律用 shell form（`shell: "bash"`）＋ `bash "<path>"`，**不要**用 exec form 直接指向 `.sh`。官方文件明示 Windows 的 exec form 需要真正的 `.exe`；而且 `bash` 在 Windows PATH 上會解析到 `C:\Windows\system32\bash.exe`（WSL launcher），不是 Git Bash。【已確認：2026-08-31 於本機 `Get-Command bash`】
+
 ## 分類現況
 
-盤點日 2026-08-14（建立日，尚未跑過第一輪實測消融）。
+盤點日 2026-08-31（第一輪，hook 化已執行，實測消融尚未執行）。
 
-常駐面 = 根目錄 `CLAUDE.md`(36) ＋ `.claude/CLAUDE.md`(36) ＋ `rules/*.md`(267) = **339 行**。
+常駐面 = 根目錄 `CLAUDE.md`(37) ＋ `.claude/CLAUDE.md`(38) ＋ `rules/*.md`(266) = **341 行**（2026-08-14 為 339）。
 
 > ⚠ **這個數字偏高，而且有一半的規則沒有本地實證。** 第一輪消融的重點是 `evidence-grades`(47) 與
 > `dispatch`(45)——它們是這套配置的核心賭注，但賭注要用實測驗證，不是用信心。
@@ -47,7 +67,7 @@
 |---|---|---|---|
 | 根目錄 `CLAUDE.md` 入口與節奏 | 意圖 | — | 保留（只放入口；長出細節就是該下放的訊號） |
 | `.claude/CLAUDE.md` 元件責任 | 意圖 | — | 保留 |
-| `.claude/CLAUDE.md` 維護契約 | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔 | 保留 |
+| `.claude/CLAUDE.md` 維護契約 | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔。**2026-08-31 實測命中**：根 `CLAUDE.md` 指向不存在的 `/se-bootstrap`【已確認：`check-router.sh` exit 2】 | 保留；#1 已機械化 |
 | `core-rules.md` 1–5 | 意圖 | — | 保留（他檔以「第 N 條」引用，編號須穩定） |
 | `core-rules.md` 6 留下領悟 | 意圖 | — | 保留（這是這套配置存在的理由） |
 | `core-rules.md` 3 部分結果不覆蓋 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |
@@ -56,10 +76,10 @@
 | `dispatch.md` 2 切片換 Process | 意圖 | — | 保留 |
 | `dispatch.md` 3 平行前確認鎖 | 補丁 | 跨 session duplicate cherry-pick、stale branch | 保留 |
 | `dispatch.md` 4 GIL | 補丁 | 一次丟多個問題給人，全部卡住 | ⚠ 本地未實證 |
-| `git-workflow.md` 先開分支 | 補丁 | **未登記** | ⚠ 重驗：base 提示已含「預設分支先開分支」 |
-| `git-workflow.md` backup tag | 補丁 | **未登記** | ⚠ 重驗 |
+| `git-workflow.md` 先開分支 | 補丁 | **已機械化（warn）**：`guard-branch.sh` 的攔截次數即為證據，2026-08-31 起觀察 | 一到兩週後：有攔截 → 改 block；零攔截 → 刪常駐文字，只留 hook |
+| `git-workflow.md` backup tag | 補丁 | **已機械化（block）**：`guard-critical.sh`，13/13 判定案例通過【已確認：2026-08-31 stdin 測試】 | 保留最短敘述；hook 是真正的守門人 |
 | `git-workflow.md` commit→push→PR 連貫 | 補丁 | base 提示預設「只在使用者要求時 push」，需覆寫 | 保留 |
-| `git-workflow.md` body 按需寫 | 補丁 | 與全域 `~/.claude/CLAUDE.md` 的 WHY/WHAT/IMPACT 衝突 | 全域同步後刪除 |
+| ~~`git-workflow.md` body 按需寫~~ | 補丁 | **已移除（2026-08-31）**：衝突對象不存在——全域檔名是 `~/.claude/CLAUDE.md.md`（副檔名重複），從未被載入【已確認：`ls -la ~/.claude/`】 | 存於 `.out-of-scope/ablated-2026-08-31/` |
 | `thinking-boundary.md` 速通／深思 | 意圖 | — | 保留（擋過度前置治理） |
 | `thinking-boundary.md` 預算 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |
 | `register.md` 文件語域 | 意圖 | — | 保留 |
@@ -82,3 +102,4 @@
 | 日期 | 動作 | 結果 |
 |---|---|---|
 | 2026-08-14 | 建立基線。六條常駐規則、十六個 Skill、九個 Agent | 常駐面 339 行，尚未實測消融 |
+| 2026-08-31 | 第一輪：三條規則機械化為 hook（guard-branch／guard-critical／check-router）、修正 `/se-bootstrap` 斷鏈、刪除「body 按需寫」、建立 `docs/eval/` 觸發案例集 | 常駐面 341 行（與本輪前持平：刪 1 條、hook 註記 0 新增行、契約 #1 註記 +1 行）；「未登記」由 4 條降為 2 條；**實測消融尚未執行**，排在 hook warn 期滿之後 |

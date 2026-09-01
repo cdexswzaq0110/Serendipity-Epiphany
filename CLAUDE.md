@@ -32,6 +32,6 @@
 
 ## 帶進新專案
 
-複製 `.claude/` 與需要的 `templates/`，然後在新專案跑 `/se-bootstrap`（或照 [templates/\_meta/new_project_bootstrap.md](templates/_meta/new_project_bootstrap.md) 手動走一次），產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`。
+複製 `.claude/` 與需要的 `templates/`，然後照 [templates/\_meta/new_project_bootstrap.md](templates/_meta/new_project_bootstrap.md) 走一次，產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`。
 
 **這一份不要整份複製過去**——它描述的是 Serendipity 本身。

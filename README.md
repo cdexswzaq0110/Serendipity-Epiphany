@@ -78,11 +78,13 @@ CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設
 ├── rules/           (6)   # 常駐工程規則
 ├── skills/         (17)   # Coroutine 能力庫，按需載入
 ├── agents/         (14)   # Thread / Process 執行模板
-└── settings.json          # 最小權限基線＋敏感路徑 deny
+├── hooks/           (3)   # 確定性 Gate：分支保護、backup tag、Router 一致性
+└── settings.json          # 敏感路徑 deny ＋ PreToolUse hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
 ├── USAGE.md               # 詳細使用說明
 ├── DESIGN_RATIONALE.md    # 設計決策、取捨與非目標
+├── eval/                  # Skill 觸發案例集與命中率紀錄
 └── lessons/               # 經驗、事件與決策紀錄
 ```
 

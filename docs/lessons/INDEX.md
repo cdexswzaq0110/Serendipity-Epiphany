@@ -9,6 +9,7 @@
 | ID | 一句話 | tags | outcome | hits |
 |---|---|---|---|---|
 | [L0001](0001-ablation-first-run.md) | 常駐規則只會單向長大，要有機制才刪得掉 | ablation, rules, prompt | useful | 0 |
+| [L0002](0002-hook-silent-failure-windows.md) | Gate 的預設失敗模式是靜默放行，要先證明它會擋 | hooks, windows, gate | useful | 0 |
 
 ## 已升級（`outcome: promoted`）
 
@@ -28,6 +29,6 @@
 
 ## 統計
 
-- 現行：1 則
-- 距離下次回顧：19 則（滿 20 則觸發）
+- 現行：2 則
+- 距離下次回顧：18 則（滿 20 則觸發）
 - `no-trigger`（沒填失效條件）：0 則
