@@ -8,7 +8,7 @@
 
 - 收到開發任務的第一步：`git branch --show-current` + `git status`。
 - 在 main/master 上、有未提交變更、或使用者沒指定分支就要改 code → **停止並詢問**。
-- 不用 `git stash` 當工作流替代品。分支命名 `<type>/<short-description>`。
+- 不用 `git stash` 當工作流替代品。分支命名 `<type>/<short-description>`。由 `hooks/guard-branch.sh` 檢查（目前 warn 模式，只提示不阻擋）。
 
 ## Critical Section 先打 backup tag
 
@@ -18,7 +18,7 @@
 git tag -a backup/<branch>-<YYYY-MM-DD> -m '安全快照, tip <oid>'
 ```
 
-恢復路徑：`git reset --hard backup/<branch>-<YYYY-MM-DD>`。
+恢復路徑：`git reset --hard backup/<branch>-<YYYY-MM-DD>`。**由 `hooks/guard-critical.sh` 強制**——HEAD 沒有對應的 `backup/*` tag 時，上述四種操作一律擋下。
 
 ## Commit → Push → PR 為單一連貫操作
 
@@ -26,10 +26,9 @@ git tag -a backup/<branch>-<YYYY-MM-DD> -m '安全快照, tip <oid>'
 
 例外（明確中斷）：使用者明說只要 commit 或只要 push；merge 到共享分支；destructive 操作。
 
-## Commit Message 的兩條常駐約束
+## Commit Message
 
-1. 寫之前先 `git log --oneline -10` 對齊該專案的既有風格。
-2. **Body 按需寫，不是必填**——diff 已經是 WHAT 的單一真相源。
+寫之前先 `git log --oneline -10` 對齊該專案的既有風格。
 
 ## 程式碼 ↔ 文件同步
 

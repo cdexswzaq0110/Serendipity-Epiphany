@@ -1,0 +1,205 @@
+{
+  "date": "2026-09-02T131909",
+  "commit": "81fb341",
+  "runs_per_case": 2,
+  "passed": 1,
+  "total": 8,
+  "cases": [
+    {
+      "id": "A1",
+      "text": "這東西做得出來嗎，大概要多久",
+      "expect": [
+        "se-feasibility"
+      ],
+      "forbid": [
+        "se-design",
+        "se-discovery"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "A2",
+      "text": "我想做一個內部工具，但還講不出做完長什麼樣",
+      "expect": [
+        "se-discovery"
+      ],
+      "forbid": [
+        "se-design",
+        "se-clarify"
+      ],
+      "runs": [
+        {
+          "used": [
+            "se-discovery"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-discovery"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "A3",
+      "text": "這個功能幫我切成幾塊，我要分批做",
+      "expect": [
+        "se-design"
+      ],
+      "forbid": [
+        "se-discovery"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "A4",
+      "text": "這個決定要問 PM，幫我整理成一份給他填的東西",
+      "expect": [
+        "se-clarify"
+      ],
+      "forbid": [
+        "se-design",
+        "se-feasibility"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-clarify"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B1",
+      "text": "這段一直報錯，幫我找原因",
+      "expect": [
+        "se-debug"
+      ],
+      "forbid": [
+        "se-minimal-change"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B2",
+      "text": "加一個欄位到這個表單",
+      "expect": [
+        "se-minimal-change"
+      ],
+      "forbid": [
+        "se-design",
+        "se-two-axis-review"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B3",
+      "text": "改完了，幫我檢查一下",
+      "expect": [
+        "se-two-axis-review"
+      ],
+      "forbid": [
+        "se-debug"
+      ],
+      "runs": [
+        {
+          "used": [
+            "code-review"
+          ],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B4",
+      "text": "我要開分支做這個然後開 PR",
+      "expect": [
+        "se-branch-lifecycle"
+      ],
+      "forbid": [
+        "se-scheduling"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    }
+  ]
+}

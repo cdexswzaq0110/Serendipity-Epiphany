@@ -2,7 +2,7 @@
 
 **機遇下，突然領悟學到的智慧。**
 
-這是一套 Claude Code 開發配置模板。它假設你會反覆撞上同一類問題，所以除了「怎麼把事做完」，它同時管**怎麼把每次撞出來的領悟留下來**。
+這是一套 Claude Code 的工程 Harness——常駐約束、按需能力、派發模板、確定性 Gate 與驗證迴圈的集合。它假設你會反覆撞上同一類問題，所以除了「怎麼把事做完」，它同時管**怎麼把每次撞出來的領悟留下來**。
 
 ## 開始一輪工作
 
@@ -32,6 +32,6 @@
 
 ## 帶進新專案
 
-複製 `.claude/` 與需要的 `templates/`，然後在新專案跑 `/se-bootstrap`（或照 [templates/\_meta/new_project_bootstrap.md](templates/_meta/new_project_bootstrap.md) 手動走一次），產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`。
+複製 `.claude/` 與需要的 `templates/`，然後照 [templates/\_meta/new_project_bootstrap.md](templates/_meta/new_project_bootstrap.md) 走一次，產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`。
 
 **這一份不要整份複製過去**——它描述的是 Serendipity 本身。
