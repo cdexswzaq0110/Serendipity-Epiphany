@@ -8,6 +8,8 @@
 
 把開發過程中的經驗，沉澱成可重複使用的工作流。
 
+*An evidence-driven multi-agent engineering harness for Claude Code.*
+
 </div>
 
 ---
