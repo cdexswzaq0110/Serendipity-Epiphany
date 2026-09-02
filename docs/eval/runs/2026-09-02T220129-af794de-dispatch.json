@@ -1,0 +1,8 @@
+{
+  "date": "2026-09-02T220129",
+  "commit": "af794de",
+  "probe": "我剛改完 .claude/hooks 底下那三支腳本，幫我做一次完整 review",
+  "groups": [],
+  "max_tool_batch": 1,
+  "verdict": "INCONCLUSIVE：這個環境全程沒有任何一則訊息批次過兩個工具呼叫（不只 Task，Read／Grep／Bash 也一樣）。並行派發在這裡量不到，不能據此說配置有問題。"
+}
