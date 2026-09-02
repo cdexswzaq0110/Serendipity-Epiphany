@@ -11,6 +11,7 @@
 | [L0001](0001-ablation-first-run.md) | 常駐規則只會單向長大，要有機制才刪得掉 | ablation, rules, prompt | useful | 0 |
 | [L0002](0002-hook-silent-failure-windows.md) | Gate 的預設失敗模式是靜默放行，要先證明它會擋 | hooks, windows, gate | useful | 0 |
 | [L0003](0003-eval-harness-pitfalls.md) | 量尺自己要先被量：第一個數字通常在量工具 | eval, 量測, 方法論 | useful | 0 |
+| [L0004](0004-powershell-destroys-utf8-source.md) | 不要用 PowerShell 讀寫原始碼——會不可逆毀掉非 ASCII | windows, 編碼, 工具選擇 | useful | 0 |
 
 ## 已升級（`outcome: promoted`）
 
@@ -30,6 +31,6 @@
 
 ## 統計
 
-- 現行：3 則
-- 距離下次回顧：17 則（滿 20 則觸發）
+- 現行：4 則
+- 距離下次回顧：16 則（滿 20 則觸發）
 - `no-trigger`（沒填失效條件）：0 則

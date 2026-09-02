@@ -75,6 +75,69 @@ def skills_used(stream):
     return used, refused
 
 
+DISPATCH_PROBE = "我剛改完 .claude/hooks 底下那三支腳本，幫我做一次完整 review"
+
+
+def dispatch_groups(stream):
+    """每一則 assistant 訊息裡派了哪些 subagent。
+
+    平行 = 同一則訊息內出現 2 個以上派發呼叫。分散在不同訊息就是序列化——
+    這是 rules/dispatch.md 第 3 條講的那個機制，也是這支探測唯一在看的東西。
+    """
+    groups = []
+    for line in stream.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if d.get("type") != "assistant":
+            continue
+        names = [(b.get("input") or {}).get("subagent_type") or "?"
+                 for b in d.get("message", {}).get("content", [])
+                 if b.get("type") == "tool_use" and b.get("name") in ("Task", "Agent")]
+        if names:
+            groups.append(names)
+    return groups
+
+
+def max_batch(stream):
+    """整份 transcript 裡，單一 assistant 訊息最多同時發出幾個工具呼叫。
+
+    這是**儀器自檢**：若全程最大值是 1，代表這個執行環境根本不批次工具呼叫，
+    於是「有沒有並行派發」在這裡量不到——那是儀器的極限，不是被測系統壞掉。
+    """
+    best = 0
+    for line in stream.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        if d.get("type") != "assistant":
+            continue
+        n = sum(1 for b in d.get("message", {}).get("content", [])
+                if b.get("type") == "tool_use")
+        best = max(best, n)
+    return best
+
+
+def run_dispatch_probe(timeout):
+    proc = subprocess.run(
+        ["claude", "-p", DISPATCH_PROBE, "--output-format", "stream-json",
+         "--verbose", "--max-turns", "25",
+         "--allowedTools", "Skill", "Task", "Read", "Grep", "Glob", "Bash"],
+        cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8",
+        errors="replace", timeout=timeout, shell=(sys.platform == "win32"),
+    )
+    raw = proc.stdout or ""
+    return dispatch_groups(raw), max_batch(raw)
+
+
 def run_case(case, timeout):
     proc = subprocess.run(
         # 只給 Skill，刻意不給 Read/Grep：本案例集就存在被測的 repo 裡，
@@ -101,12 +164,52 @@ def main():
     ap.add_argument("--timeout", type=int, default=180)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--parse-only")
+    ap.add_argument("--dispatch", action="store_true",
+                    help="並行派發探測：雙軸 review 的兩個 Thread 有沒有在同一則訊息裡一次派出")
     args = ap.parse_args()
 
     if args.parse_only:
-        used, refused = skills_used(Path(args.parse_only).read_text(encoding="utf-8"))
+        raw = Path(args.parse_only).read_text(encoding="utf-8")
+        used, refused = skills_used(raw)
         print("skills:", used, "| not-logged-in:", refused)
+        groups = dispatch_groups(raw)
+        batch = max_batch(raw)
+        print("派發分組:", groups or "（無）",
+              "→", "平行" if any(len(g) >= 2 for g in groups) else "序列／無派發")
+        print(f"單則訊息最大工具批次: {batch}",
+              "（=1 代表這份 transcript 量不到並行）" if batch <= 1 else "")
         return 0
+
+    if args.dispatch:
+        groups, batch = run_dispatch_probe(max(args.timeout, 900))
+        print(f"派發訊息數 {len(groups)}，派發總數 {sum(len(g) for g in groups)}，"
+              f"全程單則訊息最大工具批次 {batch}")
+        for i, g in enumerate(groups, 1):
+            print(f"  訊息 {i}: {g}" + ("   ← 平行" if len(g) >= 2 else ""))
+
+        if any(len(g) >= 2 for g in groups):
+            verdict, code = "PASS：兩軸在同一則訊息內一次派出", 0
+        elif batch <= 1:
+            verdict, code = (
+                "INCONCLUSIVE：這個環境全程沒有任何一則訊息批次過兩個工具呼叫"
+                "（不只 Task，Read／Grep／Bash 也一樣）。並行派發在這裡量不到，"
+                "不能據此說配置有問題。", 0)
+        else:
+            verdict, code = ("FAIL：環境會批次工具呼叫，但這兩個派發被拆成多則訊息"
+                             "＝序列化", 1)
+        print(verdict)
+
+        RUNS_DIR.mkdir(parents=True, exist_ok=True)
+        sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=str(ROOT),
+                             capture_output=True, text=True).stdout.strip()
+        stamp = datetime.now().strftime("%Y-%m-%dT%H%M%S")
+        out = RUNS_DIR / f"{stamp}-{sha or 'nogit'}-dispatch.json"
+        with open(out, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump({"date": stamp, "commit": sha, "probe": DISPATCH_PROBE,
+                       "groups": groups, "max_tool_batch": batch,
+                       "verdict": verdict}, fh, ensure_ascii=False, indent=2)
+        print(f"結果寫入 {out.relative_to(ROOT)}")
+        return code
 
     cases = load_cases(args.only)
     if not cases:

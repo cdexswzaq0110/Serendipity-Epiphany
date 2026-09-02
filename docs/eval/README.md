@@ -46,6 +46,24 @@ claude login
 
 「都沒載入任何 skill」也是 FAIL（案例 1–8 都應該命中某個 skill）。
 
+## 並行派發探測
+
+```bash
+python docs/eval/run_eval.py --dispatch
+```
+
+跑一次真實的雙軸 review，檢查兩個 reviewer thread 有沒有在**同一則訊息**裡一次派出。三個檔位：
+
+| 判定 | 條件 |
+|---|---|
+| **PASS** | 兩個派發出現在同一則訊息 |
+| **FAIL** | 環境會批次工具呼叫，但這兩個被拆開 |
+| **INCONCLUSIVE** | 全程單則訊息最大工具批次 = 1，並行在這裡不可測 |
+
+**第三個檔位不是逃生口，是儀器自檢。** headless `claude -p` 目前不批次任何工具呼叫（連 `Read`／`Grep` 都不批），所以它在這個環境永遠回 INCONCLUSIVE——那是真話。**只有兩個檔位的測試會把「測不到」誤報成「壞掉」**，那個錯誤已經實際發生過一次，見 [`../lessons/0003`](../lessons/0003-eval-harness-pitfalls.md)。
+
+互動 session 則已實測可以並行派發【已確認：2026-09-02】。想量它需要另一種方法，本探測涵蓋不到。
+
 ## 什麼時候必須跑
 
 - 改任何 skill 的 `description`（維護契約 #8）
