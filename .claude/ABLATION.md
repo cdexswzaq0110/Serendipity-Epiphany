@@ -111,4 +111,5 @@ bash .claude/hooks/selftest.sh
 |---|---|---|
 | 2026-08-14 | 建立基線。六條常駐規則、十六個 Skill、九個 Agent | 常駐面 339 行，尚未實測消融 |
 | 2026-08-31 | 第一輪：三條規則機械化為 hook（guard-branch／guard-critical／check-router）、修正 `/se-bootstrap` 斷鏈、刪除「body 按需寫」、建立 `docs/eval/` 觸發案例集 | 常駐面 341 行（與本輪前持平：刪 1 條、hook 註記 0 新增行、契約 #1 註記 +1 行）；「未登記」由 4 條降為 2 條；**實測消融尚未執行**，排在 hook warn 期滿之後 |
+| 2026-09-02 | 提案「平行 = 同一則訊息」常駐規則 → **實測後拒絕**。撤回三個檔案的改動，留檔於 `.out-of-scope/parallel-dispatch-rule.md` | 不加規則也會發生：在已撤回改動的 working tree 上，互動 session 仍從同一則訊息送出兩個 Task【已確認】。常駐面維持 341 行 |
 | 2026-09-02 | 跑出第一個有效的 skill 觸發 baseline：A 組（4 個相鄰入口）**4/4、8 次全對、零誤觸發**。原本要改的四份 description **決定不動**——重疊是事實，誤觸發不是 | 前兩次量測作廢（案例不自足、答案外洩），見 `docs/lessons/0003` |
