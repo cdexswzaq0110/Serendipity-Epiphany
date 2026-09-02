@@ -35,6 +35,24 @@
 
 ## Phase 3 — 前置檢查
 
+### 3.1 先進版控（這一條漏掉的代價不可逆）
+
+```bash
+cd <新專案>
+git init -b main
+printf '.claude/settings.local.json
+' > .gitignore
+```
+
+**在複製任何檔案、寫任何一行之前做完。** 2026-09-02 第一次把這套配置帶進真實專案時，
+因為還沒 init，一個檔案被工具毀掉之後只能整份重寫——見 [`docs/lessons/0004`](../../docs/lessons/0004-powershell-destroys-utf8-source.md)。
+
+⚠ **注意上層目錄**：如果新專案開在一個已經是 git repo 的目錄底下（例如家目錄本身
+被版控），`git status` 會有反應，但那是**上層的**版控，不是這個專案的。
+`bootstrap_check.sh` 會抓這種情況。
+
+### 3.2 工具前置檢查
+
 跑一次 `se-preflight`：這台機器上有什麼 CLI、什麼 MCP、什麼 API key、平台並行數多少。
 
 **在寫第一行程式碼之前做完**，不要邊做邊發現缺工具。
@@ -91,12 +109,22 @@
 
 ## 完成後檢查
 
-- [ ] `.claude/` 已複製，`rules/` 六條都在
-- [ ] 專案的 `CLAUDE.md` 已產出，且**只放環境查不到的東西**
-- [ ] `CONTEXT.md` 有三到五個真的會用到的詞
-- [ ] 前置檢查跑過，缺的都已記錄
-- [ ] `docs/lessons/` 已建立
-- [ ] `.gitignore` 已含 `.claude/settings.local.json`
+**不要用眼睛核對，跑它：**
+
+```bash
+bash templates/_meta/bootstrap_check.sh <新專案路徑>
+```
+
+八項檢查，任何一項沒過就 exit 1：版控是否為本專案自己的、有沒有 commit、
+`.claude/` 是否完整、`rules/` 是否六條、專案 `CLAUDE.md`／`CONTEXT.md`／
+`docs/lessons/` 是否產出、`.gitignore` 有沒有擋 `settings.local.json`。
+
+**核取方塊靠人記得，腳本不會忘。** 這份清單原本是七個方塊，第一次被真的執行時
+就漏掉了最重要的那一條（版控）。
+
+還有一項腳本判不了、要人自己確認：
+
+- [ ] 專案的 `CLAUDE.md` **只放環境查不到的東西**（`package.json` 已有的別抄一份）
 - [ ] 新專案裡用不到的 templates 已刪掉
 
 ---
