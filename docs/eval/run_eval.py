@@ -77,6 +77,9 @@ def skills_used(stream):
 
 def run_case(case, timeout):
     proc = subprocess.run(
+        # 只給 Skill，刻意不給 Read/Grep：本案例集就存在被測的 repo 裡，
+        # 給了搜尋工具模型會 grep 到 trigger-cases.md 的答案欄（實測發生過）。
+        # 路由決策在第一輪就發生，不需要其他工具。
         ["claude", "-p", case["text"], "--output-format", "stream-json",
          "--verbose", "--max-turns", "2", "--allowedTools", "Skill"],
         cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8",
@@ -137,10 +140,10 @@ def main():
     stamp = datetime.now().strftime("%Y-%m-%dT%H%M%S")
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     out = RUNS_DIR / f"{stamp}-{sha or 'nogit'}.json"
-    out.write_text(json.dumps(
-        {"date": stamp, "commit": sha, "runs_per_case": args.runs,
-         "passed": passes, "total": len(cases), "cases": results},
-        ensure_ascii=False, indent=2), encoding="utf-8")
+    with open(out, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump({"date": stamp, "commit": sha, "runs_per_case": args.runs,
+                   "passed": passes, "total": len(cases), "cases": results},
+                  fh, ensure_ascii=False, indent=2)
 
     print(f"命中 {passes}/{len(cases)}（每條跑 {args.runs} 次）")
     print(f"結果寫入 {out.relative_to(ROOT)}")

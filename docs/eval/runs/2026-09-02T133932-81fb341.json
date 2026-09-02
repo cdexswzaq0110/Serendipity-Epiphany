@@ -1,0 +1,214 @@
+{
+  "date": "2026-09-02T133932",
+  "commit": "81fb341",
+  "runs_per_case": 2,
+  "passed": 4,
+  "total": 8,
+  "cases": [
+    {
+      "id": "A1",
+      "text": "我想做一個把 Notion 筆記自動同步到 Obsidian 的小工具，這做得出來嗎？大概要多久",
+      "expect": [
+        "se-feasibility"
+      ],
+      "forbid": [
+        "se-design",
+        "se-discovery"
+      ],
+      "runs": [
+        {
+          "used": [
+            "se-feasibility"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-feasibility"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "A2",
+      "text": "我想做一個內部工具，但還講不出做完長什麼樣",
+      "expect": [
+        "se-discovery"
+      ],
+      "forbid": [
+        "se-design",
+        "se-clarify"
+      ],
+      "runs": [
+        {
+          "used": [
+            "se-discovery"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-discovery"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "A3",
+      "text": "訂單匯出要加上多幣別支援，這個功能幫我切成幾塊，我要分批做",
+      "expect": [
+        "se-design"
+      ],
+      "forbid": [
+        "se-discovery"
+      ],
+      "runs": [
+        {
+          "used": [
+            "se-design"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-design"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "A4",
+      "text": "退款要不要開放給非會員，這個決定要問 PM，幫我整理成一份給他填的東西",
+      "expect": [
+        "se-clarify"
+      ],
+      "forbid": [
+        "se-design",
+        "se-feasibility"
+      ],
+      "runs": [
+        {
+          "used": [
+            "se-clarify"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-clarify"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "B1",
+      "text": "匯入 CSV 的時候一直報 encoding 錯誤，幫我找原因",
+      "expect": [
+        "se-debug"
+      ],
+      "forbid": [
+        "se-minimal-change"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B2",
+      "text": "幫我在使用者註冊表單加一個手機號碼欄位",
+      "expect": [
+        "se-minimal-change"
+      ],
+      "forbid": [
+        "se-design",
+        "se-two-axis-review"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B3",
+      "text": "我剛改完付款流程的重試邏輯，幫我 review 一下",
+      "expect": [
+        "se-two-axis-review"
+      ],
+      "forbid": [
+        "se-debug",
+        "code-review"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "B4",
+      "text": "我要開分支做付款重試這個功能，做完開 PR",
+      "expect": [
+        "se-branch-lifecycle"
+      ],
+      "forbid": [
+        "se-scheduling"
+      ],
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    }
+  ]
+}
