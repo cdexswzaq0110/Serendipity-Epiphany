@@ -19,6 +19,8 @@
 - `../docs/lessons/`：領悟帳本。這套配置的長期記憶，由 `se-epiphany` 維護。
 - `hooks/`：**確定性 Gate**——判定條件寫得成 shell 的規則放這裡，模型配不配合都會執行。清單見 [ABLATION.md](ABLATION.md)「機械化優先」。
 - `.out-of-scope/`：已審視並拒絕的機制與理由；重新提案前先讀對應檔。
+- `../.claude-plugin/plugin.json`：**發佈面**。`claude --plugin-dir <repo>` 裝得起來，帶 skills／agents／hooks；**帶不了 `rules/`**（常駐面是專案層的東西）。
+- `../AGENTS.md`：非 Claude Code agent 的入口指標。只放指標與三條跨工具仍成立的約束，不重複內容。
 
 ## 維護契約（改動本配置時必須重新滿足的不變量）
 

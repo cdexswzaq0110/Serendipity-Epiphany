@@ -22,6 +22,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 回答太長太散 | `se-focus` | |
 | 這一輪學到東西了／要召回舊教訓／帳本該回顧了 | `se-epiphany` | |
 | 要新增或修改 skill、改常駐提示 | `se-skill-authoring` | |
+| **要把這套配置帶進新專案** | **`se-bootstrap`** | 不是 `se-sdlc`——bootstrap 讓**配置**在新專案成立，sdlc 決定**專案**由誰負責哪一層 |
 | **要從零啟動一個專案、盤點缺哪個角色的產出、決定某件事該誰負責** | **`se-sdlc`** | 不是 `se-scheduling`——sdlc 決定**由誰負責哪一層的正確性**，scheduling 決定**怎麼派**。先跑 sdlc 定角色，再用 scheduling 派工 |
 
 ## 特例領域（遇到相關問題才觸發）

@@ -31,7 +31,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CASES_MD = ROOT / "docs" / "eval" / "trigger-cases.md"
 RUNS_DIR = ROOT / "docs" / "eval" / "runs"
 
-ROW = re.compile(r"^\|\s*([AB]\d+)\s*\|(.+?)\|(.+?)\|(.+?)\|\s*$")
+ROW = re.compile(r"^\|\s*([AB]\d+)\s*\|(.+)\|\s*$")
+INDEPENDENT = {"session-trace", "user-prompt"}
+FLOOR_POSITIVE, FLOOR_COLLISION = 3, 2
 SKILL = re.compile(r"`([a-z0-9-]+)`")
 
 
@@ -41,16 +43,46 @@ def load_cases(only=None):
         m = ROW.match(line.strip())
         if not m:
             continue
-        cid, text, expect, forbid = m.groups()
+        cid, rest = m.groups()
+        cells = [c.strip() for c in rest.split("|")]
+        if len(cells) < 3:
+            continue
+        text, expect, forbid = cells[0], cells[1], cells[2]
+        prov = SKILL.findall(cells[3])[0] if len(cells) > 3 and SKILL.findall(cells[3]) else "authored"
         if only and not cid.startswith(only):
             continue
         cases.append({
             "id": cid,
-            "text": text.strip(),
+            "text": text,
             "expect": SKILL.findall(expect),
             "forbid": SKILL.findall(forbid),
+            "provenance": prov,
         })
     return cases
+
+
+def coverage(cases):
+    """每個受測 skill 的獨立來源覆蓋率。不足下限就是 unmeasured，不編分數。
+
+    `authored`（照 skill 自己的 description 寫出來的案例）**不計入**——
+    用 description 寫的案例交給讀同一份 description 的判官，不可能失敗。
+    它測的是自我一致性，不是路由能力。
+    """
+    stat = {}
+    for c in cases:
+        indep = c["provenance"] in INDEPENDENT
+        for sk in c["expect"]:
+            d = stat.setdefault(sk, {"positive": 0, "collision": 0, "authored": 0})
+            d["positive" if indep else "authored"] += 1
+        for sk in c["forbid"]:
+            d = stat.setdefault(sk, {"positive": 0, "collision": 0, "authored": 0})
+            if indep:
+                d["collision"] += 1
+    for sk, d in stat.items():
+        d["sufficient"] = (d["positive"] >= FLOOR_POSITIVE
+                           and d["collision"] >= FLOOR_COLLISION)
+        d["verdict"] = "measurable" if d["sufficient"] else "unmeasured"
+    return stat
 
 
 def skills_used(stream):
@@ -163,6 +195,8 @@ def main():
     ap.add_argument("--only", choices=["A", "B"])
     ap.add_argument("--timeout", type=int, default=180)
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--coverage", action="store_true",
+                    help="每個 skill 的獨立來源覆蓋率；不足下限回 unmeasured")
     ap.add_argument("--parse-only")
     ap.add_argument("--dispatch", action="store_true",
                     help="並行派發探測：雙軸 review 的兩個 Thread 有沒有在同一則訊息裡一次派出")
@@ -215,6 +249,21 @@ def main():
     if not cases:
         print("沒有解析到任何案例——檢查 trigger-cases.md 的表格格式", file=sys.stderr)
         return 2
+
+    if args.coverage:
+        stat = coverage(cases)
+        print(f"覆蓋率下限：{FLOOR_POSITIVE} 條獨立來源正例 ＋ {FLOOR_COLLISION} 條碰撞")
+        print()
+        print(f"{'skill':26s} {'獨立正例':>8s} {'碰撞':>6s} {'authored':>9s}  判定")
+        for sk in sorted(stat):
+            d = stat[sk]
+            print(f"{sk:26s} {d['positive']:>8d} {d['collision']:>6d} "
+                  f"{d['authored']:>9d}  {d['verdict']}")
+        n_bad = sum(1 for d in stat.values() if not d["sufficient"])
+        print()
+        print(f"{n_bad}/{len(stat)} 個 skill 的案例覆蓋率不足，判定為 unmeasured。")
+        print("unmeasured 不是失敗，是**還沒有資格宣稱數字**。回填獨立來源案例才算數。")
+        return 0
 
     if args.list:
         for c in cases:

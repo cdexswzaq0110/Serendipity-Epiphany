@@ -44,14 +44,30 @@ flowchart LR
 
 ## 快速開始
 
-```bash
-# 1. 複製到新專案
-cp -r "Serendipity — Epiphany/.claude" your-project/.claude
-cp -r "Serendipity — Epiphany/templates" your-project/templates
+**兩種安裝方式，選一種。**
 
-# 2. 執行新專案 bootstrap
-#    templates/_meta/new_project_bootstrap.md
+### A. 複製（完整，含常駐規則）
+
+```bash
+cd your-project && git init -b main          # 先進版控，這條漏掉的代價不可逆
+cp -r "Serendipity — Epiphany/.claude" .claude
+cp -r "Serendipity — Epiphany/templates" templates
 ```
+
+然後在那個專案跑 `/se-bootstrap`，最後機械化驗收：
+
+```bash
+bash templates/_meta/bootstrap_check.sh .
+```
+
+### B. 裝成 plugin（只要能力，不要常駐約束）
+
+```bash
+claude --plugin-dir "/path/to/Serendipity — Epiphany"
+```
+
+拿到 18 個 skill ＋ 14 個 agent ＋ 3 道 hook，名稱前綴 `serendipity-epiphany:`。
+**拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【已確認：實測 18 skills／14 agents 載入】
 
 Windows：
 
@@ -70,6 +86,9 @@ Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\temp
 
 ```text
 CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設執行節奏
+AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的入口指標
+.claude-plugin/
+└── plugin.json            # 裝成 plugin：skills＋agents＋hooks（不含常駐規則）
 .claude/
 ├── CLAUDE.md              # 元件責任與 8 條維護契約
 ├── EXECUTION_MODEL.md     # 任務分解、執行派發與平行協調的完整定義
@@ -78,10 +97,10 @@ CLAUDE.md                  # 常駐入口：系統定位、啟動方式、預設
 ├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
 ├── rules/           (6)   # 常駐工程規則
-├── skills/         (17)   # Coroutine 能力庫，按需載入
+├── skills/         (18)   # Coroutine 能力庫，按需載入
 ├── agents/         (14)   # Thread / Process 執行模板
 ├── hooks/           (3)   # 確定性 Gate：分支保護、backup tag、Router 一致性
-│                          #   ＋ selftest.sh（22 條 Gate 自測）
+│                          #   ＋ selftest.sh（22 條自測）＋ hooks.json（plugin 用）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
@@ -294,7 +313,7 @@ Dev 與 QA 被大幅改變；**其餘八層幾乎沒變，因為那些是「定�
 
 ---
 
-## Skills（17 個 Coroutine）
+## Skills（18 個 Coroutine）
 
 ### 通用能力
 
