@@ -84,13 +84,13 @@ bash .claude/hooks/selftest.sh
 
 ## 分類現況
 
-盤點日 2026-08-31（第一輪，hook 化已執行，實測消融尚未執行）。
+盤點日 2026-09-03（v2；hook 化與第一次實測消融都已執行）。
 
-常駐面 = 根目錄 `CLAUDE.md`(37) ＋ `.claude/CLAUDE.md`(38) ＋ `rules/*.md`(266) = **341 行**（2026-08-14 為 339）。
+常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(40) ＋ `rules/*.md`(264) = **343 行**（2026-08-14 為 339）。
 
-> ⚠ **這個數字偏高，而且有一半的規則沒有本地實證。** 第一輪消融的重點是 `evidence-grades`(47) 與
-> `dispatch`(45)——它們是這套配置的核心賭注，但賭注要用實測驗證，不是用信心。
-> 拿掉之後模型行為沒變差的，該降級成 Skill。
+> ⚠ **這個數字沒有下降，而且大部分規則仍未實證。** 20 天來只跑過一條規則的消融
+> （`dispatch.md` #1）。下一批：`evidence-grades`(47) 與 `dispatch` 剩下三條——
+> 它們是這套配置的核心賭注，而賭注要用實測驗證，不是用信心。
 
 | 檔案 | 類型 | 失敗證據 | 下次處置 |
 |---|---|---|---|
@@ -101,7 +101,7 @@ bash .claude/hooks/selftest.sh
 | `core-rules.md` 6 留下領悟 | 意圖 | — | 保留（這是這套配置存在的理由） |
 | `core-rules.md` 3 部分結果不覆蓋 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |
 | `evidence-grades.md` | 補丁 | **核心賭注**：模型把推論寫成事實，讀者無法從措辭分辨「我跑過」與「我覺得應該」 | 保留，但第一輪要量它有沒有真的改變行為 |
-| `dispatch.md` 1 預設 Coroutine | 補丁 | 模型傾向為「分工感」派 subagent | ⚠ 重驗：base 提示可能已足夠 |
+| `dispatch.md` 1 預設 Coroutine | 補丁 | **已消融（2026-09-03）**：leave-one-out，replay 廣度搜尋任務。`full_rule` 派發 0/3、`absent` 派發 0/3 —— `no_measured_difference`【已確認：`docs/eval/runs/2026-09-03T123229-2e28431-ablate-dispatch-1.json`】 | 依單向門檻**已縮短**（12 行 → 9 行，保留決策表刪掉論證散文）。**限制：單一任務、N=3**。要刪整條需要第二個任務重現同樣結果 |
 | `dispatch.md` 2 切片換 Process | 意圖 | — | 保留 |
 | `dispatch.md` 3 平行前確認鎖 | 補丁 | 跨 session duplicate cherry-pick、stale branch | 保留 |
 | `dispatch.md` 4 GIL | 補丁 | 一次丟多個問題給人，全部卡住 | ⚠ 本地未實證 |
@@ -134,3 +134,4 @@ bash .claude/hooks/selftest.sh
 | 2026-08-31 | 第一輪：三條規則機械化為 hook（guard-branch／guard-critical／check-router）、修正 `/se-bootstrap` 斷鏈、刪除「body 按需寫」、建立 `docs/eval/` 觸發案例集 | 常駐面 341 行（與本輪前持平：刪 1 條、hook 註記 0 新增行、契約 #1 註記 +1 行）；「未登記」由 4 條降為 2 條；**實測消融尚未執行**，排在 hook warn 期滿之後 |
 | 2026-09-02 | 提案「平行 = 同一則訊息」常駐規則 → **實測後拒絕**。撤回三個檔案的改動，留檔於 `.out-of-scope/parallel-dispatch-rule.md` | 不加規則也會發生：在已撤回改動的 working tree 上，互動 session 仍從同一則訊息送出兩個 Task【已確認】。常駐面維持 341 行 |
 | 2026-09-02 | 跑出第一個有效的 skill 觸發 baseline：A 組（4 個相鄰入口）**4/4、8 次全對、零誤觸發**。原本要改的四份 description **決定不動**——重疊是事實，誤觸發不是 | 前兩次量測作廢（案例不自足、答案外洩），見 `docs/lessons/0003` |
+| 2026-09-03 | **第一次真的執行消融**（建立至今 20 天）。`dispatch.md` #1，leave-one-out，2 條件 × 3 次 | `no_measured_difference`（0/3 vs 0/3）→ 依單向門檻縮短該條。執行器 `docs/eval/ablate.py`，刻意只做這一件事、不是通用平台 |

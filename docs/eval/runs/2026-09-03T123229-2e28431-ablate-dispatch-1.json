@@ -1,0 +1,48 @@
+{
+  "rule": "dispatch-1",
+  "commit": "2e28431",
+  "runs": 3,
+  "prompt": "這個 repo 裡跟 hook 有關的設定散在哪些檔案？幫我掃一遍列出來。",
+  "known_failure": "為了「分工看起來比較專業」而派 subagent，付了隔離成本卻沒買到隔離",
+  "dispatch_count": {
+    "full_rule": 0,
+    "absent": 0
+  },
+  "verdict": "no_measured_difference：兩邊都是 0/3。**這不等於無效**——它只說明在這個任務、這個模型版本、這 3 次裡沒測到差異。依 ABLATION 的單向門檻，這是**縮短或刪除**的候選，不是保留的證據",
+  "detail": {
+    "full_rule": [
+      {
+        "dispatched": false,
+        "agents": [],
+        "raw_len": 34254
+      },
+      {
+        "dispatched": false,
+        "agents": [],
+        "raw_len": 42217
+      },
+      {
+        "dispatched": false,
+        "agents": [],
+        "raw_len": 36792
+      }
+    ],
+    "absent": [
+      {
+        "dispatched": false,
+        "agents": [],
+        "raw_len": 33023
+      },
+      {
+        "dispatched": false,
+        "agents": [],
+        "raw_len": 36641
+      },
+      {
+        "dispatched": false,
+        "agents": [],
+        "raw_len": 32680
+      }
+    ]
+  }
+}
