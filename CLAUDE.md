@@ -32,6 +32,8 @@
 
 ## 帶進新專案
 
-複製 `.claude/` 與需要的 `templates/`，然後照 [templates/\_meta/new_project_bootstrap.md](templates/_meta/new_project_bootstrap.md) 走一次，產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`。
+複製 `.claude/` 與需要的 `templates/`，然後跑 `/se-bootstrap`，產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`，最後用 `templates/_meta/bootstrap_check.sh` 機械化驗收。
+
+也可以裝成 plugin（`claude --plugin-dir <這個 repo>`）——那會拿到 skills、agents 與 hooks，**但不含常駐規則**。
 
 **這一份不要整份複製過去**——它描述的是 Serendipity 本身。

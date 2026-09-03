@@ -1,0 +1,40 @@
+{
+  "name": "serendipity-epiphany",
+  "displayName": "Serendipity — Epiphany",
+  "version": "2.0.0",
+  "description": "An evidence-driven multi-agent engineering harness for Claude Code. Every conclusion carries an evidence grade; every resident rule must show a failure it prevents, or it gets deleted.",
+  "author": {
+    "name": "TerryHC",
+    "url": "https://github.com/cdexswzaq0110"
+  },
+  "homepage": "https://github.com/cdexswzaq0110/Serendipity-Epiphany",
+  "repository": "https://github.com/cdexswzaq0110/Serendipity-Epiphany",
+  "license": "MIT",
+  "keywords": [
+    "harness",
+    "evidence-driven",
+    "ablation",
+    "multi-agent",
+    "engineering-discipline",
+    "eval",
+    "hooks"
+  ],
+  "skills": "./.claude/skills/",
+  "agents": [
+    "./.claude/agents/process-ml-engineer.md",
+    "./.claude/agents/process-worker.md",
+    "./.claude/agents/thread-dba.md",
+    "./.claude/agents/thread-devops.md",
+    "./.claude/agents/thread-ml-auditor.md",
+    "./.claude/agents/thread-ml-interpreter.md",
+    "./.claude/agents/thread-reviewer-spec.md",
+    "./.claude/agents/thread-reviewer-standards.md",
+    "./.claude/agents/thread-sa.md",
+    "./.claude/agents/thread-scout.md",
+    "./.claude/agents/thread-security.md",
+    "./.claude/agents/thread-supervisor.md",
+    "./.claude/agents/thread-system-architect.md",
+    "./.claude/agents/thread-ux.md"
+  ],
+  "hooks": "./.claude/hooks/hooks.json"
+}
