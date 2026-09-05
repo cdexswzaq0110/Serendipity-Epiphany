@@ -46,6 +46,12 @@ Process   可獨立派發、獨立驗證的執行單元（完整 context 隔離�
 
 裝不進就往下拆；無法獨立驗證的就往上合併。
 
+### 寫規格之前：不熟這個 codebase 的話
+
+**意圖清楚、但不知道這個 repo 的慣例長什麼樣**時，不要憑印象寫驗收條件——派一個唯讀 Thread（`thread-scout`）先回報相鄰實作、既有 pattern 與測試放哪，再據此寫規格。
+
+界線：這招只補**codebase 知識**。**「講不出做完長什麼樣」不在這裡解決**——那是意圖還沒成形，走 `se-discovery`（撥霧）或 `se-clarify`（被逼問），不是叫 agent 替你決定要什麼。
+
 ### Process 規格
 
 完整模板見 [`templates/PROCESS_SPEC.md`](../../../templates/PROCESS_SPEC.md)。最小形式：
@@ -152,6 +158,8 @@ Ready Queue = { Process | Depends on 全數完成 ∧ 所需鎖全部可取得 }
 
 grep 一下 README、測一個相鄰的東西、印出 `True` 然後 exit 0、再確認一次檔案存在——**這些都證明不了任何事**。跑真正的指令，讀真正的輸出。
 
+各種交付物「碰到它」具體是什麼、要留哪種證據，見 [`references/verification-surfaces.md`](references/verification-surfaces.md)。
+
 每個結果三選一：
 
 | 判定 | 意義 | 動作 |
@@ -193,7 +201,7 @@ Supervisor 是**最強推理模型的唯讀 Thread**（`agents/thread-supervisor
 ## Phase 6 — 收斂
 
 - **Barrier**：所有 Process PASS 之後，才對照原始需求做一次總驗收。逐個宣稱完成不等於整體成立。
-- 有可操作介面的，實際開起來走一次主要流程；自動化測試與 API 呼叫只能是補充。做不到就直說做不到，**不宣稱通過**。
+- 有可操作介面的，實際開起來走一次主要流程；自動化測試與 API 呼叫只能是補充。做不到就直說做不到，**不宣稱通過**（對照表：[`references/verification-surfaces.md`](references/verification-surfaces.md)）。
 - 收尾走 `se-two-axis-review` → `se-branch-lifecycle` → `se-epiphany`。
 
 ---

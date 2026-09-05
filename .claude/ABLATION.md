@@ -135,3 +135,4 @@ bash .claude/hooks/selftest.sh
 | 2026-09-02 | 提案「平行 = 同一則訊息」常駐規則 → **實測後拒絕**。撤回三個檔案的改動，留檔於 `.out-of-scope/parallel-dispatch-rule.md` | 不加規則也會發生：在已撤回改動的 working tree 上，互動 session 仍從同一則訊息送出兩個 Task【已確認】。常駐面維持 341 行 |
 | 2026-09-02 | 跑出第一個有效的 skill 觸發 baseline：A 組（4 個相鄰入口）**4/4、8 次全對、零誤觸發**。原本要改的四份 description **決定不動**——重疊是事實，誤觸發不是 | 前兩次量測作廢（案例不自足、答案外洩），見 `docs/lessons/0003` |
 | 2026-09-03 | **第一次真的執行消融**（建立至今 20 天）。`dispatch.md` #1，leave-one-out，2 條件 × 3 次 | `no_measured_difference`（0/3 vs 0/3）→ 依單向門檻縮短該條。執行器 `docs/eval/ablate.py`，刻意只做這一件事、不是通用平台 |
+| 2026-09-05 | 外部最佳實踐清單（10 條 Coding Agent tips）做覆蓋度對照。6 條已覆蓋、4 條是真缺口 | **常駐面 0 行變動**。四個缺口全部進既有 Skill（`se-debug` 補訊號、`se-minimal-change` 第 0 階、`se-scheduling` 驗證面對照與 scout 先行）。沒有一條填得出「模型反覆犯什麼錯」，依本檔門檻不得常駐。對照表見 [`../docs/lessons/0006-external-practice-lists-need-a-coverage-diff.md`](../docs/lessons/0006-external-practice-lists-need-a-coverage-diff.md) |
