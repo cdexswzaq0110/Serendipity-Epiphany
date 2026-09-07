@@ -8,6 +8,7 @@ anchors:
   - docs/eval/run_eval.py
   - .claude/skills/INDEX.md
 supersedes:
+source: self-observed   # self-observed | user-stated | external
 hits: 0
 ---
 

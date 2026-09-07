@@ -66,7 +66,7 @@ bash templates/_meta/bootstrap_check.sh .
 claude --plugin-dir "/path/to/Serendipity — Epiphany"
 ```
 
-拿到 18 個 skill ＋ 14 個 agent ＋ 3 道 hook，名稱前綴 `serendipity-epiphany:`。
+拿到 18 個 skill ＋ 14 個 agent ＋ 4 道 hook，名稱前綴 `serendipity-epiphany:`。
 **拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【已確認：實測 18 skills／14 agents 載入】
 
 Windows：
@@ -99,8 +99,8 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── rules/           (6)   # 常駐工程規則
 ├── skills/         (18)   # Coroutine 能力庫，按需載入
 ├── agents/         (14)   # Thread / Process 執行模板
-├── hooks/           (3)   # 確定性 Gate：分支保護、backup tag、Router 一致性
-│                          #   ＋ selftest.sh（22 條自測）＋ hooks.json（plugin 用）
+├── hooks/           (4)   # 確定性 Gate：分支保護、backup tag、Router 一致性、記憶層准入
+│                          #   ＋ selftest.sh（30 條自測）＋ hooks.json（plugin 用）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/

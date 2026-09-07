@@ -7,6 +7,7 @@ anchors:
   - .claude/ABLATION.md
   - .claude/rules/
 supersedes:
+source: self-observed   # self-observed | user-stated | external
 hits: 0
 ---
 

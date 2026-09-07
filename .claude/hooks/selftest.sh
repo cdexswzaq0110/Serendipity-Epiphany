@@ -91,6 +91,46 @@ check 2 "$(run check-router.sh "$commit_payload")" "常駐檔指向不存在的 
 export CLAUDE_PROJECT_DIR="$ROOT"
 check 0 "$(run check-router.sh "$commit_payload")" "本專案目前狀態一致"
 
+# ---------- check-memory ----------
+echo "check-memory"
+MEM="$TMP/mem"; mkdir -p "$MEM/docs/lessons"
+export CLAUDE_PROJECT_DIR="$MEM"
+
+lesson() {  # lesson <檔名> <source 行> <outcome> <validated 行>
+  printf -- '---\nid: L0001\ndate: 2026-01-01\noutcome: %s\ntags: [t]\nanchors:\nsupersedes:\n%s\nhits: 0\ngeneralizes_to: x\n%s\n---\n\n# t\n' \
+    "$3" "$2" "$4" > "$MEM/docs/lessons/$1"
+}
+index() { printf '# 索引\n\n| ID | 一句話 |\n|---|---|\n%s\n' "$1" > "$MEM/docs/lessons/INDEX.md"; }
+
+lesson 0001-a.md "source: self-observed" useful "validated:"
+index "| [L0001](0001-a.md) | x |"
+check 0 "$(run check-memory.sh "$commit_payload")" "來源合法、INDEX 一致 → 放行"
+
+lesson 0001-a.md "" useful "validated:"
+check 2 "$(run check-memory.sh "$commit_payload")" "缺 source 欄位"
+
+lesson 0001-a.md "source: 隨便寫" useful "validated:"
+check 2 "$(run check-memory.sh "$commit_payload")" "source 不是合法值"
+
+lesson 0001-a.md "source: external" promoted "validated: 有驗過"
+check 2 "$(run check-memory.sh "$commit_payload")" "外部來源不得升級成常駐規則"
+
+lesson 0001-a.md "source: self-observed" promoted "validated:"
+check 2 "$(run check-memory.sh "$commit_payload")" "promoted 但 VALIDATE 關沒過"
+
+lesson 0001-a.md "source: self-observed" useful "validated:"
+index "| — | — |"
+check 2 "$(run check-memory.sh "$commit_payload")" "檔案存在但 INDEX 未列出"
+
+index "| [L0009](0009-ghost.md) | x |"
+lesson 0001-a.md "source: self-observed" useful "validated:"
+index "| [L0001](0001-a.md) | x |
+| [L0009](0009-ghost.md) | x |"
+check 2 "$(run check-memory.sh "$commit_payload")" "INDEX 指向不存在的 lesson"
+
+export CLAUDE_PROJECT_DIR="$ROOT"
+check 0 "$(run check-memory.sh "$commit_payload")" "本專案帳本目前狀態合規"
+
 # ---------- 結果 ----------
 echo ""
 echo "通過 $pass／失敗 $fail"
