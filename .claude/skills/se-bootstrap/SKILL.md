@@ -64,10 +64,21 @@ bash templates/_meta/bootstrap_check.sh <新專案路徑>
 八項檢查，任一不過 exit 1。**核取方塊靠人記得，腳本不會忘**——這份清單原本是七個方塊，
 第一次被真的執行時就漏掉了最重要的那一條（版控）。
 
-腳本判不了、要人自己確認的兩項：
+改過這支腳本或 `templates/CONTEXT.md` 之後，跑一次自測：
+
+```bash
+bash templates/_meta/bootstrap_check.sh --selftest
+```
+
+它拿模板自己去餵腳本，並驗一次紅燈。**這一條是撞出來才加的**——舊版腳本只數表格列，
+而模板寫的是散文，照著填一律不及格（`docs/lessons/0006`）。
+
+腳本判不了、要人自己確認的三項：
 
 - 專案的 `CLAUDE.md` 只放環境查不到的東西
 - 新專案裡用不到的 templates 已刪掉
+- `CONTEXT.md` 裡的是**真的詞**，不是模板留下來的 `<詞>` 預留位——
+  腳本數的是形狀，判不了內容
 
 ## 兩種安裝方式，選一種
 
@@ -82,5 +93,5 @@ bash templates/_meta/bootstrap_check.sh <新專案路徑>
 
 - `bootstrap_check.sh` 八項全過
 - 專案 `CLAUDE.md` 的「實際指令」表只寫環境查不到的
-- `CONTEXT.md` 有三到五個真的會用到的詞
+- `CONTEXT.md` 有三到五個真的會用到的詞（散文或表格都可以，腳本兩種都認）
 - 第一輪之後跑一次消融（見 `.claude/ABLATION.md`）——繼承來的規則有一部分是在補一個已經不存在的模型缺陷

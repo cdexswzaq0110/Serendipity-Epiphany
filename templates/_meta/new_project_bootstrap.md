@@ -100,6 +100,7 @@ printf '.claude/settings.local.json
 ### 2. `CONTEXT.md`
 
 用 `templates/CONTEXT.md`。**一開始只填三到五個詞**——這時候你猜的比知道的多。
+散文式與表格式都可以，`bootstrap_check.sh` 兩種形狀都認得。
 
 ### 3. `docs/lessons/INDEX.md`
 
@@ -121,6 +122,10 @@ bash templates/_meta/bootstrap_check.sh <新專案路徑>
 
 **核取方塊靠人記得，腳本不會忘。** 這份清單原本是七個方塊，第一次被真的執行時
 就漏掉了最重要的那一條（版控）。
+
+改過這支腳本或 `templates/CONTEXT.md` 之後，跑 `bash templates/_meta/bootstrap_check.sh --selftest`
+——它拿模板自己去餵腳本，並驗一次紅燈。兩份檔案分別寫、沒有機制要求一致，就會漂掉
+（`docs/lessons/0006`）。
 
 還有一項腳本判不了、要人自己確認：
 

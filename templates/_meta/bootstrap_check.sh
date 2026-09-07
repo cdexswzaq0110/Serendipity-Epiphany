@@ -9,6 +9,85 @@
 #      不給路徑就檢查現在的目錄。
 set -uo pipefail
 
+# --selftest：拿**這個腳本自己的模板**建一份 fixture，再用一般模式檢查它。
+#
+# 存在的理由是一個真的踩過的坑：templates/CONTEXT.md 照著填會過不了這支腳本
+# （模板寫散文，腳本數表格的 `|`）。兩份檔案分別寫、沒有機制要求一致，於是漂掉，
+# 而且**兩邊看起來都很正常**——只有把模板餵給腳本才看得出來。
+#
+# 順便驗一次紅燈：詞條不足的 CONTEXT.md 必須被擋。只驗綠燈的自測，
+# 對一個永遠回傳 0 的假實作也會全過。
+if [ "${1:-}" = "--selftest" ]; then
+  self=$(cd "$(dirname "$0")" && pwd)
+  tpl="$self/../CONTEXT.md"
+  [ -f "$tpl" ] || { echo "找不到 $tpl"; exit 1; }
+
+  fixture() { # context-file -> 一個最小但合格的專案目錄
+    local ctx="$1" d
+    d=$(mktemp -d)
+    ( cd "$d"       && git init -q -b main .       && git config user.email selftest@local && git config user.name selftest       && printf '.claude/settings.local.json
+' > .gitignore       && printf '# fixture
+' > CLAUDE.md       && mkdir -p .claude/rules docs/lessons       && for n in core-rules dispatch evidence-grades git-workflow register thinking-boundary; do
+           printf '# %s
+' "$n" > ".claude/rules/$n.md"
+         done       && cp "$ctx" CONTEXT.md       && git add -A && git commit -qm 'chore: bootstrap' ) >/dev/null 2>&1
+    echo "$d"
+  }
+
+  fails=0
+
+  # 綠燈：模板原樣（它的 Language 段落有三個詞條）必須通過。
+  good=$(fixture "$tpl")
+  if bash "$0" "$good" >/dev/null 2>&1; then
+    echo "  ok    模板原樣通過自己的檢查"
+  else
+    echo "  FAIL  templates/CONTEXT.md 過不了 bootstrap_check.sh —— 兩者又漂開了"
+    bash "$0" "$good" | sed 's/^/        /'
+    fails=$((fails + 1))
+  fi
+
+  # 紅燈：只有一個詞條必須被擋。沒看過紅燈的檢查不算裝好。
+  thin=$(mktemp)
+  printf '# 共享語言
+
+## Language
+
+**只有一個詞**：
+定義
+' > "$thin"
+  poor=$(fixture "$thin")
+  if bash "$0" "$poor" >/dev/null 2>&1; then
+    echo "  FAIL  詞條不足的 CONTEXT.md 沒有被擋下來"
+    fails=$((fails + 1))
+  else
+    echo "  ok    詞條不足時擋下來（看過紅燈）"
+  fi
+
+  # 紅燈：表格式寫法也要認得。
+  tbl=$(mktemp)
+  printf '# 共享語言
+
+## Language
+
+| 詞 | 定義 | 避免 |
+|---|---|---|
+| A | a | x |
+| B | b | y |
+| C | c | z |
+' > "$tbl"
+  tblp=$(fixture "$tbl")
+  if bash "$0" "$tblp" >/dev/null 2>&1; then
+    echo "  ok    表格式寫法也算數"
+  else
+    echo "  FAIL  表格式的 CONTEXT.md 被誤判為太空"
+    fails=$((fails + 1))
+  fi
+
+  rm -rf "$good" "$poor" "$tblp" "$thin" "$tbl"
+  [ "$fails" -eq 0 ] && { echo; echo "自測通過"; exit 0; }
+  echo; echo "自測失敗 $fails 項"; exit 1
+fi
+
 ROOT="${1:-$PWD}"
 pass=0
 fail=0
@@ -45,10 +124,24 @@ n_rules=$(ls "$ROOT"/.claude/rules/*.md 2>/dev/null | wc -l | tr -d ' ')
 
 # 3. 專案自己的產出
 [ -f "$ROOT/CLAUDE.md" ] && ok "專案 CLAUDE.md 已產出" || bad "缺 CLAUDE.md"
+# CONTEXT.md 的充實度。**兩種寫法都算**——散文式（模板的預設）與表格式。
+#
+# 舊版只數以 `|` 開頭的行，於是照 templates/CONTEXT.md 填出來的檔案一律不及格：
+# 那個模板的 Language 段落是散文，`grep -c '^|'` 回傳 0。模板與它的驗收腳本
+# 分別寫、沒有任何機制要求一致，於是漂掉了。`--selftest` 現在會擋住這件事重演。
+count_terms() { # file -> 詞條數
+  local f="$1" bold rows
+  bold=$(grep -cE '^\*\*[^*]+\*\*' "$f" 2>/dev/null || true)
+  # 表格：扣掉分隔列，再扣一列表頭。
+  rows=$(grep -E '^\|' "$f" 2>/dev/null | grep -cvE '^\|[[:space:]:|-]+$' || true)
+  [ "${rows:-0}" -gt 0 ] && rows=$((rows - 1))
+  echo $(( ${bold:-0} + ${rows:-0} ))
+}
+
 if [ -f "$ROOT/CONTEXT.md" ]; then
-  terms=$(grep -c '^|' "$ROOT/CONTEXT.md" 2>/dev/null || echo 0)
-  if [ "$terms" -ge 5 ]; then ok "CONTEXT.md 有內容（$terms 列表格）"
-  else bad "CONTEXT.md 太空（$terms 列）" "至少填三到五個真的會用到的詞"; fi
+  terms=$(count_terms "$ROOT/CONTEXT.md")
+  if [ "$terms" -ge 3 ]; then ok "CONTEXT.md 有內容（$terms 個詞條）"
+  else bad "CONTEXT.md 太空（$terms 個詞條）" "至少填三到五個真的會用到的詞"; fi
 else
   bad "缺 CONTEXT.md"
 fi
