@@ -34,6 +34,14 @@
           },
           {
             "type": "command",
+            "if": "Bash(git commit*)",
+            "shell": "bash",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check-memory.sh\"",
+            "timeout": 10,
+            "statusMessage": "檢查記憶層准入"
+          },
+          {
+            "type": "command",
             "if": "Bash(git *)",
             "shell": "bash",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-critical.sh\"",

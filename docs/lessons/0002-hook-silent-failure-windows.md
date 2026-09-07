@@ -8,6 +8,7 @@ anchors:
   - .claude/settings.json
   - .claude/ABLATION.md
 supersedes:
+source: self-observed   # self-observed | user-stated | external
 hits: 0
 ---
 

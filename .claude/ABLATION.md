@@ -69,6 +69,7 @@
 | `git-workflow.md` 先開分支 | `hooks/guard-branch.sh` | PreToolUse `Edit\|Write\|NotebookEdit` ＋ `Bash(git commit*)` | **warn**（exit 1，提示不阻擋） |
 | `git-workflow.md` backup tag | `hooks/guard-critical.sh` | PreToolUse `Bash(git *)`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
 | 維護契約 #1 Router 不說謊 | `hooks/check-router.sh` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
+| 記憶層准入（外部來源不得升級成常駐規則） | `hooks/check-memory.sh` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
 
 **Gate 要先被證明會擋，才能相信它的綠燈**——hook 寫壞的預設失敗模式是靜默放行（見 [`../docs/lessons/0002-hook-silent-failure-windows.md`](../docs/lessons/0002-hook-silent-failure-windows.md)）。自測：
 
@@ -76,7 +77,7 @@
 bash .claude/hooks/selftest.sh
 ```
 
-22 條案例（含 3 個誤判陷阱），2026-08-31 全數通過。改動任一支 hook 後必須重跑。
+30 條案例（含 3 個誤判陷阱），2026-09-07 全數通過。改動任一支 hook 後必須重跑。
 
 **hook 不能取代規則文字的部分要留著**：hook 只回答「這一次擋不擋」，規則文字回答「為什麼」與「怎麼做才對」。已機械化的條目在下表標 `已機械化`，但仍保留最短的敘述句。
 
@@ -136,3 +137,5 @@ bash .claude/hooks/selftest.sh
 | 2026-09-02 | 跑出第一個有效的 skill 觸發 baseline：A 組（4 個相鄰入口）**4/4、8 次全對、零誤觸發**。原本要改的四份 description **決定不動**——重疊是事實，誤觸發不是 | 前兩次量測作廢（案例不自足、答案外洩），見 `docs/lessons/0003` |
 | 2026-09-03 | **第一次真的執行消融**（建立至今 20 天）。`dispatch.md` #1，leave-one-out，2 條件 × 3 次 | `no_measured_difference`（0/3 vs 0/3）→ 依單向門檻縮短該條。執行器 `docs/eval/ablate.py`，刻意只做這一件事、不是通用平台 |
 | 2026-09-05 | 外部最佳實踐清單（10 條 Coding Agent tips）做覆蓋度對照。6 條已覆蓋、4 條是真缺口 | **常駐面 0 行變動**。四個缺口全部進既有 Skill（`se-debug` 補訊號、`se-minimal-change` 第 0 階、`se-scheduling` 驗證面對照與 scout 先行）。沒有一條填得出「模型反覆犯什麼錯」，依本檔門檻不得常駐。對照表見 [`../docs/lessons/0006-external-practice-lists-need-a-coverage-diff.md`](../docs/lessons/0006-external-practice-lists-need-a-coverage-diff.md) |
+| 2026-09-07 | 記憶層准入控制。對照一份外部的 Agent 記憶防禦架構做覆蓋度盤點：容量約束／前置准入／拒絕無限記憶／保留干預**四項已被 ABLATION 與 GEP 四關覆蓋**，且比原文嚴格；缺的是**信任邊界、污染溯源、淨化程序** | lesson frontmatter 加 `source`；`check-memory.sh` 擋外部來源升級成常駐規則；`se-epiphany` 加模式四（淨化）。**常駐面 0 變動**——沒有本地失敗證據支持新增常駐內容 |
+

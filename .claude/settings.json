@@ -66,6 +66,14 @@
           },
           {
             "type": "command",
+            "if": "Bash(git commit*)",
+            "shell": "bash",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/check-memory.sh\"",
+            "timeout": 10,
+            "statusMessage": "檢查記憶層准入"
+          },
+          {
+            "type": "command",
             "if": "Bash(git *)",
             "shell": "bash",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-critical.sh\"",

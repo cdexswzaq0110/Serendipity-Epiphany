@@ -9,6 +9,7 @@ anchors:
   - .claude/skills/se-scheduling/SKILL.md
   - .claude/ABLATION.md
 supersedes:
+source: self-observed   # self-observed | user-stated | external
 hits: 0
 generalizes_to: 把任何外部最佳實踐清單併進一套已經成形的配置
 validated:
