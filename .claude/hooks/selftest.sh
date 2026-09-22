@@ -198,6 +198,9 @@ check 2 "$(promote "$LH/src/ext.md" --seen-in A --seen-in B)" "external 不得�
 check 2 "$(promote "$LH/src/ok.md" --seen-in A)" "只在一個專案撞到 → 不算遷移"
 check 2 "$(promote "$LH/src/nogen.md" --seen-in A --seen-in B)" "沒有泛化類別 → 不得上架"
 check 0 "$(promote "$LH/src/ok.md" --seen-in A --seen-in B)" "兩個專案、有類別、非外部 → 上架"
+check 1 "$(SERENDIPITY_HOME="$LH/home" python "$ROOT/.claude/tools/capabilities.py" --json 2>/dev/null \
+  | python -c 'import json,sys; print(json.load(sys.stdin)["verified"]["lessons"]["global"])' 2>/dev/null)" \
+  "自我模型數得到剛上架的那則（與 recall-lessons 一致）"
 
 # ---------- promote_skill.py（學習新技能的升級閘）----------
 echo "promote_skill.py"

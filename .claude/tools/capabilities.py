@@ -129,7 +129,7 @@ def lessons() -> dict:
     proj = sorted((ROOT / "docs" / "lessons").glob("[0-9]*.md"))
     fms = [_frontmatter(p.read_text(encoding="utf-8")) for p in proj]
     glob_dir = GLOBAL_HOME / "lessons"
-    glob_n = len(list(glob_dir.glob("[0-9]*.md"))) if glob_dir.is_dir() else 0
+    glob_n = len(list(glob_dir.glob("G[0-9]*.md"))) if glob_dir.is_dir() else 0  # lessons.py 寫的是 G0001-*.md
     return {
         "project": len(proj),
         "promoted": sum(1 for f in fms if f.get("outcome") == "promoted"),

@@ -79,7 +79,7 @@
 bash .claude/hooks/selftest.sh
 ```
 
-64 條案例（含誤判陷阱、迴圈內指令、heredoc 內文），2026-09-22 全數通過；同一份自測對修正前的 hook 為 51／13。改動任一支 hook 後必須重跑。
+65 條案例（含誤判陷阱、迴圈內指令、heredoc 內文、自我模型計數），2026-09-22 全數通過；hook 部分對修正前的版本為 51／13。改動任一支 hook 後必須重跑。
 
 **`if` 只是省成本的預篩，不是判定。** `Bash(git commit*)` 遇到 `for`／`while` 迴圈會照樣觸發 hook（2026-09-22 實測），所以每支 Bash hook 都自己讀 `tool_input.command` 判定。見 [`../docs/lessons/0009-a-prefilter-is-not-a-gate.md`](../docs/lessons/0009-a-prefilter-is-not-a-gate.md)。
 
@@ -144,4 +144,5 @@ bash .claude/hooks/selftest.sh
 | 2026-09-07 | 記憶層准入控制。對照一份外部的 Agent 記憶防禦架構做覆蓋度盤點：容量約束／前置准入／拒絕無限記憶／保留干預**四項已被 ABLATION 與 GEP 四關覆蓋**，且比原文嚴格；缺的是**信任邊界、污染溯源、淨化程序** | lesson frontmatter 加 `source`；`check-memory.sh` 擋外部來源升級成常駐規則；`se-epiphany` 加模式四（淨化）。**常駐面 0 變動**——沒有本地失敗證據支持新增常駐內容 |
 | 2026-09-22 | 通用能力：自我理解（`capabilities.py`）、未知領域（`se-acquire`）、學習新技能（`skill-candidates/` ＋ `promote_skill.py`）、自主自控（`guard-done.sh`）、遷移（`lessons.py` ＋ `recall-lessons.sh`）。全域帳本上架 G0001（L0005，兩個專案各自發生），L0004 被閘擋下 | 常駐面 343 → 345（元件責任表 +2 行）。**動態注入的失敗證據**：兩個專案 9 則 lesson、hits 總和 0、升級 0 則——召回從未被觸發。端到端：無工具 session 正確答出 G0001【已確認】；新領域 `se-acquire` 路由 1/2、熟領域對照 0 誤觸發 |
 | 2026-09-22 | commit 閘改為腳本自行判定指令，不再只靠 `if`。起因：router 不一致時，一條不含 `git` 的 Bash 指令被 `check-router` 擋下 | 實機探測 8 種形狀：`for`／`while` 迴圈誤觸發，單純／串接／heredoc／`$(...)`／`if`／`git status` 不會【已確認】。順帶修掉 `guard-critical` 的放行漏洞：迴圈內、`git -C`、換行後的破壞性操作原本不擋【已確認：舊版 selftest 51／13】。判定規則抽成 `hooks/_command.sh` 四支共用，比對前先去掉 heredoc 內文。常駐面 0 變動 |
+| 2026-09-22 | 把配置帶進 churn-guard（第二個專案）後，`capabilities.py` 與 `recall-lessons.sh` 對全域帳本並排給出 0 與 1 | `capabilities.py` 找錯檔名（`[0-9]*` vs `G*`），自我模型從未數到全域帳本【已確認】。已修，selftest 加「上架後數到 1」。L0008 走淨化程序標 `corrected`，由 L0010 取代——**跨專案遷移第一次實際發生，第一個產出是抓到自我模型的錯** |
 
