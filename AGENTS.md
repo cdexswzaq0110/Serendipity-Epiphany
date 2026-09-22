@@ -35,3 +35,5 @@ PreToolUse hook）。在其他 agent 上，那些會退化成「要你自己去�
 （2 = 擋下，1 = 提示，0 = 放行）。
 
 `templates/_meta/bootstrap_check.sh` 與 `docs/eval/run_eval.py` 同樣是獨立腳本。
+
+`.claude/tools/` 下的三支 Python 腳本（能力自我模型、跨專案帳本、skill 升級閘）也不依賴 Claude Code——任何 agent 都能直接呼叫。

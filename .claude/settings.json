@@ -82,6 +82,33 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-done.sh\"",
+            "timeout": 15,
+            "statusMessage": "結束前自檢"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/recall-lessons.sh\"",
+            "timeout": 5,
+            "statusMessage": "召回領悟帳本"
+          }
+        ]
+      }
     ]
   }
 }

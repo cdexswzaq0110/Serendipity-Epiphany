@@ -5,7 +5,7 @@
 
 用法：
     python docs/eval/run_eval.py --list          # 只列出解析到的案例，不呼叫模型
-    python docs/eval/run_eval.py                 # 跑 A/B 組，每條 2 次
+    python docs/eval/run_eval.py                 # 跑 A/B/D 組，每條 2 次
     python docs/eval/run_eval.py --runs 1        # 快速版
     python docs/eval/run_eval.py --only A        # 只跑 A 組
     python docs/eval/run_eval.py --parse-only <file.jsonl>   # 驗證解析邏輯
@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CASES_MD = ROOT / "docs" / "eval" / "trigger-cases.md"
 RUNS_DIR = ROOT / "docs" / "eval" / "runs"
 
-ROW = re.compile(r"^\|\s*([AB]\d+)\s*\|(.+)\|\s*$")
+ROW = re.compile(r"^\|\s*([ABD]\d+)\s*\|(.+)\|\s*$")
 INDEPENDENT = {"session-trace", "user-prompt"}
 FLOOR_POSITIVE, FLOOR_COLLISION = 3, 2
 SKILL = re.compile(r"`([a-z0-9-]+)`")
@@ -192,7 +192,7 @@ def judge(case, used):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", type=int, default=2)
-    ap.add_argument("--only", choices=["A", "B"])
+    ap.add_argument("--only", choices=["A", "B", "D"])
     ap.add_argument("--timeout", type=int, default=180)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--coverage", action="store_true",

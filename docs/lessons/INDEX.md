@@ -15,6 +15,9 @@
 | [L0005](0005-your-checker-is-the-first-suspect.md) | 系統說壞了的時候，第一個嫌疑犯是你的判定條件 | 量測, 判定, 除錯 | useful | 0 |
 | [L0006](0006-external-practice-lists-need-a-coverage-diff.md) | 外部最佳實踐清單，先做覆蓋度對照再決定加什麼 | 外部來源, 覆蓋度, 常駐面 | useful | 0 |
 | [L0007](0007-memory-layer-needs-a-trust-boundary.md) | 記憶層是配置層，外部內容進去要有邊界不能只靠判斷 | 記憶層, 信任邊界, 污染 | useful | 0 |
+| [L0008](0008-hand-written-self-description-is-the-part-that-lies.md) | 自我描述裡手寫的那一段，就是會說謊的那一段 | 自我模型, 生成, 一致性 | useful | 0 |
+
+跨專案的教訓在全域帳本（`python .claude/tools/lessons.py list`），目前 1 則：G0001（源自 L0005）。
 
 ## 已升級（`outcome: promoted`）
 
@@ -34,6 +37,6 @@
 
 ## 統計
 
-- 現行：7 則
-- 距離下次回顧：13 則（滿 20 則觸發）
+- 現行：8 則
+- 距離下次回顧：12 則（滿 20 則觸發）
 - `no-trigger`（沒填失效條件）：0 則
