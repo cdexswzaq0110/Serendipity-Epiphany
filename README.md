@@ -102,7 +102,7 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘
 ├── agents/         (14)   # Thread / Process 執行模板
 ├── hooks/           (6)   # 分支保護、backup tag、Router、記憶層准入、結束前自檢、開工召回
-│                          #   ＋ selftest.sh（43 條自測）＋ hooks.json（plugin 用）
+│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（64 條自測）＋ hooks.json（plugin 用）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse／Stop／SessionStart hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/

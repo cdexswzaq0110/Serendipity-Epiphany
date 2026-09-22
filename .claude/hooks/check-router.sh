@@ -9,6 +9,14 @@ set -uo pipefail
 
 MODE="${SE_CHECK_ROUTER_MODE:-block}"
 ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
+
+# 腳本自己判定是不是 git commit，不完全依賴 settings.json 的 if（見 docs/lessons/0009）。
+# _command.sh 不在時退回「一律檢查」——寧可多查，不可漏查。
+payload=$(cat 2>/dev/null || true)
+if . "$(dirname "$0")/_command.sh" 2>/dev/null; then
+  is_git_cmd "$payload" 'commit' || exit 0
+fi
+
 INDEX="$ROOT/.claude/skills/INDEX.md"
 SKILL_DIR="$ROOT/.claude/skills"
 
