@@ -131,6 +131,61 @@ check 2 "$(run check-memory.sh "$commit_payload")" "INDEX 指向不存在的 les
 export CLAUDE_PROJECT_DIR="$ROOT"
 check 0 "$(run check-memory.sh "$commit_payload")" "本專案帳本目前狀態合規"
 
+# ---------- guard-done（自主自控）----------
+echo "guard-done"
+GD="$TMP/gd"; mkdir -p "$GD/.claude/skills/se-a" "$GD/.claude/skills/se-orphan" "$GD/.claude/hooks" "$GD/docs/lessons"
+cp "$H/check-router.sh" "$H/check-memory.sh" "$GD/.claude/hooks/"
+printf '# INDEX\n\n- `se-a`\n' > "$GD/.claude/skills/INDEX.md"
+printf '# 索引\n' > "$GD/docs/lessons/INDEX.md"
+stop() { printf '{"stop_hook_active":%s}' "$1" | CLAUDE_PROJECT_DIR="$2" bash "$H/guard-done.sh" >/dev/null 2>&1; echo $?; }
+check 2 "$(stop false "$GD")" "配置不一致 → 不准結束，繼續修"
+check 0 "$(stop true "$GD")" "已被擋過一次 → 放行（自控邊界，防無限迴圈）"
+printf '# INDEX\n\n- `se-a`\n- `se-orphan`\n' > "$GD/.claude/skills/INDEX.md"
+check 0 "$(stop false "$GD")" "修好之後 → 放行"
+check 0 "$(stop false "$TMP")" "非本配置的目錄 → 放行"
+
+# ---------- recall-lessons（開工召回）----------
+echo "recall-lessons"
+RL="$TMP/rl"; mkdir -p "$RL/proj/docs/lessons" "$RL/home/lessons"
+recall() { printf '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$1" SERENDIPITY_HOME="$2" \
+  bash "$H/recall-lessons.sh" 2>/dev/null | grep -c . ; }
+check 0 "$(recall "$RL/proj" "$RL/nohome")" "兩邊都空 → 完全安靜，不佔 context"
+printf '| [G0001](G0001-x.md) | 跨專案教訓 | 類別 | A、B |\n' > "$RL/home/lessons/INDEX.md"
+n=$(recall "$RL/proj" "$RL/home")
+[ "$n" -ge 2 ] && n=ok || n="只有 $n 行"
+check ok "$n" "有跨專案 lesson → 另一個專案開工時看得到（遷移）"
+
+# ---------- lessons.py（全域帳本上架閘）----------
+echo "lessons.py"
+LH="$TMP/lh"; mkdir -p "$LH/src"
+les() { printf -- '---\nsource: %s\nhits: 0\ngeneralizes_to: %s\n---\n\n# t\n' "$2" "$3" > "$LH/src/$1"; }
+promote() { SERENDIPITY_HOME="$LH/home" python "$ROOT/.claude/tools/lessons.py" promote "$@" >/dev/null 2>&1; echo $?; }
+les ext.md external 類別; les ok.md self-observed 類別; les nogen.md self-observed ""
+check 2 "$(promote "$LH/src/ext.md" --seen-in A --seen-in B)" "external 不得上架全域"
+check 2 "$(promote "$LH/src/ok.md" --seen-in A)" "只在一個專案撞到 → 不算遷移"
+check 2 "$(promote "$LH/src/nogen.md" --seen-in A --seen-in B)" "沒有泛化類別 → 不得上架"
+check 0 "$(promote "$LH/src/ok.md" --seen-in A --seen-in B)" "兩個專案、有類別、非外部 → 上架"
+
+# ---------- promote_skill.py（學習新技能的升級閘）----------
+echo "promote_skill.py"
+PS="$TMP/ps"; mkdir -p "$PS/.claude/tools" "$PS/.claude/skills" "$PS/.claude/skill-candidates"
+cp "$ROOT/.claude/tools/promote_skill.py" "$PS/.claude/tools/"
+printf '# INDEX\n' > "$PS/.claude/skills/INDEX.md"
+cand() {
+  d="$PS/.claude/skill-candidates/$1"; mkdir -p "$d/evals"
+  printf -- '---\nname: %s\ndescription: 處理某個新領域的完整程序，當任務屬於這個新領域時使用\nvalidated: %s\n---\n\n# x\n' "$1" "$2" > "$d/SKILL.md"
+  printf '| # | 使用者說的話 | 來源 |\n|---|---|---|\n' > "$d/evals/trigger-cases.md"
+  shift 2; i=0
+  for p in "$@"; do i=$((i+1)); printf '| %d | c%d | `%s` |\n' "$i" "$i" "$p" >> "$d/evals/trigger-cases.md"; done
+}
+pskill() { python "$PS/.claude/tools/promote_skill.py" "$@" >/dev/null 2>&1; echo $?; }
+cand se-auth "用過" authored authored authored
+cand se-noval "" user-prompt user-prompt user-prompt
+cand se-good "2026-09-22 在X完成Y" user-prompt session-trace user-prompt
+check 2 "$(pskill se-auth --dry-run)" "案例全照 description 寫 → 不得升級"
+check 2 "$(pskill se-noval --dry-run)" "沒真的用過（validated 空）→ 不得升級"
+check 0 "$(pskill se-good --dry-run)" "3 條獨立來源＋用過 → 可升級"
+
 # ---------- 結果 ----------
 echo ""
 echo "通過 $pass／失敗 $fail"

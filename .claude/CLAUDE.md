@@ -17,6 +17,8 @@
 - `agents/`：**Thread／Process 模板**——需要獨立 context、權限邊界、平行處理或第二意見時才使用。派發規則見 [EXECUTION_MODEL.md](EXECUTION_MODEL.md)。
 - `templates/`：文件與交付物模板。**依需要取用，不強制填滿**。
 - `../docs/lessons/`：領悟帳本。這套配置的長期記憶，由 `se-epiphany` 維護。
+- `tools/`：**自我理解與學習的工具**——`capabilities.py`（能力自我模型，從原始碼生成）、`lessons.py`（跨專案帳本）、`promote_skill.py`（候選 skill 升級閘）。
+- `skill-candidates/`：`se-acquire` 習得的候選 skill。**不會自動載入**，過了升級閘才搬進 `skills/`。
 - `hooks/`：**確定性 Gate**——判定條件寫得成 shell 的規則放這裡，模型配不配合都會執行。清單見 [ABLATION.md](ABLATION.md)「機械化優先」。
 - `.out-of-scope/`：已審視並拒絕的機制與理由；重新提案前先讀對應檔。
 - `../.claude-plugin/plugin.json`：**發佈面**。`claude --plugin-dir <repo>` 裝得起來，帶 skills／agents／hooks；**帶不了 `rules/`**（常駐面是專案層的東西）。

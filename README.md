@@ -66,8 +66,8 @@ bash templates/_meta/bootstrap_check.sh .
 claude --plugin-dir "/path/to/Serendipity — Epiphany"
 ```
 
-拿到 18 個 skill ＋ 14 個 agent ＋ 4 道 hook，名稱前綴 `serendipity-epiphany:`。
-**拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【已確認：實測 18 skills／14 agents 載入】
+拿到 19 個 skill ＋ 14 個 agent ＋ 6 道 hook，名稱前綴 `serendipity-epiphany:`。
+**拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【已確認：2026-09-22 實測 19 skills／14 agents 載入】
 
 Windows：
 
@@ -97,11 +97,13 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
 ├── rules/           (6)   # 常駐工程規則
-├── skills/         (18)   # Coroutine 能力庫，按需載入
+├── skills/         (19)   # Coroutine 能力庫，按需載入
+├── skill-candidates/     # se-acquire 習得的候選，不自動載入，過閘才升級
+├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘
 ├── agents/         (14)   # Thread / Process 執行模板
-├── hooks/           (4)   # 確定性 Gate：分支保護、backup tag、Router 一致性、記憶層准入
-│                          #   ＋ selftest.sh（30 條自測）＋ hooks.json（plugin 用）
-└── settings.json          # 敏感路徑 deny ＋ PreToolUse hooks 註冊
+├── hooks/           (6)   # 分支保護、backup tag、Router、記憶層准入、結束前自檢、開工召回
+│                          #   ＋ selftest.sh（43 條自測）＋ hooks.json（plugin 用）
+└── settings.json          # 敏感路徑 deny ＋ PreToolUse／Stop／SessionStart hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
 ├── USAGE.md               # 詳細使用說明
