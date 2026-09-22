@@ -1,7 +1,7 @@
 ---
 id: L0008
 date: 2026-09-22
-outcome: useful
+outcome: corrected
 tags: [自我模型, 生成, 一致性, 通用能力]
 anchors:
   - .claude/tools/capabilities.py
@@ -70,3 +70,18 @@ skill 清單讀 frontmatter、hook 讀 settings.json、已知缺口讀 ABLATION.
 
 過了 SCAN（具體的錯誤引用）與 MUTATE（泛化到「任何自我描述」），**沒過 VALIDATE**。
 留在帳本。
+
+## 為什麼這則是錯的（2026-09-22 更正，被 [L0010](0010-a-value-nobody-cross-checked-is-the-one-that-lies.md) 取代）
+
+「生成的部分一行都沒錯」是假的。**生成的部分裡有一個數字一直是錯的**：`capabilities.py` 找全域帳本用
+`[0-9]*.md`，但 `lessons.py` 寫的檔名是 `G0001-*.md`，所以永遠回報「全域 0 則」【已確認：修正前 0、
+實際 1】。
+
+第 3 點「生成的部分錯了會很明顯」也是假的：0 是最像真的錯誤數字。它是在 churn-guard 裡被抓到的——
+同一個畫面上 `recall-lessons.sh` 說「跨專案 1 則」、`capabilities.py` 說「全域 0 則」，
+兩個各自實作的計數並排出現才露餡。
+
+錯的是分類軸。「手寫 vs 生成」不是說不說謊的分界，「**有沒有被獨立來源對照過**」才是。
+手寫的引用那次被抓到，是因為我去 DESIGN_RATIONALE 對照了；生成的計數沒被抓到，是因為沒人對照。
+
+原文保留：錯誤的分類本身就是內容。

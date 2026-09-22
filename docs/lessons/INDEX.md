@@ -15,8 +15,9 @@
 | [L0005](0005-your-checker-is-the-first-suspect.md) | 系統說壞了的時候，第一個嫌疑犯是你的判定條件 | 量測, 判定, 除錯 | useful | 0 |
 | [L0006](0006-external-practice-lists-need-a-coverage-diff.md) | 外部最佳實踐清單，先做覆蓋度對照再決定加什麼 | 外部來源, 覆蓋度, 常駐面 | useful | 0 |
 | [L0007](0007-memory-layer-needs-a-trust-boundary.md) | 記憶層是配置層，外部內容進去要有邊界不能只靠判斷 | 記憶層, 信任邊界, 污染 | useful | 0 |
-| [L0008](0008-hand-written-self-description-is-the-part-that-lies.md) | 自我描述裡手寫的那一段，就是會說謊的那一段 | 自我模型, 生成, 一致性 | useful | 0 |
+| [L0008](0008-hand-written-self-description-is-the-part-that-lies.md) | 自我描述裡手寫的那一段，就是會說謊的那一段 | 自我模型, 生成, 一致性 | corrected → L0010 | 0 |
 | [L0009](0009-a-prefilter-is-not-a-gate.md) | 預篩不是判定：hook 的 if 會多觸發，判定要在腳本裡再做一次 | hooks, gate, 預篩 | useful | 0 |
+| [L0010](0010-a-value-nobody-cross-checked-is-the-one-that-lies.md) | 會說謊的不是手寫的那段，是沒被對照過的那段 | 自我模型, 一致性, 對照 | useful | 0 |
 
 跨專案的教訓在全域帳本（`python .claude/tools/lessons.py list`），目前 1 則：G0001（源自 L0005）。
 
@@ -38,6 +39,6 @@
 
 ## 統計
 
-- 現行：9 則
-- 距離下次回顧：11 則（滿 20 則觸發）
+- 現行：10 則（其中 1 則 `corrected`：L0008，由 L0010 取代，內容保留）
+- 距離下次回顧：10 則（滿 20 則觸發）
 - `no-trigger`（沒填失效條件）：0 則
