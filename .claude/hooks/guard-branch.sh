@@ -11,6 +11,15 @@ set -uo pipefail
 MODE="${SE_GUARD_BRANCH_MODE:-warn}"
 PROTECTED="main master"
 
+# Edit／Write 一律檢查；Bash 只在 git commit 時檢查。
+# 腳本自己判定，不完全依賴 settings.json 的 if（見 docs/lessons/0009）。
+# _command.sh 不在時退回「一律檢查」。
+payload=$(cat 2>/dev/null || true)
+if printf '%s' "$payload" | grep -q '"tool_name"[[:space:]]*:[[:space:]]*"Bash"' \
+   && . "$(dirname "$0")/_command.sh" 2>/dev/null; then
+  is_git_cmd "$payload" 'commit' || exit 0
+fi
+
 cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
 

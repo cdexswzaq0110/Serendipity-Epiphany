@@ -64,8 +64,7 @@ skill 清單讀 frontmatter、hook 讀 settings.json、已知缺口讀 ABLATION.
   工具時，`se-preflight` 在搶。沒有為了這條（自己寫的）案例去調 description，那是 Goodhart；
   改成讓 `se-acquire` 第 3 步明確呼叫 `se-preflight`。【已確認：兩份 transcript】
 - 一個不含 `git commit` 字樣的 Bash 指令被 `check-router`（`if: Bash(git commit*)`）擋下。
-  **原因未知**——`if` 的比對範圍可能比前綴更寬。沒有追下去。【未知：查過 hook 設定與指令內容，
-  下一步是在 router 不一致時跑一個確定無關的 Bash 指令看是否被擋】
+  同一天追下去：`for`／`while` 迴圈會讓 `if` 誤觸發，已修，見 [L0009](0009-a-prefilter-is-not-a-gate.md)。
 
 ## 尚未驗證
 

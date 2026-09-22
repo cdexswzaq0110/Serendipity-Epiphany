@@ -10,12 +10,17 @@ MODE="${SE_GUARD_CRITICAL_MODE:-block}"
 
 payload=$(cat 2>/dev/null || true)
 
-# git 必須出現在「指令位置」（payload 的 command 開頭，或 && ; | 之後），
-# 否則 `echo git reset --hard` 這類敘述會被誤判。
-CMD_POS='("command"[[:space:]]*:[[:space:]]*"|&&[[:space:]]*|;[[:space:]]*|[|][[:space:]]*|^[[:space:]]*)'
-DESTRUCTIVE='(reset[[:space:]][^"]*--hard|push[[:space:]][^"]*(--force|-f([[:space:]"]|$))|branch[[:space:]][^"]*-D|rebase)'
+# git 必須出現在「指令位置」，否則 `echo git reset --hard` 這類敘述會被誤判；
+# heredoc 內文（commit message）不算指令。判定規則在 _command.sh，四支閘共用。
+DESTRUCTIVE='reset[[:space:]][^"]*--hard|push[[:space:]][^"]*(--force|-f([[:space:]"]|$))|branch[[:space:]][^"]*-D|rebase'
 
-printf '%s' "$payload" | grep -Eq "${CMD_POS}git[[:space:]]+${DESTRUCTIVE}" || exit 0
+# 判定不了就擋——這是 Critical Section，寧可多擋。
+if ! . "$(dirname "$0")/_command.sh" 2>/dev/null; then
+  echo "[guard-critical] 找不到 .claude/hooks/_command.sh，無法判定是否為破壞性操作，先擋下。" >&2
+  [ "$MODE" = "block" ] && exit 2
+  exit 1
+fi
+is_git_cmd "$payload" "$DESTRUCTIVE" || exit 0
 
 cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Gate 自測：確認三支 hook 在**該擋的時候真的擋**、該放的時候真的放。
+# Gate 自測：確認每支 hook 在**該擋的時候真的擋**、該放的時候真的放。
 #
 # 為什麼要有這支：hook 寫壞的預設失敗模式是「靜默放行」——路徑錯、spawn 失敗、
 # 退出碼用錯，全部只產生 non-blocking error，動作照常執行。裝好不等於守得住，
@@ -42,6 +42,8 @@ export CLAUDE_PROJECT_DIR="$REPO"
 check 1 "$(run guard-branch.sh "$edit_payload")" "main（warn 模式）提示但不阻擋"
 check 2 "$(printf '%s' "$edit_payload" | SE_GUARD_BRANCH_MODE=block bash "$H/guard-branch.sh" >/dev/null 2>&1; echo $?)" \
         "main（block 模式）阻擋"
+check 1 "$(run guard-branch.sh "$(bash_payload "git add . && git commit -m x")")" "main 上 Bash 的 git commit 也提示"
+check 0 "$(run guard-branch.sh "$(bash_payload "for i in 1; do echo \$i; done")")" "main 上不是 commit 的 Bash 迴圈放行"
 ( cd "$REPO" && git checkout -q -b feature/x )
 check 0 "$(run guard-branch.sh "$edit_payload")" "feature 分支放行"
 
@@ -52,7 +54,12 @@ for c in "git reset --hard HEAD~1" \
          "git push -f origin main" \
          "git branch -D feature/x" \
          "git rebase -i main" \
-         "git add . && git reset --hard HEAD"; do
+         "git add . && git reset --hard HEAD" \
+         "for b in x; do git branch -D \$b; done" \
+         "git -C repo reset --hard HEAD" \
+         "cd repo\\ngit rebase main" \
+         "cat <<'EOF'\\nhi\\nEOF\\ngit reset --hard HEAD" \
+         "cat <<<x; git reset --hard HEAD"; do
   check 2 "$(run guard-critical.sh "$(bash_payload "$c")")" "無 tag 時攔下：$c"
 done
 
@@ -62,9 +69,16 @@ for c in "git status" \
          "git reset HEAD~1" \
          "git commit -m 'docs: 說明 rebase 恢復策略'" \
          "echo git reset --hard is dangerous" \
-         "grep -rn 'branch -D' docs/"; do
+         "grep -rn 'branch -D' docs/" \
+         "git commit -F - <<'EOF'\\nfix: for x; do git branch -D y; done\\ngit rebase main 前先打 tag\\nEOF" \
+         "python - <<PY\\nprint(1); git reset --hard\\nPY"; do
   check 0 "$(run guard-critical.sh "$(bash_payload "$c")")" "不該攔：$c"
 done
+
+# 判定規則缺席時要往安全的方向失敗：guard-critical 擋，commit 閘退回一律檢查
+NOLIB="$TMP/nolib"; mkdir -p "$NOLIB"; cp "$H/guard-critical.sh" "$H/check-router.sh" "$NOLIB/"
+check 2 "$(printf '%s' "$(bash_payload "git status")" | bash "$NOLIB/guard-critical.sh" >/dev/null 2>&1; echo $?)" \
+        "缺 _command.sh 時 guard-critical 擋下"
 
 ( cd "$REPO" && git tag -a "backup/selftest" -m snap )
 check 0 "$(run guard-critical.sh "$(bash_payload "git reset --hard HEAD~1")")" "已有指向 HEAD 的 backup tag 時放行"
@@ -77,6 +91,24 @@ commit_payload=$(bash_payload "git commit -m x")
 
 printf '# INDEX\n\n- `se-a`\n' > "$FAKE/.claude/skills/INDEX.md"
 check 2 "$(run check-router.sh "$commit_payload")" "目錄存在但 INDEX 未列出"
+
+# 同一個不一致狀態下：不是 commit 的指令一律放行（if 會對迴圈誤觸發，腳本要自己守）
+for c in "for i in 1; do echo \$i; done" \
+         "x=1; while [ -n \"\$x\" ]; do x=; done" \
+         "git status" \
+         "echo git commit is just a word"; do
+  check 0 "$(run check-router.sh "$(bash_payload "$c")")" "不是 commit，放行：$c"
+done
+for c in "for f in a; do git commit -m x; done" \
+         "git -C repo commit -m x" \
+         "cd repo\\ngit commit -m x" \
+         "git commit -F - <<'EOF'\\nmsg\\nEOF"; do
+  check 2 "$(run check-router.sh "$(bash_payload "$c")")" "是 commit，照擋：$c"
+done
+check 0 "$(run check-router.sh "$(bash_payload "python - <<'PY'\\nprint(1); git commit\\nPY")")" \
+        "heredoc 內文提到 git commit 不算 commit"
+check 2 "$(printf '%s' "$(bash_payload "echo x")" | bash "$NOLIB/check-router.sh" >/dev/null 2>&1; echo $?)" \
+        "缺 _command.sh 時 check-router 退回一律檢查"
 
 printf '# INDEX\n\n- `se-a`\n- `se-b`\n' > "$FAKE/.claude/skills/INDEX.md"
 check 0 "$(run check-router.sh "$commit_payload")" "INDEX 與目錄一致"
@@ -108,6 +140,7 @@ check 0 "$(run check-memory.sh "$commit_payload")" "來源合法、INDEX 一致 
 
 lesson 0001-a.md "" useful "validated:"
 check 2 "$(run check-memory.sh "$commit_payload")" "缺 source 欄位"
+check 0 "$(run check-memory.sh "$(bash_payload "for f in a; do echo \$f; done")")" "同一狀態下不是 commit 的迴圈放行"
 
 lesson 0001-a.md "source: 隨便寫" useful "validated:"
 check 2 "$(run check-memory.sh "$commit_payload")" "source 不是合法值"
@@ -134,7 +167,7 @@ check 0 "$(run check-memory.sh "$commit_payload")" "本專案帳本目前狀態�
 # ---------- guard-done（自主自控）----------
 echo "guard-done"
 GD="$TMP/gd"; mkdir -p "$GD/.claude/skills/se-a" "$GD/.claude/skills/se-orphan" "$GD/.claude/hooks" "$GD/docs/lessons"
-cp "$H/check-router.sh" "$H/check-memory.sh" "$GD/.claude/hooks/"
+cp "$H/check-router.sh" "$H/check-memory.sh" "$H/_command.sh" "$GD/.claude/hooks/"
 printf '# INDEX\n\n- `se-a`\n' > "$GD/.claude/skills/INDEX.md"
 printf '# 索引\n' > "$GD/docs/lessons/INDEX.md"
 stop() { printf '{"stop_hook_active":%s}' "$1" | CLAUDE_PROJECT_DIR="$2" bash "$H/guard-done.sh" >/dev/null 2>&1; echo $?; }
