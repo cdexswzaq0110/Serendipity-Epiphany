@@ -17,6 +17,13 @@ if . "$(dirname "$0")/_command.sh" 2>/dev/null; then
   is_git_cmd "$payload" 'commit' || exit 0
 fi
 
+# 這次的改動（已暫存＋未暫存＋未追蹤）沒碰到路由相關的檔案 → 不可能新增不一致，跳過。
+# 完整掃描在 Windows 上要 1 秒多，每次 commit、每個回合結束（guard-done）都付（2026-09-24 基準量到）。
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$ROOT" status --porcelain --untracked-files=all 2>/dev/null | cut -c4- \
+    | grep -qE '^"?(\.claude/(skills/|rules/|CLAUDE\.md)|CLAUDE\.md)' || exit 0
+fi
+
 INDEX="$ROOT/.claude/skills/INDEX.md"
 SKILL_DIR="$ROOT/.claude/skills"
 

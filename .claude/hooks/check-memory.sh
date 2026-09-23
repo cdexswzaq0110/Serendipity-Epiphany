@@ -23,6 +23,12 @@ if . "$(dirname "$0")/_command.sh" 2>/dev/null; then
   is_git_cmd "$payload" 'commit' || exit 0
 fi
 
+# 這次的改動沒碰到帳本 → 不可能新增不合規的 lesson，跳過（理由同 check-router）
+if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$ROOT" status --porcelain --untracked-files=all 2>/dev/null | cut -c4- \
+    | grep -qE '^"?docs/lessons/' || exit 0
+fi
+
 DIR="$ROOT/docs/lessons"
 INDEX="$DIR/INDEX.md"
 

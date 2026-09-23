@@ -14,7 +14,7 @@ PreToolUse hook）。在其他 agent 上，那些會退化成「要你自己去�
 
 1. **每個結論帶證據等級**——已確認／推論／候選／未知／未驗證，五選一，不留裸主張。
    細節見 [`.claude/rules/evidence-grades.md`](.claude/rules/evidence-grades.md)。
-2. **先確認分支再動 code。** 在 main 上、有未提交變更、或使用者沒指定分支就要改 → 停下來問。
+2. **先開分支再動 code。** 在 main 上就自己開分支（可逆，不必問）；不屬於這個任務的未提交變更原樣保留，要覆蓋或丟棄既有工作時才停下來問。
 3. **破壞性 git 操作前先打 backup tag。** `reset --hard`／`push --force`／`branch -D`／`rebase`。
 
 ## 目錄對照

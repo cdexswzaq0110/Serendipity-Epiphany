@@ -41,7 +41,27 @@ $out"
   fi
 done
 
-[ -z "$problems" ] && exit 0
+if [ -z "$problems" ]; then
+  # 學習訊號：這一回合有「同一種指令先失敗、後來改對」而帳本沒被寫過 → 提醒一次。
+  # 兩輪端到端基準 14 次一則 lesson 都沒留（含 commit 被 hook 拒、看了訊息才改對的案例）：
+  # 捕捉靠模型收尾時想起來，單次任務沒有收尾的時刻（docs/lessons/0013）。
+  # 不是閘：只問一次（stop_hook_active），評測（SE_EVAL）與 SE_LEARN_NUDGE=off 時不問。
+  if [ -z "${SE_EVAL:-}" ] && [ "${SE_LEARN_NUDGE:-on}" != "off" ] && [ -d "$ROOT/docs/lessons" ]; then
+    PY=$(command -v python || command -v python3) || exit 0
+    hits=$(cd "$ROOT" && "$PY" "$HOOKS/../tools/checkpoint.py" learned 2>/dev/null)
+    if [ $? -eq 3 ]; then  # 只認 exit 3——其他輸出（例如「不在 git repo 裡」）不是學習訊號
+      {
+        echo "[guard-done] 這一回合有「撞到才改對」的情形："
+        echo "$hits"
+        echo "如果其中有下一輪還會撞到、而且在環境裡（程式碼、git log、錯誤訊息）查不到的東西，"
+        echo "用 se-epiphany 的捕捉模式寫進 docs/lessons/；沒有就直接結束——這個提醒只出現一次。"
+      } >&2
+      [ "$MODE" = "block" ] && exit 2
+      exit 1
+    fi
+  fi
+  exit 0
+fi
 
 cat >&2 <<EOF
 [guard-done] 結束前自檢未通過——配置目前處於不一致的狀態，先修好再結束。

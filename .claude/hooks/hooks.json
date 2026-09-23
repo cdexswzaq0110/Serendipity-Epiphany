@@ -65,7 +65,8 @@
             "type": "command",
             "shell": "bash",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
-            "timeout": 15
+            "timeout": 15,
+            "async": true
           }
         ]
       }
@@ -131,7 +132,8 @@
             "type": "command",
             "shell": "bash",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
-            "timeout": 15
+            "timeout": 15,
+            "async": true
           }
         ]
       }
