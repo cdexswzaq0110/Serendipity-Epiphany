@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-23T215555",
+  "commit": "c2addba",
+  "runs_per_case": 2,
+  "passed": 0,
+  "total": 1,
+  "cases": [
+    {
+      "id": "D1",
+      "text": "我想用 LilyPond 排一份巴哈風格的四聲部聖詠樂譜，要能印出來給合唱團用",
+      "expect": [
+        "se-acquire"
+      ],
+      "forbid": [
+        "se-discovery",
+        "se-feasibility"
+      ],
+      "provenance": "authored",
+      "runs": [
+        {
+          "used": [
+            "se-acquire",
+            "se-preflight"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    }
+  ]
+}
