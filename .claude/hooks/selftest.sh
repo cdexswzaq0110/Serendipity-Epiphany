@@ -226,6 +226,51 @@ cand se-good "2026-09-22 在X完成Y" user-prompt session-trace user-prompt
 check 2 "$(pskill se-auth --dry-run)" "案例全照 description 寫 → 不得升級"
 check 2 "$(pskill se-noval --dry-run)" "沒真的用過（validated 空）→ 不得升級"
 check 0 "$(pskill se-good --dry-run)" "3 條獨立來源＋用過 → 可升級"
+cand se-dup "2026-09-24 用過" user-prompt user-prompt user-prompt
+sed -i 's/| c[0-9] |/| 同一句話 |/' "$PS/.claude/skill-candidates/se-dup/evals/trigger-cases.md"
+check 2 "$(pskill se-dup --dry-run)" "同一句話貼三行只算一條 → 不得升級（採礦會挖出大量逐字重複）"
+
+# ---------- mine.py（經驗採礦：學習迴圈的第一步）----------
+echo "mine.py"
+MN="$TMP/mn"; mkdir -p "$MN/tx" "$MN/proj/.claude/tools" "$MN/proj/.claude/skill-candidates" "$MN/proj/.claude/skills"
+cp "$ROOT/.claude/tools/mine.py" "$ROOT/.claude/tools/promote_skill.py" "$MN/proj/.claude/tools/"
+printf '# INDEX\n' > "$MN/proj/.claude/skills/INDEX.md"
+python - "$MN/tx" <<'PY'
+import json, sys, os
+d = sys.argv[1]
+def u(text, human=True, meta=False):
+    o = {"type": "user", "message": {"role": "user", "content": text}}
+    if human: o["origin"] = {"kind": "human"}
+    if meta: o["isMeta"] = True
+    return o
+def tool(name, inp): return {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": name, "input": inp}]}}
+def err(t): return {"type": "user", "message": {"content": [{"type": "tool_result", "is_error": True, "content": t}]}}
+sed = tool("Bash", {"command": 'for f in a b; do sed -i \'s/\\r$//\' "$f"; done'})
+look = tool("Bash", {"command": "tail -3 x.txt"})
+here = tool("Bash", {"command": "python - <<'PY'\nprint(1)\nPY"})
+e = err("Error: widget exploded while reading C:/tmp/abc123.txt at line 12")
+h1 = [u("幫我跑測試"), tool("Skill", {"skill": "se-debug"}), u("幫我跑測試"), u("測試跑一下"), u("測試跑一下"),
+      u("run the tests"), u("run the tests"), u("<task-notification>x</task-notification>"),
+      u("[Image: original 10x10]", meta=True), e, e] + [sed] * 6 + [look] * 12 + [here] * 12
+h2 = [u("幫我跑測試"), u("測試跑一下"), u("run the tests"), e] + [sed] * 6 + [here] * 3
+x = [u("幫我跑測試", human=False)] * 10 + [sed] * 20
+for name, evs in (("aaaaaaaa-h1", h1), ("bbbbbbbb-h2", h2), ("cccccccc-x", x)):
+    with open(os.path.join(d, name + ".jsonl"), "w", encoding="utf-8") as f:
+        f.writelines(json.dumps(o, ensure_ascii=False) + "\n" for o in evs)
+PY
+mjson=$(cd "$MN/proj" && python .claude/tools/mine.py --transcripts "$MN/tx" --json 2>/dev/null)
+mq() { printf '%s' "$mjson" | PYTHONUTF8=1 python -c "import json,sys; m=json.load(sys.stdin); print($1)" 2>/dev/null; }  # 不設 UTF-8 模式，Windows 的 stdin 會用 cp950 把中文解壞
+check "2/1" "$(mq 'str(m["human_sessions"]) + "/" + str(m["skipped_sessions"])')" "只讀人類 session，headless 評測略過"
+check 3 "$(mq 'next((r["n"] for r in m["needs"] if r["key"]=="幫我跑測試"), 0)')" "headless 裡重複 10 次的話不算需求（只數人類的 3 次）"
+check no "$(mq '"yes" if any(r["key"].startswith(("<","[image")) for r in m["needs"]) else "no"')" "系統通知與圖片說明不算使用者的話"
+check yes "$(mq '"yes" if any(r["key"]=="幫我跑測試" and "se-debug" in r["skills"] for r in m["needs"]) else "no"')" "記下那句話之後實際載入了哪個 skill"
+check 12 "$(mq 'next((r["n"] for r in m["actions"] if r["key"].startswith("sed -i")), 0)')" "迴圈 do 後面的動作也抓得到（CRLF 儀式就藏在那裡）"
+check no "$(mq '"yes" if any(r["key"].startswith(("tail","print")) for r in m["actions"]) else "no"')" "純查看的指令與 heredoc 內文不算動作"
+check 3 "$(mq 'next((r["n"] for r in m["failures"] if "widget exploded" in r["key"]), 0)')" "反覆撞到的錯誤依簽名歸在一起（路徑、數字遮掉）"
+check 2 "$(cd "$MN/proj" && python .claude/tools/mine.py --transcripts "$MN/tx" seed se-runtests --from 1 >/dev/null 2>&1; echo $?)" "從零播種但說法不滿 3 種 → 拒絕"
+check 0 "$(cd "$MN/proj" && python .claude/tools/mine.py --transcripts "$MN/tx" seed se-runtests --from 1 --from 2 --from 3 >/dev/null 2>&1; echo $?)" "3 種不同說法 → 播種成候選"
+check 3 "$(grep -c '`session-trace`' "$MN/proj/.claude/skill-candidates/se-runtests/evals/trigger-cases.md" 2>/dev/null)" "案例逐字取自逐字紀錄，來源標 session-trace"
+check 2 "$(cd "$MN/proj" && python .claude/tools/promote_skill.py se-runtests --dry-run >/dev/null 2>&1; echo $?)" "播種出來的候選在寫好 SKILL.md、真的用過之前升不上去"
 
 # ---------- checkpoint（斷點續跑）----------
 echo "checkpoint"

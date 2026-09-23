@@ -99,10 +99,10 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── rules/           (6)   # 常駐工程規則
 ├── skills/         (20)   # Coroutine 能力庫，按需載入
 ├── skill-candidates/     # se-acquire 習得的候選，不自動載入，過閘才升級
-├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘、斷點續跑
+├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘、斷點續跑、經驗採礦
 ├── agents/         (14)   # Thread / Process 執行模板
 ├── hooks/           (7)   # 分支保護、backup tag、Router、記憶層准入、結束前自檢、開工召回、斷點記錄
-│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（99 條自測）＋ hooks.json（plugin 用）
+│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（111 條自測）＋ hooks.json（plugin 用）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse／PostToolUse／Stop／StopFailure／UserPromptSubmit／SessionStart hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
