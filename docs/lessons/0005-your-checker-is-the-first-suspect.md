@@ -8,7 +8,7 @@ anchors:
   - .claude-plugin/plugin.json
 supersedes:
 source: self-observed   # self-observed | user-stated | external
-hits: 0
+hits: 1
 generalizes_to: 用自己寫的判定條件，去判斷一個自己不熟悉的系統輸出
 validated:
 ---

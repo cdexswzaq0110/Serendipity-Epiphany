@@ -50,18 +50,21 @@ def _frontmatter(text: str) -> dict:
 
 
 def independent_positives(cases_md: Path) -> tuple[int, int]:
-    """回傳 (獨立來源正例數, 總案例數)。表格最後一欄是來源。"""
+    """回傳 (獨立來源正例數, 總案例數)。表格第二欄是原話、最後一欄是來源。
+
+    同一句話出現三次仍是一條案例——只數**不同說法**。mine.py 會挖出大量逐字重複的原話，
+    不去重的話，一句話貼三行就過得了這一關。"""
     if not cases_md.exists():
         return 0, 0
-    total = indep = 0
+    total, seen = 0, set()
     for line in cases_md.read_text(encoding="utf-8").splitlines():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if len(cells) < 3 or not re.match(r"^[A-Z]?\d+$", cells[0]):
             continue
         total += 1
-        prov = re.sub(r"[`\s]", "", cells[-1])
-        indep += prov in INDEPENDENT
-    return indep, total
+        if re.sub(r"[`\s]", "", cells[-1]) in INDEPENDENT:
+            seen.add(" ".join(cells[1].lower().split()))
+    return len(seen), total
 
 
 def gates(name: str) -> list[str]:

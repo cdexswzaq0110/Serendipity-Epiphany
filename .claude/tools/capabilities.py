@@ -152,9 +152,14 @@ def known_gaps() -> list[str]:
     unmeasured = [k for k, v in cov.items() if not v.get("sufficient")]
     if unmeasured:
         gaps.append(f"skill 觸發評測覆蓋率不足：{len(unmeasured)}/{len(cov)} 個 unmeasured")
+    # 兩個學習迴圈各自回報。舊版只在 hits 總和為 0 時才報，hits 一變成 3 這個缺口就從自我模型上消失了，
+    # 但升級與候選仍然是 0（2026-09-24 發現）——看的是產出，不是有沒有被碰過。
     ls = lessons()
-    if ls["total_hits"] == 0 and ls["project"]:
-        gaps.append(f"自我改進迴圈零產出：{ls['project']} 則 lesson、hits 總和 0、升級 0 則")
+    if ls["project"] and ls["promoted"] == 0:
+        gaps.append(f"從經驗學習的迴圈還沒產出升級：{ls['project']} 則 lesson、hits {ls['total_hits']}、"
+                    f"驗證 {ls['validated']}、升級 0 則")
+    if not candidates():
+        gaps.append("學習新技能的迴圈零吞吐：0 個候選 skill（入口是 tools/mine.py）")
     return gaps
 
 

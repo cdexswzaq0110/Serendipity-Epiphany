@@ -100,6 +100,9 @@ python .claude/tools/lessons.py list --tag <這個領域的關鍵字>
 
 - `SKILL.md` 照一般 skill 的格式寫，frontmatter 加 `validated:`，填**這一次在哪裡成功、產出是什麼**
 - `trigger-cases.md` 的第一條，用**使用者這一次的原話**，來源標 `user-prompt`
+- 其餘案例先查 `python .claude/tools/mine.py` 的需求礦脈：同一個需求在過去 session 裡的**不同說法**，
+  用 `mine.py seed <名稱> --from N1 --from N2 --from N3` 逐字寫進去（來源 `session-trace`）。
+  湊不滿 3 種說法就是還沒重複到值得成為能力——等它再出現
 
 **候選不會自動載入。** 要升級成正式 skill，得過 `promote_skill.py` 的四道閘——其中一道是
 **至少 3 條獨立來源的觸發案例**。這一次只貢獻 1 條。

@@ -80,7 +80,7 @@
 bash .claude/hooks/selftest.sh
 ```
 
-99 條案例（含誤判陷阱、迴圈內指令、heredoc 內文、自我模型計數、斷點續跑的每一種中斷形狀與程序身分），2026-09-23 全數通過；commit 閘部分對修正前的版本為 51／13。改動任一支 hook 後必須重跑。
+111 條案例（含誤判陷阱、迴圈內指令、heredoc 內文、自我模型計數、斷點續跑的每一種中斷形狀與程序身分、經驗採礦），2026-09-24 全數通過；commit 閘部分對修正前的版本為 51／13。改動任一支 hook 後必須重跑。
 
 **`if` 只是省成本的預篩，不是判定。** `Bash(git commit*)` 遇到 `for`／`while` 迴圈會照樣觸發 hook（2026-09-22 實測），所以每支 Bash hook 都自己讀 `tool_input.command` 判定。見 [`../docs/lessons/0009-a-prefilter-is-not-a-gate.md`](../docs/lessons/0009-a-prefilter-is-not-a-gate.md)。
 
@@ -147,3 +147,4 @@ bash .claude/hooks/selftest.sh
 | 2026-09-22 | commit 閘改為腳本自行判定指令，不再只靠 `if`。起因：router 不一致時，一條不含 `git` 的 Bash 指令被 `check-router` 擋下 | 實機探測 8 種形狀：`for`／`while` 迴圈誤觸發，單純／串接／heredoc／`$(...)`／`if`／`git status` 不會【已確認】。順帶修掉 `guard-critical` 的放行漏洞：迴圈內、`git -C`、換行後的破壞性操作原本不擋【已確認：舊版 selftest 51／13】。判定規則抽成 `hooks/_command.sh` 四支共用，比對前先去掉 heredoc 內文。常駐面 0 變動 |
 | 2026-09-22 | 把配置帶進 churn-guard（第二個專案）後，`capabilities.py` 與 `recall-lessons.sh` 對全域帳本並排給出 0 與 1 | `capabilities.py` 找錯檔名（`[0-9]*` vs `G*`），自我模型從未數到全域帳本【已確認】。已修，selftest 加「上架後數到 1」。L0008 走淨化程序標 `corrected`，由 L0010 取代——**跨專案遷移第一次實際發生，第一個產出是抓到自我模型的錯**。churn-guard 端：配置更新到 `731a6b1`（`f2b6c1b`），兩則 lesson 補 `source`；無工具的新 session 在 churn-guard 答出 G0001 並註明來自開場 hook【已確認】。更新前它沒有 SessionStart hook，理應答不出【推論：未先跑對照】 |
 | 2026-09-23 | 斷點續跑：`tools/checkpoint.py`＋`hooks/checkpoint.sh`＋`se-resume`。起點是一道面試題（長任務跑到一半掛了怎麼續跑），標準答案對 agent 有三個洞：掛掉時來不及寫、存的是宣稱不是現實、斷點本身會寫壞 | **常駐面 0 行變動**（只在元件責任表既有一行補上 `checkpoint.py`）。失敗證據：本專案逐字紀錄裡「Continue from where you left off.」9 次、用量上限後續跑 2 次、「Try again」12 次。端到端：真的殺掉一個 session，新 session 無工具答對中斷前的要求與檔案歸屬【已確認】。dogfooding 抓到兩個誤報（回合進行中插進的通知被當成中斷；開著的 session 被別的 session 判成當機），改用程序身分＋查程序存活，寫成 L0011。第二個誤報**汙染了觸發評測**：20 個評測 session 收到簡報，兩輪作廢；評測改 `--tools Skill`＋`SE_EVAL=1`＋先 commit。`se-resume` 是第一個達到覆蓋率下限的 skill，乾淨條件下正例 5/6、碰撞 1/4 正確（無上下文的「繼續下一步」會誤觸發） |
+| 2026-09-24 | 通用能力第二階段：`tools/mine.py` 從逐字紀錄挖三條礦脈（需求／失敗／動作），只讀人類 session；`promote_skill.py` 的 MUTATE 改為只數不同說法；`se-epiphany` 回顧模式與 `se-acquire` 第 5 步接上採礦 | **常駐面 0 行變動**（元件責任表既有一行補上 `mine.py`）。失敗證據：學習迴圈從建立到現在 0 個候選、升級 0；唯一一次跑通靠人工翻逐字紀錄。第一次在真實紀錄上跑就挖到一個迷信——CRLF 正規化 89 次以上，起因是 `grep` 在這台機器上兩個方向都誤判 CR【已確認：對照組】，寫成 L0012 |
