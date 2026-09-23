@@ -395,6 +395,37 @@ check $((nb + 1)) "$(grep -c '"kind": "base"' "$CK/.git/serendipity/journal.json
 CKPID=""
 check no "$( [ -s "$CK/.git/serendipity/error.log" ] && echo yes || echo no)" "整個過程記錄器沒有出錯"
 
+# 學習訊號：同一種會改變狀態的指令先失敗、後來改對 → 回合結束提醒一次（捕捉 0/14 的對策）
+echo "learned"
+LN="$TMP/ln"; mkdir -p "$LN/docs/lessons" "$LN/.claude/skills" "$LN/.claude/hooks" "$LN/.claude/tools"
+printf '# INDEX\n' > "$LN/.claude/skills/INDEX.md"; printf '# 索引\n' > "$LN/docs/lessons/INDEX.md"
+cp "$H/check-router.sh" "$H/check-memory.sh" "$H/_command.sh" "$H/guard-done.sh" "$LN/.claude/hooks/"
+cp "$ROOT/.claude/tools/checkpoint.py" "$LN/.claude/tools/"
+( cd "$LN" && git init -q -b main . && git add -A && git -c user.name=t -c user.email=t@t commit -qm base ) >/dev/null 2>&1
+LNN=$(cygpath -m "$LN" 2>/dev/null || printf '%s' "$LN")
+lnrec() { printf '{"hook_event_name":"%s","session_id":"LLLL","cwd":"%s"%s}' "$1" "$LNN" "$2" \
+  | CLAUDE_PID=4242 python "$LN/.claude/tools/checkpoint.py" record >/dev/null 2>&1; }
+bashev() { lnrec "$1" ",\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"$2\"},\"error\":\"$3\""; }
+lnlearned() { ( cd "$LN" && CLAUDE_PID=4242 python .claude/tools/checkpoint.py learned >/dev/null 2>&1; echo $? ); }
+lnrec UserPromptSubmit ',"prompt":"x"'
+bashev PostToolUseFailure "grep -n foo a.txt" "Exit code 1"
+bashev PostToolUse "grep -n bar a.txt" ""
+bashev PostToolUseFailure "python -m pytest -q" "1 failed"
+bashev PostToolUse "python -m pytest -q" ""
+check 0 "$(lnlearned)" "搜尋找不到、測試先紅後綠 → 不是學習訊號"
+bashev PostToolUseFailure "git commit -m x" "commit 被拒：訊息要以 [SHOP-n] 開頭"
+bashev PostToolUse "git commit -m '[SHOP-1] x'" ""
+check 3 "$(lnlearned)" "同一種會改變狀態的指令先失敗後改對 → 學習訊號"
+gd() { printf '{"stop_hook_active":%s}' "$1" | CLAUDE_PROJECT_DIR="$LN" CLAUDE_PID=4242 SE_EVAL="${2:-}" \
+  bash "$LN/.claude/hooks/guard-done.sh" >/dev/null 2>&1; echo $?; }
+check 2 "$(gd false)" "回合結束時提醒一次要不要留 lesson"
+check 0 "$(gd true)" "已經提醒過（stop_hook_active）→ 放行，不無限迴圈"
+check 0 "$(gd false 1)" "觸發評測（SE_EVAL）不提醒"
+sleep 1; printf -- '---\nsource: self-observed\n---\n# x\n' > "$LN/docs/lessons/0001-x.md"
+check 0 "$(lnlearned)" "這一回合已經寫過 lesson → 不再提醒"
+lnrec UserPromptSubmit ',"prompt":"下一回合"'
+check 0 "$(lnlearned)" "新的回合重新計算，不拿上一回合的失敗來提醒"
+
 # ---------- 結果 ----------
 echo ""
 echo "通過 $pass／失敗 $fail"

@@ -35,6 +35,7 @@ agent 手動寫：
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -377,6 +378,57 @@ def brief(top, sd, st, run_probes=False):
     return "\n".join(out)
 
 
+# ---------- 學習訊號 ----------
+
+# 失敗了不代表學到東西：搜尋找不到、測試先紅後綠是正常節奏，不是「撞到才知道」
+NOT_LEARNING = re.compile(r"^(grep|rg|find|ls|cat|head|tail|test|\[|which|type|command|echo|wc|diff|"
+                          r"pytest|npm test|yarn test|go test|cargo test|make test|python -m pytest|python -m unittest|"
+                          r"git (status|diff|log|show|branch|rev-parse|ls-files|fetch))\b")
+
+
+def cmd_head(cmd):
+    """指令的「種類」：去掉 cd 前綴與 heredoc 內文後，第一段的前兩個字（python -m 取三個）。"""
+    first = cmd.split("\n")[0]
+    parts = [p.strip() for p in re.split(r"&&|;|\|\|", first) if p.strip()]
+    parts = [p for p in parts if not re.match(r"^(cd|export|set)\b|^\w+=", p)] or parts
+    toks = parts[0].split() if parts else []
+    n = 3 if toks[:2] == ["python", "-m"] else 2
+    return " ".join(toks[:n])
+
+
+def learned(sd, pid):
+    """這個程序的**這一回合**裡，同一種會改變狀態的指令先失敗、後來又成功的情形。
+
+    這是「撞到才知道」的形狀——核心規則第 6 條要捕捉的東西。兩輪端到端基準 14 次、
+    包括一個教科書級的案例（commit 被 hook 拒、看了訊息才改對），一則 lesson 都沒留：
+    捕捉完全靠模型收尾時想起來，而單次任務沒有收尾的時刻。"""
+    evs = [e for e in load(sd)[0] if str(e.get("pid")) == str(pid)]
+    starts = [i for i, e in enumerate(evs) if e["kind"] == "prompt"]
+    turn = evs[starts[-1] + 1:] if starts else evs
+    out, seen = [], set()
+    for i, e in enumerate(turn):
+        h = e.get("cmd") or ""
+        if e["kind"] != "snap" or not e.get("failed") or not h or NOT_LEARNING.match(h) or h in seen:
+            continue
+        if any(x["kind"] == "snap" and x.get("cmd") == h and not x.get("failed") for x in turn[i + 1:]):
+            seen.add(h)
+            out.append((h, e.get("error") or ""))
+    t0 = evs[starts[-1]]["at"] if starts else ""
+    return out, t0
+
+
+def lessons_touched_since(top, at):
+    """這一回合開始之後，docs/lessons/ 底下有沒有檔案被寫過。"""
+    d = Path(top) / "docs" / "lessons"
+    if not d.is_dir() or not at:
+        return False
+    try:
+        t0 = datetime.fromisoformat(at).timestamp()
+    except ValueError:
+        return False
+    return any(p.stat().st_mtime > t0 for p in d.glob("*.md"))
+
+
 # ---------- hook 入口 ----------
 
 def record(stdin_text):
@@ -401,8 +453,11 @@ def record(stdin_text):
                  "tree": fingerprint(top, sd), "head": sha, "head_tree": htree, "branch": br}
             if p.get("agent_id"):
                 e["agent"] = p["agent_id"]
+            if p.get("tool_name") == "Bash":  # 學習訊號用：同一種指令先失敗後成功（見 learned）
+                e["cmd"] = cmd_head((p.get("tool_input") or {}).get("command", ""))
             if ev == "PostToolUseFailure":
                 e["failed"] = True
+                e["error"] = clip(str(p.get("error") or "").split("\n")[0], 160)
             append(sd, e)
         elif ev == "Stop":
             append(sd, {"kind": "turn_end", "at": at, **who})
@@ -444,6 +499,7 @@ def main(argv=None):
     sub.add_parser("resume")
     sub.add_parser("status")
     sub.add_parser("close")
+    sub.add_parser("learned")
     st_ = sub.add_parser("step")
     st_.add_argument("action", choices=["add", "done"])
     st_.add_argument("id")
@@ -478,6 +534,16 @@ def main(argv=None):
         if bad:
             print(f"  （日誌有 {bad} 行殘缺，已跳過——通常是寫到一半被打斷）")
         return 0
+    if a.cmd == "learned":  # 給 guard-done 用：這一回合「撞到才改對」而帳本沒被寫過 → 印出來、exit 3
+        pid = os.environ.get("CLAUDE_PID")
+        if not pid:
+            return 0
+        hits, t0 = learned(sd, pid)
+        if not hits or lessons_touched_since(top, t0):
+            return 0
+        for h, err in hits:
+            print(f"  - `{h}`：{err or '失敗後改對'}")
+        return 3
     if a.cmd == "close":
         append(sd, {"kind": "close"})
         print("[checkpoint] 這段工作已結束，之後不再提示。")
