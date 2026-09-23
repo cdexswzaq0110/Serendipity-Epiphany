@@ -111,7 +111,7 @@ bash .claude/hooks/selftest.sh
 | `dispatch.md` 2 切片換 Process | 意圖 | — | 保留 |
 | `dispatch.md` 3 平行前確認鎖 | 補丁 | 跨 session duplicate cherry-pick、stale branch | 保留 |
 | `dispatch.md` 4 GIL | 補丁 | 一次丟多個問題給人，全部卡住 | ⚠ 本地未實證 |
-| `git-workflow.md` 先開分支 | 補丁 | **已機械化（warn）**：`guard-branch.sh` 的攔截次數即為證據，2026-08-31 起觀察 | 一到兩週後：有攔截 → 改 block；零攔截 → 刪常駐文字，只留 hook |
+| `git-workflow.md` 先開分支 | 補丁 | **已機械化（warn）**：`guard-branch.sh` 的攔截次數即為證據，2026-08-31 起觀察。**2026-09-24 端到端基準抓到原文有害**：「在 main 上……就要改 code → 停止並詢問」讓 harness 在 T1／T2／T5 找到根因後停下來問要不要開分支，任務沒做（第二輪 3/7 失敗；第一輪同任務自己開了分支做完）；使用者也反覆表示不要一直問。改成「自己開分支，不必問；不屬於任務的變更原樣保留」 | 改寫後重跑基準確認；仍零攔截 → 刪常駐文字，只留 hook |
 | `git-workflow.md` backup tag | 補丁 | **已機械化（block）**：`guard-critical.sh`，13/13 判定案例通過【已確認：2026-08-31 stdin 測試】 | 保留最短敘述；hook 是真正的守門人 |
 | `git-workflow.md` commit→push→PR 連貫 | 補丁 | base 提示預設「只在使用者要求時 push」，需覆寫 | 保留 |
 | ~~`git-workflow.md` body 按需寫~~ | 補丁 | **已移除（2026-08-31）**：衝突對象不存在——全域檔名是 `~/.claude/CLAUDE.md.md`（副檔名重複），從未被載入【已確認：`ls -la ~/.claude/`】 | 存於 `.out-of-scope/ablated-2026-08-31/` |
