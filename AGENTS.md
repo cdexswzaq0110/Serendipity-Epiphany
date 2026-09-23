@@ -36,4 +36,4 @@ PreToolUse hook）。在其他 agent 上，那些會退化成「要你自己去�
 
 `templates/_meta/bootstrap_check.sh` 與 `docs/eval/run_eval.py` 同樣是獨立腳本。
 
-`.claude/tools/` 下的三支 Python 腳本（能力自我模型、跨專案帳本、skill 升級閘）也不依賴 Claude Code——任何 agent 都能直接呼叫。
+`.claude/tools/` 下的四支 Python 腳本（能力自我模型、跨專案帳本、skill 升級閘、斷點續跑）也不依賴 Claude Code——任何 agent 都能直接呼叫。斷點的**自動記錄**靠 Claude Code 的 hook；其他 agent 拿不到自動記錄，但 `checkpoint.py step／verify／decide／resume` 照樣能用。

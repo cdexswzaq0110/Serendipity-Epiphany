@@ -102,22 +102,22 @@ def hooks() -> list[dict]:
         cfg = json.loads((CLAUDE / "settings.json").read_text(encoding="utf-8"))
     except Exception:
         return []
-    out, seen = [], set()
+    by_script = {}  # 一支腳本掛在多個事件上仍是一道 hook（checkpoint.sh 掛六個）
     for event, groups in cfg.get("hooks", {}).items():
         for g in groups:
             for h in g.get("hooks", []):
                 m = re.search(r"hooks/([\w-]+\.sh)", h.get("command", ""))
-                if not m or (event, m.group(1)) in seen:
+                if not m:
                     continue
-                seen.add((event, m.group(1)))
-                script = CLAUDE / "hooks" / m.group(1)
-                mode = "?"
-                if script.exists():
-                    mm = re.search(r'MODE="\$\{[A-Z_]+:-(\w+)\}"',
-                                   script.read_text(encoding="utf-8"))
-                    mode = mm.group(1) if mm else "always"
-                out.append({"event": event, "script": m.group(1), "mode": mode})
-    return out
+                entry = by_script.setdefault(m.group(1), {"script": m.group(1), "events": [], "mode": "?"})
+                if event not in entry["events"]:
+                    entry["events"].append(event)
+    for entry in by_script.values():
+        script = CLAUDE / "hooks" / entry["script"]
+        if script.exists():
+            mm = re.search(r'MODE="\$\{[A-Z_]+:-(\w+)\}"', script.read_text(encoding="utf-8"))
+            entry["mode"] = mm.group(1) if mm else "always"
+    return list(by_script.values())
 
 
 def resident_lines() -> int:

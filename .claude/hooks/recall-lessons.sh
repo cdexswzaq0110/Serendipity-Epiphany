@@ -9,6 +9,9 @@
 # 上限 10 則全域 lesson，超過就只給數量與查法。
 set -uo pipefail
 
+# 觸發評測的 session 不注入：提示裡點名了 se-epiphany／se-acquire，會汙染它們的路由量測（docs/lessons/0011）
+[ -n "${SE_EVAL:-}" ] && exit 0
+
 ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
 HOME_DIR="${SERENDIPITY_HOME:-$HOME/.claude/serendipity}"
 GLOBAL_INDEX="$HOME_DIR/lessons/INDEX.md"

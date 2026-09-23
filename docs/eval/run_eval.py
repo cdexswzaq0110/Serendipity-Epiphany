@@ -5,7 +5,7 @@
 
 用法：
     python docs/eval/run_eval.py --list          # 只列出解析到的案例，不呼叫模型
-    python docs/eval/run_eval.py                 # 跑 A/B/D 組，每條 2 次
+    python docs/eval/run_eval.py                 # 跑 A/B/D/E 組，每條 2 次
     python docs/eval/run_eval.py --runs 1        # 快速版
     python docs/eval/run_eval.py --only A        # 只跑 A 組
     python docs/eval/run_eval.py --parse-only <file.jsonl>   # 驗證解析邏輯
@@ -15,6 +15,7 @@
 """
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -31,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CASES_MD = ROOT / "docs" / "eval" / "trigger-cases.md"
 RUNS_DIR = ROOT / "docs" / "eval" / "runs"
 
-ROW = re.compile(r"^\|\s*([ABD]\d+)\s*\|(.+)\|\s*$")
+ROW = re.compile(r"^\|\s*([ABDE]\d+)\s*\|(.+)\|\s*$")
 INDEPENDENT = {"session-trace", "user-prompt"}
 FLOOR_POSITIVE, FLOOR_COLLISION = 3, 2
 SKILL = re.compile(r"`([a-z0-9-]+)`")
@@ -175,16 +176,21 @@ def run_case(case, timeout):
         # 只給 Skill，刻意不給 Read/Grep：本案例集就存在被測的 repo 裡，
         # 給了搜尋工具模型會 grep 到 trigger-cases.md 的答案欄（實測發生過）。
         # 路由決策在第一輪就發生，不需要其他工具。
+        # 要用 --tools 才是真的只給 Skill：--allowedTools 只是「免問就放行」的清單，
+        # 唯讀的 Bash／Read 照樣能跑——2026-09-23 一個案例先跑了 git status 看到髒工作樹才決定。
         ["claude", "-p", case["text"], "--output-format", "stream-json",
-         "--verbose", "--max-turns", "2", "--allowedTools", "Skill"],
+         "--verbose", "--max-turns", "2", "--tools", "Skill", "--allowedTools", "Skill"],
         cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8",
         errors="replace", timeout=timeout, shell=(sys.platform == "win32"),
+        # SE_EVAL：會注入 context 的 hook（開工召回、斷點簡報）在評測 session 裡不說話——
+        # 注入的內容點名了被測的 skill，量到的會是注入，不是 description（docs/lessons/0011）。
+        env={**os.environ, "SE_EVAL": "1"},
     )
     return skills_used(proc.stdout or "")
 
 
 def judge(case, used):
-    hit = any(s in used for s in case["expect"])
+    hit = any(s in used for s in case["expect"]) if case["expect"] else True  # 只測「不該載入」的案例
     bad = [s for s in case["forbid"] if s in used]
     return hit and not bad, bad
 
@@ -192,7 +198,7 @@ def judge(case, used):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", type=int, default=2)
-    ap.add_argument("--only", choices=["A", "B", "D"])
+    ap.add_argument("--only", choices=["A", "B", "D", "E"])
     ap.add_argument("--timeout", type=int, default=180)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--coverage", action="store_true",

@@ -9,7 +9,7 @@
 | ID | 一句話 | tags | outcome | hits |
 |---|---|---|---|---|
 | [L0001](0001-ablation-first-run.md) | 常駐規則只會單向長大，要有機制才刪得掉 | ablation, rules, prompt | useful | 0 |
-| [L0002](0002-hook-silent-failure-windows.md) | Gate 的預設失敗模式是靜默放行，要先證明它會擋 | hooks, windows, gate | useful | 0 |
+| [L0002](0002-hook-silent-failure-windows.md) | Gate 的預設失敗模式是靜默放行，要先證明它會擋 | hooks, windows, gate | useful | 1 |
 | [L0003](0003-eval-harness-pitfalls.md) | 量尺自己要先被量：第一個數字通常在量工具 | eval, 量測, 方法論 | useful | 0 |
 | [L0004](0004-powershell-destroys-utf8-source.md) | 不要用 PowerShell 讀寫原始碼——會不可逆毀掉非 ASCII | windows, 編碼, 工具選擇 | useful | 0 |
 | [L0005](0005-your-checker-is-the-first-suspect.md) | 系統說壞了的時候，第一個嫌疑犯是你的判定條件 | 量測, 判定, 除錯 | useful | 0 |
@@ -17,7 +17,8 @@
 | [L0007](0007-memory-layer-needs-a-trust-boundary.md) | 記憶層是配置層，外部內容進去要有邊界不能只靠判斷 | 記憶層, 信任邊界, 污染 | useful | 0 |
 | [L0008](0008-hand-written-self-description-is-the-part-that-lies.md) | 自我描述裡手寫的那一段，就是會說謊的那一段 | 自我模型, 生成, 一致性 | corrected → L0010 | 0 |
 | [L0009](0009-a-prefilter-is-not-a-gate.md) | 預篩不是判定：hook 的 if 會多觸發，判定要在腳本裡再做一次 | hooks, gate, 預篩 | useful | 0 |
-| [L0010](0010-a-value-nobody-cross-checked-is-the-one-that-lies.md) | 會說謊的不是手寫的那段，是沒被對照過的那段 | 自我模型, 一致性, 對照 | useful | 0 |
+| [L0010](0010-a-value-nobody-cross-checked-is-the-one-that-lies.md) | 會說謊的不是手寫的那段，是沒被對照過的那段 | 自我模型, 一致性, 對照 | useful | 1 |
+| [L0011](0011-no-end-marker-means-crashed-only-to-the-successor.md) | 沒有結束標記，只在接手的人眼裡才代表「掛了」 | 斷點續跑, 中斷偵測, 分散式 | useful | 0 |
 
 跨專案的教訓在全域帳本（`python .claude/tools/lessons.py list`），目前 1 則：G0001（源自 L0005）。
 
@@ -39,6 +40,7 @@
 
 ## 統計
 
-- 現行：10 則（其中 1 則 `corrected`：L0008，由 L0010 取代，內容保留）
-- 距離下次回顧：10 則（滿 20 則觸發）
+- 現行：11 則（其中 1 則 `corrected`：L0008，由 L0010 取代，內容保留）
+- 通過 VALIDATE：1 則（L0010，2026-09-23 第一次被實際用上並抓到錯）
+- 距離下次回顧：9 則（滿 20 則觸發）
 - `no-trigger`（沒填失效條件）：0 則

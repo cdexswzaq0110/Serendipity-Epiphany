@@ -19,6 +19,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 要任務分解、派發、管平行、處理卡住的並行 | `se-scheduling` | 不是 `se-design`——design 產切片，scheduling 派切片 |
 | 外部 CLI／MCP／API 不確定能不能用 | `se-preflight` | |
 | 開分支、worktree、收尾開 PR、救亂掉的歷史 | `se-branch-lifecycle` | |
+| **上一段工作被中斷了（用量上限、斷線、當機）／開工看到 `[斷點]`／要開始一段可能跑不完的長任務** | **`se-resume`** | 不是 `templates/HANDOFF.md`——HANDOFF 是**計畫中**的交接，agent 還活著、能自己寫；resume 處理**沒有預期**的中斷，斷點由 hook 在掛掉之前就寫好 |
 | 回答太長太散 | `se-focus` | |
 | 這一輪學到東西了／要召回舊教訓／帳本該回顧了／發現記下的東西是錯的 | `se-epiphany` | |
 | **領域本身是新的——沒有任何 skill 覆蓋這個任務** | **`se-acquire`** | 不是 `se-discovery`——discovery 處理熟領域裡講不清楚的大工作；acquire 處理**領域本身沒見過**的。判準：把任務講給所有 skill 的 description 聽，沒有一個說「這是我的」 |
@@ -75,6 +76,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 排程 | `se-scheduling` | 切片、Ready Queue、寫入鎖、派發與驗證 |
 | 前置檢查 | `se-preflight` | Connection Pool 的取得程序 |
 | 分支 | `se-branch-lifecycle` | worktree、commit、PR、歷史恢復 |
+| 斷點續跑 | `se-resume` | 中斷後拿現實對照斷點：認領變更、重跑失效驗證、副作用先查再做 |
 | 輸出治理 | `se-focus` | 密度與收斂 |
 | 長期記憶 | `se-epiphany` | 捕捉／召回／回顧領悟帳本 |
 | Skill 作者工具 | `se-skill-authoring` | 寫給 Agent 看的文件、觸發測試、出貨門檻 |

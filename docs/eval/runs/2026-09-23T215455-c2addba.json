@@ -1,0 +1,151 @@
+{
+  "date": "2026-09-23T215455",
+  "commit": "c2addba",
+  "runs_per_case": 2,
+  "passed": 2,
+  "total": 5,
+  "cases": [
+    {
+      "id": "E1",
+      "text": "Continue from where you left off.",
+      "expect": [
+        "se-resume"
+      ],
+      "forbid": [],
+      "provenance": "session-trace",
+      "runs": [
+        {
+          "used": [
+            "se-resume",
+            "Bash"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-resume",
+            "se-resume"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "E2",
+      "text": "I hit my usage limit while you were working, but it has reset now. Please continue from where you left off.",
+      "expect": [
+        "se-resume"
+      ],
+      "forbid": [],
+      "provenance": "user-prompt",
+      "runs": [
+        {
+          "used": [
+            "se-resume",
+            "se-resume"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-resume",
+            "se-resume"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "E3",
+      "text": "Try again",
+      "expect": [
+        "se-resume"
+      ],
+      "forbid": [],
+      "provenance": "user-prompt",
+      "runs": [
+        {
+          "used": [],
+          "ok": false,
+          "forbidden_hit": []
+        },
+        {
+          "used": [
+            "se-resume",
+            "se-resume"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "E4",
+      "text": "繼續下一步",
+      "expect": [],
+      "forbid": [
+        "se-resume"
+      ],
+      "provenance": "user-prompt",
+      "runs": [
+        {
+          "used": [
+            "se-resume",
+            "se-resume"
+          ],
+          "ok": false,
+          "forbidden_hit": [
+            "se-resume"
+          ]
+        },
+        {
+          "used": [
+            "se-resume",
+            "se-resume"
+          ],
+          "ok": false,
+          "forbidden_hit": [
+            "se-resume"
+          ]
+        }
+      ],
+      "pass": false
+    },
+    {
+      "id": "E5",
+      "text": "繼續下一步驟 包含部屬mlops測試可以",
+      "expect": [],
+      "forbid": [
+        "se-resume"
+      ],
+      "provenance": "user-prompt",
+      "runs": [
+        {
+          "used": [
+            "se-resume",
+            "se-ml-lifecycle"
+          ],
+          "ok": false,
+          "forbidden_hit": [
+            "se-resume"
+          ]
+        },
+        {
+          "used": [
+            "se-ml-lifecycle"
+          ],
+          "ok": true,
+          "forbidden_hit": []
+        }
+      ],
+      "pass": false
+    }
+  ]
+}
