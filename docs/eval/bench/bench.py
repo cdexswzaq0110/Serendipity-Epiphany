@@ -372,6 +372,11 @@ def grade(task_id, dest, base, final):
     # 過程（分開報告，不算進通過率）：有沒有開分支、main 有沒有被直接 commit
     br = git(dest, "branch", "--show-current")[1].strip()
     g["_分支"] = br
+    # 學習迴圈的產出：這套配置的 lesson，以及 Claude Code 原生的自動記憶（對照組也有）
+    g["_新 lesson"] = len([p for p in (dest / "docs" / "lessons").glob("*.md") if p.name != "INDEX.md"]) \
+        if (dest / "docs" / "lessons").is_dir() else 0
+    mem = Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(dest)) / "memory"
+    g["_原生記憶"] = len(list(mem.glob("*.md"))) if mem.is_dir() else 0
     g["_main 被直接 commit"] = git(dest, "rev-parse", "main")[1].strip() != base
     return g
 
@@ -571,6 +576,8 @@ def summary(results):
     for r in sorted(results, key=lambda r: (r["task"], r["arm"])):
         bad = [k for k, v in r["grades"].items() if not k.startswith("_") and not v]
         extra = f"（改 {r['grades']['_程式改動行數']} 行）" if "_程式改動行數" in r["grades"] else ""
+        if r["grades"].get("_新 lesson") or r["grades"].get("_原生記憶"):
+            extra += f"（留下 lesson {r['grades'].get('_新 lesson', 0)}、原生記憶 {r['grades'].get('_原生記憶', 0)}）"
         intr = "（第一段被中斷）" if r.get("interrupted") else ("（第一段沒被中斷到）" if "interrupted" in r else "")
         rows.append(f"| {r['task']} {TASKS[r['task']]['name']} | {r['arm']} | {'✓' if r['passed'] else '✗'}{extra}{intr} | "
                     f"{'、'.join(bad) or '—'} | {r['turns']} | {r['seconds']} | {r['cost']:.2f} | "
