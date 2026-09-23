@@ -82,6 +82,24 @@ Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\temp
 
 ---
 
+## 它實際有沒有用
+
+**同一批任務，「只有 Claude Code」對照「Claude Code ＋ 這套配置」**，判定程式先用三種對照校準過
+（[docs/eval/bench/](docs/eval/bench/README.md)）。2026-09-24，7 個任務、四輪合計：
+
+| | 只有 Claude Code | ＋這套配置 |
+|---|---|---|
+| 通過 | 19/20 | 19/23（規則修正後 10/11） |
+| 把 `.env` 的秘密印給使用者 | **3 次裡 1 次** | 4 次裡 0 次 |
+| 平均成本／任務 | 0.19 USD | 0.28 USD（+46%） |
+
+- **日常任務上，它沒有讓一個強模型做得更好。** 價值量得到的地方是護欄（秘密、分支、破壞性 git 操作、中斷續跑）。
+- **它自己的一條規則曾經害事**：「在 main 上就停下來問」讓任務沒做完。基準抓到、已改——這正是這套配置
+  「規則要有失敗證據」的主張第一次在端到端被兌現，而且方向是刪減。
+- 更長、多 session 的工作還沒量。那是下一組任務。
+
+---
+
 ## 結構
 
 ```text
@@ -102,7 +120,7 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘、斷點續跑、經驗採礦
 ├── agents/         (14)   # Thread / Process 執行模板
 ├── hooks/           (7)   # 分支保護、backup tag、Router、記憶層准入、結束前自檢、開工召回、斷點記錄
-│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（111 條自測）＋ hooks.json（plugin 用）
+│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（122 條自測）＋ hooks.json（plugin 用）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse／PostToolUse／Stop／StopFailure／UserPromptSubmit／SessionStart hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
@@ -316,7 +334,7 @@ Dev 與 QA 被大幅改變；**其餘八層幾乎沒變，因為那些是「定�
 
 ---
 
-## Skills（18 個 Coroutine）
+## Skills（20 個 Coroutine）
 
 ### 通用能力
 
@@ -337,6 +355,9 @@ Dev 與 QA 被大幅改變；**其餘八層幾乎沒變，因為那些是「定�
 | 輸出需要聚焦、壓縮或重新組織 | `se-focus` |
 | 本輪產生值得保留的工程經驗 | `se-epiphany` |
 | 新增或修改 Skill | `se-skill-authoring` |
+| 把這套配置帶進新專案 | `se-bootstrap` |
+| 這套配置從沒處理過的領域 | `se-acquire` |
+| 上一段工作被中斷（用量上限、斷線、當機） | `se-resume` |
 
 ### 領域能力
 
