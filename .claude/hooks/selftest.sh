@@ -187,6 +187,7 @@ printf '| [G0001](G0001-x.md) | 跨專案教訓 | 類別 | A、B |\n' > "$RL/hom
 n=$(recall "$RL/proj" "$RL/home")
 [ "$n" -ge 2 ] && n=ok || n="只有 $n 行"
 check ok "$n" "有跨專案 lesson → 另一個專案開工時看得到（遷移）"
+check 0 "$(SE_EVAL=1 recall "$RL/proj" "$RL/home")" "觸發評測的 session（SE_EVAL）不注入——提示點名了被測的 skill"
 
 # ---------- lessons.py（全域帳本上架閘）----------
 echo "lessons.py"
@@ -201,6 +202,10 @@ check 0 "$(promote "$LH/src/ok.md" --seen-in A --seen-in B)" "兩個專案、有
 check 1 "$(SERENDIPITY_HOME="$LH/home" python "$ROOT/.claude/tools/capabilities.py" --json 2>/dev/null \
   | python -c 'import json,sys; print(json.load(sys.stdin)["verified"]["lessons"]["global"])' 2>/dev/null)" \
   "自我模型數得到剛上架的那則（與 recall-lessons 一致）"
+check "$(grep -o 'hooks/[a-z-]*\.sh' "$ROOT/.claude/settings.json" | sort -u | wc -l | tr -d ' ')" \
+  "$(python "$ROOT/.claude/tools/capabilities.py" --json 2>/dev/null \
+     | python -c 'import json,sys; print(len(json.load(sys.stdin)["can_do"]["hooks"]))' 2>/dev/null)" \
+  "自我模型的 hook 數＝設定檔實際註冊的腳本數（一支掛多個事件只算一道）"
 
 # ---------- promote_skill.py（學習新技能的升級閘）----------
 echo "promote_skill.py"
@@ -221,6 +226,110 @@ cand se-good "2026-09-22 在X完成Y" user-prompt session-trace user-prompt
 check 2 "$(pskill se-auth --dry-run)" "案例全照 description 寫 → 不得升級"
 check 2 "$(pskill se-noval --dry-run)" "沒真的用過（validated 空）→ 不得升級"
 check 0 "$(pskill se-good --dry-run)" "3 條獨立來源＋用過 → 可升級"
+
+# ---------- checkpoint（斷點續跑）----------
+echo "checkpoint"
+CK="$TMP/ck"; mkdir -p "$CK"
+( cd "$CK" && git init -q -b main . && git config user.email t@t && git config user.name t \
+  && echo a > a.txt && git add . && git commit -qm init && git checkout -q -b feature/x ) >/dev/null 2>&1
+CKPY="$ROOT/.claude/tools/checkpoint.py"
+# 真實 payload 的 cwd 是原生路徑（Windows 上是 C:\...），不是 Git Bash 的 /tmp/...
+CKN=$(cygpath -m "$CK" 2>/dev/null || printf '%s' "$CK")
+# 身分用程序（CLAUDE_PID）。自測本身常在 Claude Code 裡跑、會繼承它，所以一律明確指定：
+# CKPID 空 → 清掉（退回用結束標記推論）；有值 → 當成那個程序
+ckenv() { if [ -n "${CKPID:-}" ]; then CLAUDE_PID="$CKPID" "$@"; else env -u CLAUDE_PID "$@"; fi; }
+ck() {  # ck <事件> <session> [額外欄位] → 記錄器的 stdout
+  printf '{"hook_event_name":"%s","session_id":"%s","cwd":"%s"%s}' "$1" "$2" "$CKN" "${3:-}" \
+    | ckenv bash "$H/checkpoint.sh" 2>/dev/null
+}
+ckcli() { ( cd "$CK" && ckenv python "$CKPY" "$@" 2>&1 ); }
+CKPID=""
+has() { printf '%s' "$1" | grep -q -- "$2" && echo yes || echo no; }
+
+check 0 "$(printf 'not json' | bash "$H/checkpoint.sh" >/dev/null 2>&1; echo $?)" "壞掉的 payload → 記錄器不擋工作（exit 0）"
+check 0 "$(printf '{"hook_event_name":"Stop","cwd":"%s"}' "$TMP" | bash "$H/checkpoint.sh" >/dev/null 2>&1; echo $?)" "不在 git repo → 放行"
+
+ck UserPromptSubmit AAAAAAAA ',"prompt":"把付款重試做完並開 PR"' >/dev/null
+( cd "$CK" && echo b > b.txt && echo a2 > a.txt )
+ck PostToolUse AAAAAAAA ',"tool_name":"Edit"' >/dev/null
+check yes "$( [ -s "$CK/.git/serendipity/journal.jsonl" ] && echo yes || echo no)" "工具呼叫後寫下斷點（在 .git 裡，不進版控）"
+check 0 "$( cd "$CK" && git diff --cached --name-only | wc -l | tr -d ' ')" "算指紋不動使用者的 index"
+
+out=$(ck SessionStart BBBBBBBB ',"source":"startup"')
+check yes "$(has "$out" '沒有正常結束')" "回合沒結束就掛掉 → 新 session 開工時看到斷點"
+check yes "$(has "$out" '把付款重試做完')" "簡報帶出中斷前最後的要求"
+check yes "$(has "$out" 'a.txt、b.txt')" "簡報列出這段工作改過的檔案"
+check yes "$(has "$out" '沒有被別人動過')" "工作樹沒被別人動過 → 明說可以接手"
+check 0 "$(ck UserPromptSubmit BBBBBBBB ',"prompt":"繼續"' | grep -c .)" "同一個 session 已看過簡報 → 下一則訊息不重複"
+
+( cd "$CK" && echo user > c.txt )
+check yes "$(has "$(ckcli status)" 'c.txt——先確認')" "斷點之後別人改的檔案被指認出來"
+
+ckcli verify -- bash -c "exit 0" >/dev/null
+check yes "$(has "$(ckcli status)" '仍有效')" "驗證綁定工作樹：沒變 → 仍有效"
+( cd "$CK" && echo more >> c.txt )
+check yes "$(has "$(ckcli status)" '視為未驗證')" "工作樹變了 → 驗證自動失效"
+
+ckcli decide "非會員能不能退款" "不能" >/dev/null
+check yes "$(has "$(ckcli status)" '不要再問')" "人拍板過的決定帶進續跑"
+
+ckcli step add S1 "寫完 done.txt" --done-when "test -f done.txt" >/dev/null
+ckcli step done S1 >/dev/null
+check yes "$(has "$(ckcli resume)" '宣稱完成，但現實不成立')" "宣稱完成但完成條件不成立 → 抓出來"
+ckcli step add S2 "推上遠端" --done-when "test -f pushed.txt" >/dev/null
+( cd "$CK" && touch done.txt pushed.txt )
+check yes "$(has "$(ckcli resume)" '可能做完就斷了')" "做完了但沒記到（副作用發生在記錄之前）→ 從現實認出來"
+
+printf '{"kind":"snap","at":"2099-' >> "$CK/.git/serendipity/journal.jsonl"
+check yes "$(has "$(ckcli status)" '殘缺')" "日誌最後一行寫到一半 → 跳過，不讓整份失效"
+ckcli decide "殘缺行之後的下一筆" "要活下來" >/dev/null
+check yes "$(has "$(ckcli status)" '要活下來')" "殘缺行之後寫入的下一筆不被連帶吃掉"
+
+mkdir -p "$CK/.git/rebase-merge"
+check yes "$(has "$(ckcli status)" '進行中的 git 操作：rebase')" "中斷在 rebase 中途 → 先處理它"
+rmdir "$CK/.git/rebase-merge"
+
+ck PostToolUse CCCCCCCC ',"tool_name":"Bash"' >/dev/null
+check 0 "$(ck UserPromptSubmit CCCCCCCC ',"prompt":"背景工作完成的通知"' | grep -c .)" "回合進行中插進訊息（還沒 Stop）→ 不是中斷，不提醒"
+ck StopFailure CCCCCCCC ',"error":"rate_limit"' >/dev/null
+check yes "$(has "$(ck UserPromptSubmit CCCCCCCC ',"prompt":"額度恢復了，繼續"')" 'rate_limit')" "同一個 session 因用量上限中止 → 下一則訊息提醒原因"
+
+ck PostToolUse CCCCCCCC ',"tool_name":"Edit"' >/dev/null
+ck Stop CCCCCCCC >/dev/null
+ck UserPromptSubmit DDDDDDDD ',"prompt":"只是聊天"' >/dev/null
+ck StopFailure DDDDDDDD ',"error":"overloaded"' >/dev/null
+check no "$(has "$(ckcli status)" '沒有正常結束\|API 錯誤')" "沒動工作樹的 session 失敗 → 不算中斷，也不蓋掉別人的狀態"
+
+ckcli close >/dev/null
+check 0 "$(ck SessionStart EEEEEEEE ',"source":"startup"' | grep -c .)" "工作結束（close）→ 開工不再提示"
+
+# 程序身分：沒有結束標記時，程序還活著＝還在跑，死了＝中斷（docs/lessons/0011）
+LIVEPID=$(cat /proc/$$/winpid 2>/dev/null || echo $$)   # Git Bash 的 $$ 不是 Windows pid
+DEADPID=999999
+CKPID=$LIVEPID; ck PostToolUse LLLLLLLL ',"tool_name":"Edit"' >/dev/null
+CKPID=77777777; out=$(ck SessionStart NNNNNNNN ',"source":"startup"')
+check 0 "$(printf '%s' "$out" | grep -c '斷點')" "另一個程序還活著、回合沒結束 → 是並行不是中斷，開工不提示"
+check yes "$(has "$(ckcli status)" '正在這個工作樹上工作')" "status 仍指出有另一個程序在同一個工作樹上"
+CKPID=$LIVEPID; check no "$(has "$(ckcli status)" '沒有正常結束')" "呼叫者自己的程序回合還沒結束 → 不把自己當成中斷"
+ckcli close >/dev/null
+
+CKPID=$DEADPID; ck UserPromptSubmit XXXXXXXX ',"prompt":"改完 z 並推上去"' >/dev/null
+ck UserPromptSubmit XXXXXXXX ',"prompt":"<task-notification>背景工作完成</task-notification>"' >/dev/null
+ck PostToolUse XXXXXXXX ',"tool_name":"Edit"' >/dev/null
+( cd "$CK" && echo foreign > foreign.txt )
+CKPID=$LIVEPID; ck SessionStart YYYYYYYY ',"source":"startup"' >/dev/null
+( cd "$CK" && echo mine > mine.txt ); ck PostToolUse YYYYYYYY ',"tool_name":"Write"' >/dev/null
+out=$(ckcli resume)
+check yes "$(has "$out" '沒有正常結束')" "程序已經死了、回合沒結束 → 中斷；新 session 先做了別的事再查也一樣認得出來"
+check yes "$(has "$out" '改完 z 並推上去')" "中斷前的要求取使用者的話，不取系統插進來的通知"
+check yes "$(has "$out" '開工之前被改過的檔案（不是上一段 agent 留下的）：foreign.txt')" "開工前別人改的指認出來"
+check no "$(has "$out" 'mine.txt——')" "開工後自己改的不算成別人的"
+CKPID=88888888
+nb=$(grep -c '"kind": "base"' "$CK/.git/serendipity/journal.jsonl")
+check 0 "$(SE_EVAL=1 ck SessionStart ZZZZZZZZ ',"source":"startup"' | grep -c .)" "觸發評測的 session（SE_EVAL）有斷點也不印簡報——簡報點名 se-resume"
+check $((nb + 1)) "$(grep -c '"kind": "base"' "$CK/.git/serendipity/journal.jsonl")" "SE_EVAL 下照常記錄（開工基準仍寫入）"
+CKPID=""
+check no "$( [ -s "$CK/.git/serendipity/error.log" ] && echo yes || echo no)" "整個過程記錄器沒有出錯"
 
 # ---------- 結果 ----------
 echo ""

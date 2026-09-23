@@ -9,9 +9,9 @@ anchors:
   - .claude/tools/lessons.py
 supersedes: L0008
 source: self-observed
-hits: 0
+hits: 1
 generalizes_to: 任何由多處各自推導同一個事實的系統——儀表板與報表、快取與來源、兩支腳本各自數同一個目錄
-validated:
+validated: 2026-09-23 checkpoint.sh 掛六個事件，自我模型把 hook 數算成 12——照第 2 點加「hook 數＝設定檔實際註冊的腳本數」對照測試，抓到並修正
 ---
 
 # 會說謊的不是手寫的那段，是沒被對照過的那段

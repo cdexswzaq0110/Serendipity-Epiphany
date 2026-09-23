@@ -72,6 +72,7 @@
 | 記憶層准入（外部來源不得升級成常駐規則） | `hooks/check-memory.sh` | PreToolUse `Bash(git commit*)`，腳本自行判定是否為 commit | **block**（exit 2） |
 | 結束前自檢（自主自控） | `hooks/guard-done.sh` | Stop | **block**（exit 2），`stop_hook_active` 時放行——只強制一次 |
 | 開工召回跨專案帳本 | `hooks/recall-lessons.sh` | SessionStart `startup\|clear\|compact` | 注入（不阻擋） |
+| 斷點續跑（沒有預期的中斷，無常駐規則對應） | `hooks/checkpoint.sh` | PostToolUse／PostToolUseFailure `Edit\|Write\|NotebookEdit\|Bash`（**背景**）、Stop、StopFailure、UserPromptSubmit、SessionStart `startup\|resume\|clear\|compact` | 記錄＋注入（不阻擋；失敗寫 `error.log`，簡報會提示） |
 
 **Gate 要先被證明會擋，才能相信它的綠燈**——hook 寫壞的預設失敗模式是靜默放行（見 [`../docs/lessons/0002-hook-silent-failure-windows.md`](../docs/lessons/0002-hook-silent-failure-windows.md)）。自測：
 
@@ -79,7 +80,7 @@
 bash .claude/hooks/selftest.sh
 ```
 
-65 條案例（含誤判陷阱、迴圈內指令、heredoc 內文、自我模型計數），2026-09-22 全數通過；hook 部分對修正前的版本為 51／13。改動任一支 hook 後必須重跑。
+99 條案例（含誤判陷阱、迴圈內指令、heredoc 內文、自我模型計數、斷點續跑的每一種中斷形狀與程序身分），2026-09-23 全數通過；commit 閘部分對修正前的版本為 51／13。改動任一支 hook 後必須重跑。
 
 **`if` 只是省成本的預篩，不是判定。** `Bash(git commit*)` 遇到 `for`／`while` 迴圈會照樣觸發 hook（2026-09-22 實測），所以每支 Bash hook 都自己讀 `tool_input.command` 判定。見 [`../docs/lessons/0009-a-prefilter-is-not-a-gate.md`](../docs/lessons/0009-a-prefilter-is-not-a-gate.md)。
 
@@ -91,7 +92,7 @@ bash .claude/hooks/selftest.sh
 
 盤點日 2026-09-03（v2；hook 化與第一次實測消融都已執行）。
 
-常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(42) ＋ `rules/*.md`(264) = **345 行**（2026-08-14 為 339）。另有 `recall-lessons.sh` 的**動態**注入：有 lesson 時約 4–13 行，兩邊都空時 0 行。
+常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(42) ＋ `rules/*.md`(264) = **345 行**（2026-08-14 為 339）。另有 `recall-lessons.sh` 的**動態**注入：有 lesson 時約 4–13 行，兩邊都空時 0 行。`checkpoint.sh` 的續跑簡報只在有斷點時注入（約 5–12 行），正常結束時 0 行。
 
 > ⚠ **這個數字沒有下降，而且大部分規則仍未實證。** 20 天來只跑過一條規則的消融
 > （`dispatch.md` #1）。下一批：`evidence-grades`(47) 與 `dispatch` 剩下三條——
@@ -145,4 +146,4 @@ bash .claude/hooks/selftest.sh
 | 2026-09-22 | 通用能力：自我理解（`capabilities.py`）、未知領域（`se-acquire`）、學習新技能（`skill-candidates/` ＋ `promote_skill.py`）、自主自控（`guard-done.sh`）、遷移（`lessons.py` ＋ `recall-lessons.sh`）。全域帳本上架 G0001（L0005，兩個專案各自發生），L0004 被閘擋下 | 常駐面 343 → 345（元件責任表 +2 行）。**動態注入的失敗證據**：兩個專案 9 則 lesson、hits 總和 0、升級 0 則——召回從未被觸發。端到端：無工具 session 正確答出 G0001【已確認】；新領域 `se-acquire` 路由 1/2、熟領域對照 0 誤觸發 |
 | 2026-09-22 | commit 閘改為腳本自行判定指令，不再只靠 `if`。起因：router 不一致時，一條不含 `git` 的 Bash 指令被 `check-router` 擋下 | 實機探測 8 種形狀：`for`／`while` 迴圈誤觸發，單純／串接／heredoc／`$(...)`／`if`／`git status` 不會【已確認】。順帶修掉 `guard-critical` 的放行漏洞：迴圈內、`git -C`、換行後的破壞性操作原本不擋【已確認：舊版 selftest 51／13】。判定規則抽成 `hooks/_command.sh` 四支共用，比對前先去掉 heredoc 內文。常駐面 0 變動 |
 | 2026-09-22 | 把配置帶進 churn-guard（第二個專案）後，`capabilities.py` 與 `recall-lessons.sh` 對全域帳本並排給出 0 與 1 | `capabilities.py` 找錯檔名（`[0-9]*` vs `G*`），自我模型從未數到全域帳本【已確認】。已修，selftest 加「上架後數到 1」。L0008 走淨化程序標 `corrected`，由 L0010 取代——**跨專案遷移第一次實際發生，第一個產出是抓到自我模型的錯**。churn-guard 端：配置更新到 `731a6b1`（`f2b6c1b`），兩則 lesson 補 `source`；無工具的新 session 在 churn-guard 答出 G0001 並註明來自開場 hook【已確認】。更新前它沒有 SessionStart hook，理應答不出【推論：未先跑對照】 |
-
+| 2026-09-23 | 斷點續跑：`tools/checkpoint.py`＋`hooks/checkpoint.sh`＋`se-resume`。起點是一道面試題（長任務跑到一半掛了怎麼續跑），標準答案對 agent 有三個洞：掛掉時來不及寫、存的是宣稱不是現實、斷點本身會寫壞 | **常駐面 0 行變動**（只在元件責任表既有一行補上 `checkpoint.py`）。失敗證據：本專案逐字紀錄裡「Continue from where you left off.」9 次、用量上限後續跑 2 次、「Try again」12 次。端到端：真的殺掉一個 session，新 session 無工具答對中斷前的要求與檔案歸屬【已確認】。dogfooding 抓到一個誤報（回合進行中插進的通知被當成中斷），已修並寫成 L0011。`se-resume` 是第一個達到覆蓋率下限的 skill：正例 6/6，碰撞 1/4 正確 |

@@ -86,6 +86,30 @@ description 的判官去判，**不可能失敗**——它測的是自我一致�
 第 3 步明確呼叫 `se-preflight`，**不是**為了這條自己寫的案例去調 description——
 `authored` 案例調出來的命中率不算數（見上方來源表）。
 
+## E 組：中斷後續跑（3 正例＋2 碰撞，全部取自真實 session）
+
+測 `se-resume`。案例全部從本專案的 session 逐字紀錄撈出來，不是照 description 寫的。
+碰撞的兩條是**沒有中斷**時的「繼續」——那時載入 `se-resume` 是誤觸發。
+
+| # | 使用者說的話 | 該載入 | 明確不該載入 | 來源 |
+|---|---|---|---|---|
+| E1 | Continue from where you left off. | `se-resume` | — | `session-trace` |
+| E2 | I hit my usage limit while you were working, but it has reset now. Please continue from where you left off. | `se-resume` | — | `user-prompt` |
+| E3 | Try again | `se-resume` | — | `user-prompt` |
+| E4 | 繼續下一步 | — | `se-resume` | `user-prompt` |
+| E5 | 繼續下一步驟 包含部屬mlops測試可以 | — | `se-resume` | `user-prompt` |
+
+E1 是 app 在中斷恢復時自動送出的訊息（逐字紀錄裡標為 meta，出現 9 次），模型續跑時真的會收到它。
+E3 在逐字紀錄裡出現 12 次，全部接在錯誤之後。
+**這組在「只有 Skill、沒有任何注入、工作樹乾淨」的條件下才算數**——真實續跑時 hook 會注入 `[斷點]`
+並點名 `se-resume`，所以這裡量到的是只靠 description 的下限。三個條件都是撞過才補上的：
+
+| 條件 | 沒守住時發生什麼 | 現在怎麼保證 |
+|---|---|---|
+| 只有 Skill | `--allowedTools` 只是免問清單，案例先跑了 `git status` 再決定 | `run_eval.py` 加 `--tools Skill`（init 事件確認內建工具只剩 Skill） |
+| 沒有注入 | 開著的 session 被判成中斷，20 個評測 session 都收到 `[斷點]` 簡報 | `SE_EVAL=1`：`checkpoint.sh`、`recall-lessons.sh` 在評測 session 裡不印東西 |
+| 工作樹乾淨 | 系統提示帶著一大串未提交的變更，「繼續」看起來就像要續跑 | 先 commit 再跑 |
+
 ---
 
 ## 執行紀錄
@@ -96,6 +120,8 @@ description 的判官去判，**不可能失敗**——它測的是自我一致�
 | 2026-09-02 | `81fb341` v1 | 3/4 | 1/4 | **作廢**：開放 Read/Grep 後模型 grep 到本檔的答案欄【已確認：B1 transcript】 |
 | 2026-09-02 | `81fb341` **v2** | **4/4** | 不可測 | **有效 baseline**。案例自足＋只給 Skill 工具；A 組 8 次全對、零誤觸發 |
 | 2026-09-22 | `015be49`＋未提交 | — | B1 對照 0 誤觸發 | **D1：1/2**。命中的一次載入 `se-acquire`；沒命中的一次直接 Bash 查 `lilypond`（`se-preflight` 的形狀）。`authored`，不計入覆蓋率 |
+| 2026-09-23 | `6b26eaa`＋未提交 v1 | — | — | **作廢**（汙染，見下一列之後的說明）。E：2/5。正例 5/6 次（E1 1/2），碰撞 E4／E5 **4/4 次誤載入**——description 裡單獨的「繼續」太寬 |
+| 2026-09-23 | `6b26eaa`＋未提交 v2 | — | — | **作廢**（同上）。E：3/5。拿掉單獨的「繼續」、補一句「上一回合正常結束後的繼續下一步不用這個」。正例 **6/6**；碰撞 1/4 正確（E4 1/2、E5 0/2）。**調整與重測用同一組 5 條，沒有保留驗證集**；不再往下調（Goodhart）。改由 skill 第一步讓誤觸發便宜：簡報說正常結束就退出 |
 
 ### ⚠ 這個結論已被降級（2026-09-03）
 
