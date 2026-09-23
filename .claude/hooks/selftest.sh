@@ -120,6 +120,16 @@ printf '# INDEX\n\n- `se-a`\n- `se-b`\n' > "$FAKE/.claude/skills/INDEX.md"
 printf '跑 /se-nope 開始。\n' > "$FAKE/CLAUDE.md"
 check 2 "$(run check-router.sh "$commit_payload")" "常駐檔指向不存在的 skill"
 
+# 範圍：只在這次改動碰到路由相關檔案時才完整掃描（完整掃描在 Windows 上 1 秒多）
+SC="$TMP/scope"; mkdir -p "$SC/.claude/skills/se-a"
+printf '# INDEX\n' > "$SC/.claude/skills/INDEX.md"; echo x > "$SC/app.py"
+( cd "$SC" && git init -q -b main . && git add -A && git -c user.name=t -c user.email=t@t commit -qm base ) >/dev/null 2>&1
+export CLAUDE_PROJECT_DIR="$SC"
+echo y >> "$SC/app.py"
+check 0 "$(run check-router.sh "$commit_payload")" "改動沒碰到 skill／規則 → 跳過（既有的不一致不是這次造成的）"
+mkdir -p "$SC/.claude/skills/se-b"; echo "---" > "$SC/.claude/skills/se-b/SKILL.md"
+check 2 "$(run check-router.sh "$commit_payload")" "改動碰到 skills/ → 完整掃描，照擋"
+
 export CLAUDE_PROJECT_DIR="$ROOT"
 check 0 "$(run check-router.sh "$commit_payload")" "本專案目前狀態一致"
 
@@ -160,6 +170,15 @@ lesson 0001-a.md "source: self-observed" useful "validated:"
 index "| [L0001](0001-a.md) | x |
 | [L0009](0009-ghost.md) | x |"
 check 2 "$(run check-memory.sh "$commit_payload")" "INDEX 指向不存在的 lesson"
+
+SM="$TMP/scopemem"; mkdir -p "$SM/docs/lessons"
+printf -- '---\nid: L0001\n---\n' > "$SM/docs/lessons/0001-x.md"; printf '# 索引\n' > "$SM/docs/lessons/INDEX.md"; echo x > "$SM/app.py"
+( cd "$SM" && git init -q -b main . && git add -A && git -c user.name=t -c user.email=t@t commit -qm base ) >/dev/null 2>&1
+export CLAUDE_PROJECT_DIR="$SM"
+echo y >> "$SM/app.py"
+check 0 "$(run check-memory.sh "$commit_payload")" "改動沒碰到帳本 → 跳過"
+echo "# 追加" >> "$SM/docs/lessons/0001-x.md"
+check 2 "$(run check-memory.sh "$commit_payload")" "改動碰到 docs/lessons/ → 完整檢查，照擋"
 
 export CLAUDE_PROJECT_DIR="$ROOT"
 check 0 "$(run check-memory.sh "$commit_payload")" "本專案帳本目前狀態合規"

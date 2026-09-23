@@ -97,7 +97,8 @@
             "type": "command",
             "shell": "bash",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/checkpoint.sh\"",
-            "timeout": 15
+            "timeout": 15,
+            "async": true
           }
         ]
       }
@@ -163,7 +164,8 @@
             "type": "command",
             "shell": "bash",
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/checkpoint.sh\"",
-            "timeout": 15
+            "timeout": 15,
+            "async": true
           }
         ]
       }
