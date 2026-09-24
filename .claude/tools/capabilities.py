@@ -3,7 +3,8 @@
 
 **這份模型是從原始碼生成的，不是手寫的。** 手寫的自我描述會漂——加了 skill 忘了
 更新、刪了 hook 還寫著有。從 frontmatter、settings.json、ABLATION.md、eval 覆蓋率
-直接讀出來，它就不可能跟現實不一致。這是「Router 不說謊」延伸到整個配置的版本。
+直接讀出來比較不會漂，**但生成的也錯過**（全域帳本數、hook 數、按路徑載入的規則被算成常駐，
+docs/lessons/0010）——所以 selftest 拿它跟獨立來源對照。
 
 三個問題，每個都要能被回答：
   1. 我會什麼？          → skills / agents / hooks
@@ -120,9 +121,21 @@ def hooks() -> list[dict]:
     return list(by_script.values())
 
 
+def _scoped(text: str) -> bool:
+    """開頭有 paths: frontmatter 的規則只在讀到符合的檔案時才載入，不算常駐。"""
+    m = re.match(r"^---\n(.*?)\n---", text, re.S)
+    return bool(m and re.search(r"^paths:", m.group(1), re.M))
+
+
 def resident_lines() -> int:
     files = [ROOT / "CLAUDE.md", CLAUDE / "CLAUDE.md", *sorted((CLAUDE / "rules").glob("*.md"))]
-    return sum(len(f.read_text(encoding="utf-8").splitlines()) for f in files if f.exists())
+    texts = [f.read_text(encoding="utf-8") for f in files if f.exists()]
+    return sum(len(t.splitlines()) for t in texts if not _scoped(t))
+
+
+def scoped_lines() -> int:
+    texts = [f.read_text(encoding="utf-8") for f in sorted((CLAUDE / "rules").glob("*.md"))]
+    return sum(len(t.splitlines()) for t in texts if _scoped(t))
 
 
 def lessons() -> dict:
@@ -170,7 +183,7 @@ def model() -> dict:
         "commit": sha,
         "can_do": {"skills": skills(), "skill_candidates": candidates(),
                    "agents": agents(), "hooks": hooks()},
-        "verified": {"resident_lines": resident_lines(), "lessons": lessons()},
+        "verified": {"resident_lines": resident_lines(), "scoped_lines": scoped_lines(), "lessons": lessons()},
         "known_gaps": known_gaps(),
         "cannot_do": [{"what": w, "why": y} for w, y in CANNOT_DO],
     }
@@ -184,7 +197,7 @@ def summary(m: dict) -> str:
     L.append(f"## 我會什麼")
     L.append(f"- {len(sk)} 個 skill、{len(cd['agents'])} 個 agent、"
              f"{len(cd['hooks'])} 道 hook、{len(cd['skill_candidates'])} 個候選 skill（未驗證，不會自動載入）")
-    L.append(f"- 常駐規則 {vf['resident_lines']} 行")
+    L.append(f"- 常駐規則 {vf['resident_lines']} 行（另有按路徑載入 {vf['scoped_lines']} 行，改動配置時才進 context）")
     L.append("")
     L.append("## 其中驗證過的")
     L.append(f"- skill 觸發路由：{measured}/{len(sk)} 個達到覆蓋率下限（其餘 unmeasured 或無案例）")

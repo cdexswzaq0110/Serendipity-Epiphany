@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreToolUse gate（git commit 時觸發）：強制 .claude/CLAUDE.md 維護契約 #1「Router 不說謊」。
+# PreToolUse gate（git commit 時觸發）：強制維護契約 #1「Router 不說謊」（rules/harness-maintenance.md）。
 #
 # 三向檢查：
 #   1. skills/ 有目錄，INDEX.md 沒列       → 索引漏列

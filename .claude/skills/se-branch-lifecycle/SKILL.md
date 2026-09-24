@@ -9,6 +9,8 @@ description: 分支的一生——開始工作時開出隔離的分支或 worktr
 
 ## 開始
 
+開工時系統提示已經帶著分支與未提交變更，看那個就好；session 跑了一陣子才重新查：
+
 ```bash
 git branch --show-current && git status --short
 ```

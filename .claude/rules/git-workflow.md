@@ -6,7 +6,7 @@
 
 ## 鐵律：先開分支，再動程式碼
 
-- 收到開發任務的第一步：`git branch --show-current` + `git status`。
+- 開工時系統提示已經帶著 git 狀態（分支、未提交變更、最近的 commit），**看那個就好，不必另外跑** `git branch`／`git status`；session 跑了一陣子，或要做 git 寫操作前，才重新查（`dispatch.md` 第 3 條）。
 - 在 main/master 上要改 code → **自己開分支再動**。開分支可逆、有明顯的預設值，不是要人拍板的決策（`dispatch.md` 第 4 條）——**不要為此停下來問**。
 - 工作樹裡有不屬於這個任務的未提交變更 → **原樣保留**：不 commit、不 stash、不還原；commit 時只加自己改的檔。只有要覆蓋或丟棄既有工作時才停下來確認。
 - 不用 `git stash` 當工作流替代品。分支命名 `<type>/<short-description>`。由 `hooks/guard-branch.sh` 檢查（目前 warn 模式，只提示不阻擋）。

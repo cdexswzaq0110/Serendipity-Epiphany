@@ -92,7 +92,7 @@ bash .claude/hooks/selftest.sh
 
 盤點日 2026-09-03（v2；hook 化與第一次實測消融都已執行）。
 
-常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(42) ＋ `rules/*.md`(265) = **346 行**（2026-08-14 為 339）。另有 `recall-lessons.sh` 的**動態**注入：有 lesson 時約 4–13 行，兩邊都空時 0 行。`checkpoint.sh` 的續跑簡報只在有斷點時注入（約 5–12 行），正常結束時 0 行。
+常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(13) ＋ `rules/*.md`(265) = **317 行**（2026-08-14 為 339）。另有 `rules/harness-maintenance.md`(41) **按路徑載入**，只在改動配置時進 context。另有 `recall-lessons.sh` 的**動態**注入：有 lesson 時約 4–13 行，兩邊都空時 0 行。`checkpoint.sh` 的續跑簡報只在有斷點時注入（約 5–12 行），正常結束時 0 行。
 
 > ⚠ **這個數字沒有下降，而且大部分規則仍未實證。** 20 天來只跑過一條規則的消融
 > （`dispatch.md` #1）。下一批：`evidence-grades`(47) 與 `dispatch` 剩下三條——
@@ -101,8 +101,8 @@ bash .claude/hooks/selftest.sh
 | 檔案 | 類型 | 失敗證據 | 下次處置 |
 |---|---|---|---|
 | 根目錄 `CLAUDE.md` 入口與節奏 | 意圖 | — | 保留（只放入口；長出細節就是該下放的訊號） |
-| `.claude/CLAUDE.md` 元件責任 | 意圖 | — | 保留 |
-| `.claude/CLAUDE.md` 維護契約 | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔。**2026-08-31 實測命中**：根 `CLAUDE.md` 指向不存在的 `/se-bootstrap`【已確認：`check-router.sh` exit 2】 | 保留；#1 已機械化 |
+| `rules/harness-maintenance.md` 元件責任（2026-09-24 起按路徑載入） | 意圖 | — | 保留；只在改動配置時進 context |
+| `rules/harness-maintenance.md` 維護契約（按路徑載入） | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔。**2026-08-31 實測命中**：根 `CLAUDE.md` 指向不存在的 `/se-bootstrap`【已確認：`check-router.sh` exit 2】 | 保留；#1 已機械化 |
 | `core-rules.md` 1–5 | 意圖 | — | 保留（他檔以「第 N 條」引用，編號須穩定） |
 | `core-rules.md` 6 留下領悟 | 意圖 | — | 保留（這是這套配置存在的理由） |
 | `core-rules.md` 3 部分結果不覆蓋 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |

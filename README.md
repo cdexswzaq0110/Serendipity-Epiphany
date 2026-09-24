@@ -108,13 +108,13 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 .claude-plugin/
 └── plugin.json            # 裝成 plugin：skills＋agents＋hooks（不含常駐規則）
 .claude/
-├── CLAUDE.md              # 元件責任與 8 條維護契約
+├── CLAUDE.md              # 轉址＋Runtime Context（維護契約改為按路徑載入）
 ├── EXECUTION_MODEL.md     # 任務分解、執行派發與平行協調的完整定義
 ├── WORKFLOW.md            # 執行層級、角色分工、Context 邊界與驗證流程
 ├── ROLE_MODEL.md          # 十個 SDLC 角色、四個抽象層、三道翻譯 Gate
 ├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
-├── rules/           (6)   # 常駐工程規則
+├── rules/           (7)   # 6 條常駐＋維護契約（paths: 改動配置時才載入）
 ├── skills/         (20)   # Coroutine 能力庫，按需載入
 ├── skill-candidates/     # se-acquire 習得的候選，不自動載入，過閘才升級
 ├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘、斷點續跑、經驗採礦

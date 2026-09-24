@@ -15,7 +15,7 @@
 | 誰負責哪一層的正確性（PM／UX／SA／Architect／SD／DBA／Dev／QA／DevOps） | [.claude/ROLE_MODEL.md](.claude/ROLE_MODEL.md) |
 | Rules／Skills／Agents 三層怎麼一起運作 | [.claude/WORKFLOW.md](.claude/WORKFLOW.md) |
 | 哪個 Skill 何時載入、相似入口怎麼區辨 | [.claude/skills/INDEX.md](.claude/skills/INDEX.md) |
-| 改動這套配置本身時不能破壞什麼 | [.claude/CLAUDE.md](.claude/CLAUDE.md) |
+| 改動這套配置本身時不能破壞什麼 | [.claude/rules/harness-maintenance.md](.claude/rules/harness-maintenance.md)（改動配置時自動載入） |
 | 這套配置的每一條規則為什麼存在 | [docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md) |
 
 ## 預設節奏
