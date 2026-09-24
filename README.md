@@ -66,7 +66,7 @@ bash templates/_meta/bootstrap_check.sh .
 claude --plugin-dir "/path/to/Serendipity — Epiphany"
 ```
 
-拿到 20 個 skill ＋ 14 個 agent ＋ 7 道 hook，名稱前綴 `serendipity-epiphany:`。
+拿到 20 個 skill ＋ 14 個 agent ＋ 8 道 hook，名稱前綴 `serendipity-epiphany:`。
 **拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【已確認：2026-09-23 實測 20 skills（含 se-resume）／14 agents 載入】
 
 Windows：
@@ -96,6 +96,7 @@ Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\temp
 - **日常任務上，它沒有讓一個強模型做得更好。** 價值量得到的地方是護欄（秘密、分支、破壞性 git 操作、中斷續跑）。
 - **它自己的一條規則曾經害事**：「在 main 上就停下來問」讓任務沒做完。基準抓到、已改——這正是這套配置
   「規則要有失敗證據」的主張第一次在端到端被兌現，而且方向是刪減。
+- 之後的改進（維護契約改按路徑載入、`guard-discard` 擋下丟棄使用者的未提交工作）把 T1–T5 的成本差距從 +66% 降到 +49%，最新 6/6。
 - 更長、多 session 的工作還沒量。那是下一組任務。
 
 ---
@@ -119,8 +120,8 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── skill-candidates/     # se-acquire 習得的候選，不自動載入，過閘才升級
 ├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘、斷點續跑、經驗採礦
 ├── agents/         (14)   # Thread / Process 執行模板
-├── hooks/           (7)   # 分支保護、backup tag、Router、記憶層准入、結束前自檢、開工召回、斷點記錄
-│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（122 條自測）＋ hooks.json（plugin 用）
+├── hooks/           (8)   # 分支保護、backup tag、丟棄保護、Router、記憶層准入、結束前自檢、開工召回、斷點記錄
+│                          #   ＋ _command.sh（指令判定，四支共用）＋ selftest.sh（135 條自測）＋ hooks.json（plugin 用）
 └── settings.json          # 敏感路徑 deny ＋ PreToolUse／PostToolUse／Stop／StopFailure／UserPromptSubmit／SessionStart hooks 註冊
 templates/                 # CONTEXT / ADR / PROCESS_SPEC / HANDOFF ＋ bootstrap
 docs/
