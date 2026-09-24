@@ -79,6 +79,12 @@
             "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-critical.sh\"",
             "timeout": 5,
             "statusMessage": "檢查 backup tag"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/guard-discard.sh\"",
+            "timeout": 15
           }
         ]
       }

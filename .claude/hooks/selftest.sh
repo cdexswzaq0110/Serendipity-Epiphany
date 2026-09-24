@@ -426,6 +426,29 @@ check 0 "$(lnlearned)" "這一回合已經寫過 lesson → 不再提醒"
 lnrec UserPromptSubmit ',"prompt":"下一回合"'
 check 0 "$(lnlearned)" "新的回合重新計算，不拿上一回合的失敗來提醒"
 
+# 不准丟掉開工前就存在的未提交變更（bench T2：harness 曾 git restore＋rm -rf 使用者的筆記與草稿）
+echo "guard-discard"
+DS="$TMP/ds"; mkdir -p "$DS"
+( cd "$DS" && git init -q -b main . && printf '# app\n' > README.md && echo x > app.py && git add -A \
+  && git -c user.name=t -c user.email=t@t commit -qm base ) >/dev/null 2>&1
+printf '## 我的筆記\n' >> "$DS/README.md"; mkdir -p "$DS/scratch"; echo "TIERS = 1" > "$DS/scratch/idea.py"
+DSN=$(cygpath -m "$DS" 2>/dev/null || printf '%s' "$DS")
+printf '{"hook_event_name":"SessionStart","session_id":"DDDD","cwd":"%s","source":"startup"}' "$DSN" \
+  | CLAUDE_PID=5151 python "$ROOT/.claude/tools/checkpoint.py" record >/dev/null 2>&1
+mkdir -p "$DS/build"; echo out > "$DS/build/out.txt"   # 開工之後 agent 自己產生的
+disc() { printf '{"tool_name":"Bash","tool_input":{"command":"%s"},"cwd":"%s"}' "$1" "$DSN" \
+  | CLAUDE_PID=5151 bash "$H/guard-discard.sh" >/dev/null 2>&1; echo $?; }
+for c in "rm -rf scratch/" "git restore README.md" "git checkout -- README.md" "git clean -fd" "git reset --hard" \
+         "cd scratch && rm idea.py"; do
+  check 2 "$(disc "$c")" "開工前就存在的變更 → 擋：$c"
+done
+for c in "rm -rf build/" "git restore --staged README.md" "SE_ALLOW_DISCARD=1 rm -rf scratch/" "echo 'rm -rf scratch'" "ls scratch"; do
+  check 0 "$(disc "$c")" "放行：$c"
+done
+( cd "$DS" && git add README.md && git -c user.name=t -c user.email=t@t commit -qm note ) >/dev/null 2>&1
+check 0 "$(disc "git restore README.md")" "使用者的變更已經 commit 進去 → 救得回來，放行"
+check 2 "$(disc "rm -rf scratch/")" "還沒 commit 的草稿仍然擋"
+
 # ---------- 結果 ----------
 echo ""
 echo "通過 $pass／失敗 $fail"

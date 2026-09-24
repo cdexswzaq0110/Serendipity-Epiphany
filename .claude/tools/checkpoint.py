@@ -429,6 +429,122 @@ def lessons_touched_since(top, at):
     return any(p.stat().st_mtime > t0 for p in d.glob("*.md"))
 
 
+# ---------- 不准丟掉開工前就存在的未提交變更 ----------
+
+def _strip_heredocs(cmd):
+    out, lines, i = [], cmd.split("\n"), 0
+    while i < len(lines):
+        out.append(lines[i])
+        m = re.search(r"<<-?\s*['\"]?([A-Za-z_]\w*)['\"]?", lines[i])
+        i += 1
+        if m:
+            while i < len(lines) and lines[i].strip() != m.group(1):
+                i += 1
+            i += 1
+    return "\n".join(out)
+
+
+def discard_targets(cmd, cwd):
+    """指令會丟掉哪些路徑的內容：[(種類, 絕對路徑)]。種類 any／untracked／tracked。"""
+    import shlex
+    out = []
+    for part in re.split(r"&&|\|\||;|\||\n", _strip_heredocs(cmd)):
+        try:
+            toks = shlex.split(part, posix=True)
+        except ValueError:
+            toks = part.split()
+        while toks and re.match(r"^\w+=", toks[0]):  # 前綴的環境變數
+            toks = toks[1:]
+        if not toks:
+            continue
+        if toks[0] == "cd" and len(toks) > 1:  # 同一條指令裡的 cd 會改變後面相對路徑的意思
+            cwd = os.path.normpath(os.path.join(cwd, toks[1]))
+            continue
+        paths = lambda xs: [os.path.normpath(os.path.join(cwd, x)) for x in xs if not x.startswith("-")]  # noqa: E731
+        if toks[0] == "rm":
+            out += [("any", p) for p in paths(toks[1:])]
+        elif toks[0] == "git":
+            i = 1
+            while i < len(toks) and toks[i].startswith("-"):
+                i += 2 if toks[i] in ("-C", "-c") else 1
+            sub, rest = (toks[i] if i < len(toks) else ""), toks[i + 1:]
+            if sub == "restore" and not ("--staged" in rest and "--worktree" not in rest and "-W" not in rest):
+                out += [("any", p) for p in paths(rest)]
+            elif sub == "checkout" and "--" in rest:
+                out += [("any", p) for p in paths(rest[rest.index("--") + 1:])]
+            elif sub == "checkout" and rest[:1] == ["."]:
+                out.append(("any", cwd))
+            elif sub == "clean" and any(r == "--force" or (re.match(r"^-[a-z]+$", r) and "f" in r) for r in rest):
+                out += [("untracked", p) for p in (paths(rest) or [cwd])]
+            elif sub == "reset" and "--hard" in rest:
+                out.append(("tracked", cwd))
+    return out
+
+
+def preexisting(top, sd, pid):
+    """開工前就存在的未提交變更：{路徑: 狀態, ...}，以及那棵基準快照（取回用）。"""
+    evs = load(sd)[0]
+    bases = [e for e in evs if e["kind"] == "base" and str(e.get("pid")) == str(pid)]
+    mine = [e for e in evs if e["kind"] == "snap" and str(e.get("pid")) == str(pid)]
+    if bases:
+        tree, sha = bases[-1].get("tree"), bases[-1].get("head")
+    elif mine:
+        tree, sha = mine[0].get("tree"), mine[0].get("head")
+    else:  # 這個程序還沒動過任何東西 → 現在的變更全都是開工前就在的
+        tree, (sha, _, _) = fingerprint(top, sd), head(top)
+    if not tree or not sha:
+        return {}, None
+    _, htree, _ = git(["rev-parse", f"{sha}^{{tree}}"], top)
+    rc, out, _ = git(["diff-tree", "-r", "--name-status", htree, tree], top)
+    if rc:
+        return {}, tree
+    got = {}
+    for line in out.splitlines():
+        st, _, path = line.partition("\t")
+        if st in ("A", "M"):  # 開工時多出來的（未追蹤）或被改過的
+            got[path] = st
+    return got, tree
+
+
+def discard_check(payload):
+    cmd = ((payload.get("tool_input") or {}).get("command") or "")
+    if "SE_ALLOW_DISCARD=1" in cmd:  # 使用者明確同意丟棄後，刻意加上的放行記號
+        return 0
+    loc = locate(payload.get("cwd") or os.getcwd())
+    if not loc:
+        return 0
+    top, sd = loc
+    targets = discard_targets(cmd, payload.get("cwd") or top)
+    if not targets:
+        return 0
+    pre, tree = preexisting(top, sd, os.environ.get("CLAUDE_PID"))
+    hit = []
+    for kind, abspath in targets:
+        rel = os.path.relpath(abspath, top).replace("\\", "/")
+        if rel.startswith(".."):
+            continue
+        for path, st in pre.items():
+            if not (rel == "." or path == rel or path.startswith(rel.rstrip("/") + "/")):
+                continue
+            if (kind == "untracked" and st != "A") or (kind == "tracked" and st != "M"):
+                continue
+            _, now, _ = git(["rev-parse", "-q", "--verify", f"HEAD:{path}"], top)
+            _, then, _ = git(["rev-parse", "-q", "--verify", f"{tree}:{path}"], top)
+            if now and now == then:  # 已經 commit 進去了，丟掉工作樹的也救得回來
+                continue
+            hit.append(path)
+    hit = sorted(set(hit))
+    if not hit:
+        return 0
+    shown = "、".join(hit[:8]) + (f" …共 {len(hit)} 個" if len(hit) > 8 else "")
+    sys.stderr.write(
+        f"[guard-discard] 這個指令會丟掉**開工前就存在**的未提交變更（不是這個 session 做的）：{shown}\n"
+        "丟掉就回不來——這通常是使用者自己的工作。原樣保留，只動你這次要改的檔。\n"
+        "使用者明確要你丟棄時：先把這份清單講給他、拿到同意，再在指令前加 SE_ALLOW_DISCARD=1。\n"
+        f"（開工時的內容在快照裡：git show {(tree or '')[:12]}:<路徑>）\n")
+    return 2
+
+
 # ---------- hook 入口 ----------
 
 def record(stdin_text):
@@ -500,6 +616,7 @@ def main(argv=None):
     sub.add_parser("status")
     sub.add_parser("close")
     sub.add_parser("learned")
+    sub.add_parser("discard-check")
     st_ = sub.add_parser("step")
     st_.add_argument("action", choices=["add", "done"])
     st_.add_argument("id")
@@ -514,6 +631,11 @@ def main(argv=None):
 
     if a.cmd == "record":  # payload 是 UTF-8；Windows 的 stdin 預設是 cp950，要讀位元組自己解
         return record(sys.stdin.buffer.read().decode("utf-8", errors="replace"))
+    if a.cmd == "discard-check":  # PreToolUse：exit 2 擋下，stderr 給模型看
+        try:
+            return discard_check(json.loads(sys.stdin.buffer.read().decode("utf-8", errors="replace") or "{}"))
+        except Exception:
+            return 0  # 判斷不了就放行：快照仍在，內容救得回來
 
     loc = locate(os.getcwd())
     if not loc:
