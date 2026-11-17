@@ -10,6 +10,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
+# Claude Code reads hook output as UTF-8; a zh-TW Windows console defaults to cp950, which
+# garbles every non-ASCII message (lesson L0004's sibling). Force UTF-8 on our own streams.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+
 DESTRUCTIVE = re.compile(r"(?:^|[;&|]\s*)git\s+(?:reset\b[^\r\n]*--hard|push\b[^\r\n]*(?:--force(?:-with-lease)?|-f\b)|branch\b[^\r\n]*-D\b|rebase\b)", re.I)
 RAW_DESTRUCTIVE = re.compile(r"git(?:\\?\"|\s)+(?:(?:reset\b[^\r\n]*--hard)|(?:push\b[^\r\n]*(?:--force(?:-with-lease)?|-f\b))|(?:branch\b[^\r\n]*-D\b)|rebase\b)", re.I)
 PROTECTED_PATH = re.compile(r"(?:^|[\\/])(?:\.env(?:\.|$)|secrets?|credentials?|\.ssh)(?:[\\/]|$)", re.I)
