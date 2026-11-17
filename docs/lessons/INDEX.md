@@ -2,7 +2,7 @@
 
 **一則一行。內容留在各自的檔案裡。**
 
-這份索引每次召回都會被讀，長度就是成本。維護方式見 [`.claude/skills/se-epiphany`](../../.claude/skills/se-epiphany/SKILL.md)。
+這份索引每次召回都會被讀，長度就是成本。維護方式見 [`skills/extended/se-epiphany`](../../skills/extended/se-epiphany/SKILL.md)。
 
 ## 現行
 

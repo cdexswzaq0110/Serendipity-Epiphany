@@ -40,8 +40,8 @@ Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\temp
 把 skill 目錄 symlink 到全域，**檔案實體留在專案內**（版控追得到），全域只放捷徑：
 
 ```bash
-ln -s "$(pwd)/.claude/skills/se-epiphany" ~/.claude/skills/se-epiphany
-ln -s "$(pwd)/.claude/skills/se-focus"    ~/.claude/skills/se-focus
+ln -s "$(pwd)/.claude/skills/extended/se-epiphany" ~/.claude/skills/se-epiphany
+ln -s "$(pwd)/.claude/skills/extended/se-focus"    ~/.claude/skills/se-focus
 ```
 
 ```powershell
@@ -60,7 +60,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 /se-epiphany
 ```
 
-有反應就是裝好了。沒反應 → 檢查 `.claude/skills/se-epiphany/SKILL.md` 存在，且 frontmatter 的 `name` 與目錄名一致。
+有反應就是裝好了。沒反應 → 檢查 `.claude/skills/extended/se-epiphany/SKILL.md` 存在，且 frontmatter 的 `name` 與目錄名一致。
 
 ---
 

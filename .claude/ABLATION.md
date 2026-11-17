@@ -66,17 +66,17 @@
 
 | 原規則 | Hook | 觸發 | 模式 |
 |---|---|---|---|
-| `git-workflow.md` 先開分支 | `hooks/guard-branch.sh` | PreToolUse `Edit\|Write\|NotebookEdit` ＋ `Bash(git commit*)` | **warn**（exit 1，提示不阻擋） |
-| `git-workflow.md` backup tag | `hooks/guard-critical.sh` | PreToolUse `Bash(git *)`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
-| 維護契約 #1 Router 不說謊 | `hooks/check-router.sh` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
+| `git-workflow.md` 先開分支 | `hooks/guard_branch.py` | PreToolUse `Edit\|Write\|NotebookEdit` ＋ `Bash(git commit*)` | **block**（exit 2） |
+| `git-workflow.md` backup tag | `hooks/guard_critical.py` | PreToolUse `Bash`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
+| 維護契約 #1 Router 不說謊 | `hooks/check_router.py` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
 
 **Gate 要先被證明會擋，才能相信它的綠燈**——hook 寫壞的預設失敗模式是靜默放行（見 [`../docs/lessons/0002-hook-silent-failure-windows.md`](../docs/lessons/0002-hook-silent-failure-windows.md)）。自測：
 
 ```bash
-bash .claude/hooks/selftest.sh
+python -m unittest tests.test_hooks -v
 ```
 
-22 條案例（含 3 個誤判陷阱），2026-08-31 全數通過。改動任一支 hook 後必須重跑。
+Python 自測涵蓋拒絕、放行、錯誤 payload、內部例外、含空白與中文的路徑及一次性 break-glass。改動任一支 hook 後必須重跑。
 
 **hook 不能取代規則文字的部分要留著**：hook 只回答「這一次擋不擋」，規則文字回答「為什麼」與「怎麼做才對」。已機械化的條目在下表標 `已機械化`，但仍保留最短的敘述句。
 
@@ -105,8 +105,8 @@ bash .claude/hooks/selftest.sh
 | `dispatch.md` 2 切片換 Process | 意圖 | — | 保留 |
 | `dispatch.md` 3 平行前確認鎖 | 補丁 | 跨 session duplicate cherry-pick、stale branch | 保留 |
 | `dispatch.md` 4 GIL | 補丁 | 一次丟多個問題給人，全部卡住 | ⚠ 本地未實證 |
-| `git-workflow.md` 先開分支 | 補丁 | **已機械化（warn）**：`guard-branch.sh` 的攔截次數即為證據，2026-08-31 起觀察 | 一到兩週後：有攔截 → 改 block；零攔截 → 刪常駐文字，只留 hook |
-| `git-workflow.md` backup tag | 補丁 | **已機械化（block）**：`guard-critical.sh`，13/13 判定案例通過【已確認：2026-08-31 stdin 測試】 | 保留最短敘述；hook 是真正的守門人 |
+| `git-workflow.md` 先開分支 | 補丁 | **已機械化（block）**：`guard_branch.py`，Python 自測證明 main 寫入 exit 2 | 保留最短敘述；hook 是真正的守門人 |
+| `git-workflow.md` backup tag | 補丁 | **已機械化（block）**：`guard_critical.py`，Python 自測涵蓋破壞性命令與 backup tag | 保留最短敘述；hook 是真正的守門人 |
 | `git-workflow.md` commit→push→PR 連貫 | 補丁 | base 提示預設「只在使用者要求時 push」，需覆寫 | 保留 |
 | ~~`git-workflow.md` body 按需寫~~ | 補丁 | **已移除（2026-08-31）**：衝突對象不存在——全域檔名是 `~/.claude/CLAUDE.md.md`（副檔名重複），從未被載入【已確認：`ls -la ~/.claude/`】 | 存於 `.out-of-scope/ablated-2026-08-31/` |
 | `thinking-boundary.md` 速通／深思 | 意圖 | — | 保留（擋過度前置治理） |

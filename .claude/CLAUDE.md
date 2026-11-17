@@ -24,7 +24,7 @@
 
 ## 維護契約（改動本配置時必須重新滿足的不變量）
 
-1. **Router 不說謊**：新增、改名、刪除 skill 或改變其定位時，必須同步更新 `skills/INDEX.md`。索引漏列新 skill、或仍導向已刪 skill，視為缺陷而非疏漏。**由 `hooks/check-router.sh` 在 `git commit` 前強制**（三向：目錄未列入索引／索引指向已刪 skill／常駐檔指向不存在的 skill）。
+1. **Router 不說謊**：新增、改名、刪除 skill 或改變其定位時，必須同步更新 `skills/INDEX.md`。索引漏列新 skill、或仍導向已刪 skill，視為缺陷而非疏漏。**由 `hooks/check_router.py` 在 `git commit` 前強制**。
 2. **Frontmatter 與現實一致**：Skill 的 `description` 不得引用已退役的模板或檔名。
 3. **大型 skill 分層**：SKILL.md 超過約 200 行時拆 `references/`（漸進揭露），不整檔常駐。
 4. **來源可追**：新增第三方或社群 skill 必須在 `skills/INDEX.md` 記來源、授權與更新方式。

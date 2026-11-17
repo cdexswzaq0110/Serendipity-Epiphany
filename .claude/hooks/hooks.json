@@ -6,8 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-branch.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_branch.py\"",
             "timeout": 5,
             "statusMessage": "檢查分支保護"
           }
@@ -18,25 +17,19 @@
         "hooks": [
           {
             "type": "command",
-            "if": "Bash(git commit*)",
-            "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-branch.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_branch.py\"",
             "timeout": 5,
             "statusMessage": "檢查分支保護"
           },
           {
             "type": "command",
-            "if": "Bash(git commit*)",
-            "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check-router.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check_router.py\"",
             "timeout": 10,
             "statusMessage": "檢查 Router 一致性"
           },
           {
             "type": "command",
-            "if": "Bash(git *)",
-            "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-critical.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_critical.py\"",
             "timeout": 5,
             "statusMessage": "檢查 backup tag"
           }
