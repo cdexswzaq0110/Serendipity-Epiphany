@@ -1,9 +1,4 @@
----
-name: se-two-axis-review
-description: 對一組已完成的變更做雙軸審查——Spec 軸（有沒有做對東西）與 Standards 軸（有沒有做好），兩軸派成互相隔離的 Thread，分開報告、不合併也不排名。Finding 是待驗證的主張不是命令。當變更完成要審查、要開 PR 前、使用者說「review 一下」「這樣可以嗎」時使用。
-metadata:
-  tier: extended
----
+> 2.1.0 起 `se-two-axis-review` 併入 `se-spec-review` 與 `se-quality-review`；本檔是原 skill 的完整內文，原樣保留，只修正搬家後的相對連結。
 
 # Two-Axis Review — 雙軸審查
 
@@ -39,7 +34,7 @@ git log <fixed-point>..HEAD --oneline
 
 **Standards 來源**：repo 裡任何規範文件（`CONTRIBUTING.md`、`CODING_STANDARDS.md`、`CLAUDE.md`、`CONTEXT.md`）。
 
-無論 repo 寫了什麼，Standards 軸永遠附帶 [`references/smell-baseline.md`](references/smell-baseline.md) 的 code smell 基線——**repo 的明文規範永遠優先**，衝突時壓過基線。
+無論 repo 寫了什麼，Standards 軸永遠附帶 `se-quality-review` 的 `references/smell-baseline.md` 的 code smell 基線——**repo 的明文規範永遠優先**，衝突時壓過基線。
 
 ## Phase 3 — 派兩個隔離 Thread
 

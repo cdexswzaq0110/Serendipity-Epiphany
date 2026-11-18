@@ -362,9 +362,9 @@ Dev 與 QA 被大幅改變；**其餘八層幾乎沒變，因為那些是「定�
 | 需要壓力測試假設、找出缺漏或取得外部決策 | `se-clarify` |
 | 需要先判斷技術或產品可行性 | `se-feasibility` |
 | 專案術語、Domain Language 或命名不一致 | `se-context-language` |
-| 進入程式實作 | `se-minimal-change` |
+| 進入程式實作 | `se-minimal-implementation` |
 | Debug、定位 Root Cause | `se-debug` |
-| 變更完成，需要 Spec / Standards 雙軸審查 | `se-two-axis-review` |
+| 變更完成，需要規格與品質兩次審查 | 先 `se-spec-review`，通過後 `se-quality-review` |
 | **要做任務分解、執行派發與平行協調** | **`se-scheduling`** |
 | **從零啟動專案、盤點缺哪個角色的產出** | **`se-sdlc`** |
 | 外部工具、MCP、CLI 或環境能力不確定 | `se-preflight` |

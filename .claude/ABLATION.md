@@ -128,7 +128,7 @@ bash .claude/hooks/selftest.sh
 | 張力 | 仲裁在哪 |
 |---|---|
 | `se-focus` 要 `file:line`，`register.md` 要「用動作講機制」 | `register.md`「何時不可以白話」第一條：使用者要定位時不白話 |
-| `se-minimal-change` 要最短 diff，`core-rules` 4 要驗證證據 | 階梯本身：非平凡邏輯必須留一個可跑的檢查 |
+| `se-minimal-implementation` 要最短 diff，`core-rules` 4 要驗證證據 | 階梯本身：非平凡邏輯必須留一個可跑的檢查 |
 | `dispatch.md` 要用滿並行，鎖規則要序列化 | 鎖優先。用滿的是**無衝突**的部分 |
 | `thinking-boundary` 預算 vs `core-rules` 4 以證據宣告完成 | 預算用完不等於完成。停下來報告，不降低完成標準 |
 | `se-ml-lifecycle` 的 Gate vs `thinking-boundary` 雛型期走 happy path | ML 的 Gate 是**驗證可信度**的閘，不是治理的閘。雛型可以省文件，不能省 split 正確性 |

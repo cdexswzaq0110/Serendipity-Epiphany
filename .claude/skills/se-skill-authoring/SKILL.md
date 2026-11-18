@@ -97,7 +97,7 @@ metadata:
 
 **使用者調用的 skill 可以呼叫模型可調用的 skill，但不得呼叫另一個使用者調用的 skill。**
 
-依賴用 `/skill` 式的散文呼叫（「載入 `se-minimal-change`」），**不要**深層的 `../other-skill/FILE.md` 交叉引用。共用的參考文件住在擁有它的那個 skill 裡面，別的 skill 用調用它來取得材料。
+依賴用 `/skill` 式的散文呼叫（「載入 `se-minimal-implementation`」），**不要**深層的 `../other-skill/FILE.md` 交叉引用。共用的參考文件住在擁有它的那個 skill 裡面，別的 skill 用調用它來取得材料。
 
 ---
 

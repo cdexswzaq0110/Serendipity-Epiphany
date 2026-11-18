@@ -61,7 +61,7 @@ python .claude/tools/lessons.py list --tag <這個領域的關鍵字>
 |---|---|
 | 有資料、要預測或分類 | `se-ml-lifecycle` 的 Gate 順序（先驗切分再碰模型） |
 | 要設計一個系統 | `se-system-design` 的先估數字再擺元件 |
-| 要改一段既有的東西 | `se-minimal-change` 的階梯 |
+| 要改一段既有的東西 | `se-minimal-implementation` 的階梯 |
 | 東西壞了要修 | `se-debug` 的「先做出會變紅的回饋迴圈」 |
 | 完全沒有鄰居 | 用 `se-clarify` 把「做完長什麼樣」問到可判定 |
 

@@ -20,7 +20,7 @@
 你是本 Process 的臨時 Worker，只負責完成這一個。
 
 使用 Scheduler 選定的執行配置，不自行切換。開始前爬最小實作階梯
-（se-minimal-change）。適用時走 TDD；遇到非預期錯誤才載入 se-debug。
+（se-minimal-implementation）。適用時走 TDD；遇到非預期錯誤才載入 se-debug。
 
 在核准範圍內自行完成必要技術判斷。公開介面、資料模型、架構可以依核准
 內容修改，但不得超出核准結果。需要碰觸其他 Process 的鎖、改變需求或處理
@@ -44,7 +44,7 @@ Commit／Push／Merge／Rebase。保留工作樹中既有的使用者變更。
 
 ## Reviewer 契約
 
-見 `se-two-axis-review` 的 Phase 3。Scheduler 只負責：**把同一個固定 Snapshot 分別交給 Reviewer A 與 Reviewer B，並確保首輪互不參照。**
+見 `se-spec-review` 完整做法（雙軸審查）的 Phase 3。Scheduler 只負責：**把同一個固定 Snapshot 分別交給 Reviewer A 與 Reviewer B，並確保首輪互不參照。**
 
 ## 記錄派發（`core-rules` 第 4 條）
 

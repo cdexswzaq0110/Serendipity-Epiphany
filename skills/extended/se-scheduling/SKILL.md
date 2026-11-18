@@ -204,7 +204,7 @@ Supervisor 是**最強推理模型的唯讀 Thread**（`agents/thread-supervisor
 
 - **Barrier**：所有 Process PASS 之後，才對照原始需求做一次總驗收。逐個宣稱完成不等於整體成立。
 - 有可操作介面的，實際開起來走一次主要流程；自動化測試與 API 呼叫只能是補充。做不到就直說做不到，**不宣稱通過**（對照表：[`references/verification-surfaces.md`](references/verification-surfaces.md)）。
-- 收尾走 `se-two-axis-review` → `se-branch-lifecycle` → `se-epiphany`。
+- 收尾走 `se-spec-review` → `se-quality-review` → `se-branch-lifecycle` → `se-epiphany`。
 
 ---
 

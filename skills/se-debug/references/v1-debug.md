@@ -1,9 +1,4 @@
----
-name: se-debug
-description: 遇到 bug、測試失敗或非預期行為時的紀律迴圈——先做出一個會為這個 bug 變紅的回饋迴圈，最小化、提假設、加儀器、修根因、留回歸測試。禁止在有可重現失敗之前先猜著改。當出現 bug、測試失敗、行為異常、效能退化，或同一個問題修了兩次還在時使用。
-metadata:
-  tier: extended
----
+> 2.1.0 起 `se-debug（v1）` 併入 `se-debug`；本檔是原 skill 的完整內文，原樣保留，只修正搬家後的相對連結。
 
 # Debug — 除錯迴圈
 
@@ -74,7 +69,7 @@ metadata:
 
 - 原本的紅迴圈變綠。
 - **回歸測試留下來**——放在 `se-design` 確認過的接縫上，不是隨手找個地方。
-- 一個「不會因為這個 bug 而紅」的回歸測試等於沒有（見 `se-two-axis-review` 的 Test That Cannot Fail）。
+- 一個「不會因為這個 bug 而紅」的回歸測試等於沒有（見 `se-spec-review` 完整做法裡的 Test That Cannot Fail）。
 
 ---
 

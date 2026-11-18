@@ -2,17 +2,14 @@
   "schema_version": 1,
   "bundle_version": "2.1.0",
   "source_repo": "https://github.com/cdexswzaq0110/Serendipity-Epiphany.git",
-  "source_commit": "3233f5709e8a9ed917d5ec24aea8cb1171c70974",
+  "source_commit": "6dfc5a9da80094a31fb55abfed238d1da1de7339",
   "source_dirty": true,
   "layout": "flat",
-  "skipped": [
-    "se-debug",
-    "se-feasibility"
-  ],
+  "skipped": [],
   "files": [
     {
       "path": "INDEX.md",
-      "sha256": "5863ba818ab39481bf649973e4ff2315174ad6a58044bb4a8001c4e640f4dafd"
+      "sha256": "b93a21dc4b03e2230946e143c8aeb814a184b3dc904948281bd9b9518709d09e"
     },
     {
       "path": "VERSION",
@@ -20,7 +17,7 @@
     },
     {
       "path": "se-acquire/SKILL.md",
-      "sha256": "a07b8d8f8f2c560cdd2218ed1779786b7f18e9b65d93fa2ae63c888b80758c20"
+      "sha256": "97668de849641289ea9149a6f966ff41ee2b96ed5f37c0bfce13016733ae2e1a"
     },
     {
       "path": "se-bootstrap/SKILL.md",
@@ -40,7 +37,11 @@
     },
     {
       "path": "se-debug/SKILL.md",
-      "sha256": "bea8b611f9a99b19cb2d13360113b4857937fe98cc8e4fccd967ea1b42e855ba"
+      "sha256": "2a2caa3f121830a16666ddfaf54b918e59cdf0286ae476306d86d1646b04c7e6"
+    },
+    {
+      "path": "se-debug/references/v1-debug.md",
+      "sha256": "4bc736eeb2ee1cb4b293a20bfd7c541737288722f7db94a6bc2ec9d23a869011"
     },
     {
       "path": "se-design/SKILL.md",
@@ -64,19 +65,23 @@
     },
     {
       "path": "se-feasibility/SKILL.md",
-      "sha256": "1a2326a311bb6e62217cf694cd064c9a044e7cc222db295e8aacd93fa862e9b2"
+      "sha256": "fa55d178a6af01f37302a0f83ac4e4e7262c7f9db2485ea2e86344df626b4b98"
+    },
+    {
+      "path": "se-feasibility/references/v1-feasibility.md",
+      "sha256": "65d0f985a9576a6713e3c48ac6d8a576c21ba668c81c9fe20e68b02cc5d6edcf"
     },
     {
       "path": "se-focus/SKILL.md",
       "sha256": "03420e4c2dcf72b22edb317be95b7425ef6850cf88f14909ce0337ba3c620a69"
     },
     {
-      "path": "se-minimal-change/SKILL.md",
-      "sha256": "72d146886cd812f42ea6024acc0251d978d2c3f69ce608488c13b6b718f81fdd"
+      "path": "se-minimal-implementation/SKILL.md",
+      "sha256": "cb348489b3472caab7afe37dbb04508822573621a569a21997920938c2cd8572"
     },
     {
-      "path": "se-minimal-implementation/SKILL.md",
-      "sha256": "a4b3d64095805951bba72ea1aa832351a46daee4c6ae9b2bdbc681dd97eedd0c"
+      "path": "se-minimal-implementation/references/minimal-change.md",
+      "sha256": "8219e5575e7e95eb59abdb590ca900c812c18af65be9cf406e302a88d4a2865d"
     },
     {
       "path": "se-ml-lifecycle/SKILL.md",
@@ -88,7 +93,7 @@
     },
     {
       "path": "se-ml-lifecycle/references/delivery-and-ops.md",
-      "sha256": "f5e1ae348cc4116559b1d14e89811d07080953b066c2aa4b5ad61205db0b3c2a"
+      "sha256": "8dfed7e50d5ab005687ca2b9ad2cf544f0759723fc2d1d9f294e1ae69c84a32c"
     },
     {
       "path": "se-ml-lifecycle/references/interpretability.md",
@@ -116,7 +121,7 @@
     },
     {
       "path": "se-quality-review/SKILL.md",
-      "sha256": "683e847b85cf059115a0f0d490031002564489ef5f748dee7f807e6f99b06b87"
+      "sha256": "4387dbc6b06caa22fb148783c93f67e13bb125d2334a07a659db07c6f3f00ca7"
     },
     {
       "path": "se-quality-review/references/smell-baseline.md",
@@ -128,15 +133,15 @@
     },
     {
       "path": "se-scheduling/SKILL.md",
-      "sha256": "c88ae04fd765037541aaf1f3afeb5be5ad991fdb353d02218c699977323f1497"
+      "sha256": "c3163e9f0322d345c5bae07ac14ad2f9d7bd3594c9f50d466e936adf773c8597"
     },
     {
       "path": "se-scheduling/references/dispatch-contracts.md",
-      "sha256": "862f381a89eff76c7abd9d065a9c8c6e5a49849b931572f584d33320fa3bb9e8"
+      "sha256": "4b83be09b856638ae5cb12ea6da2988ae746133a247dbbb767aea4584e30a745"
     },
     {
       "path": "se-scheduling/references/verification-surfaces.md",
-      "sha256": "9d395c027ea518d102ac2d00c9b79fc78b3ce761aab148bdef7473921f8693a3"
+      "sha256": "8bf43ec7d42b603f3cd0712f0bbfa81a95585fb595be3f03f8cf564278bf51bf"
     },
     {
       "path": "se-sdlc/SKILL.md",
@@ -144,11 +149,15 @@
     },
     {
       "path": "se-skill-authoring/SKILL.md",
-      "sha256": "c43f7c11c155f5688b0ec55f59144c7a464501f9fd02b36cec1db9457010a286"
+      "sha256": "dc904f34a2ec9217199807809829801699060c4b558db9b1b73ca9ce08d55a0f"
     },
     {
       "path": "se-spec-review/SKILL.md",
-      "sha256": "37f432b612ca216b87052b72ac4428b24fead08656d06b28edf0118c39f71355"
+      "sha256": "6b94b98ec7640237d6a6e7353efa1cf60f5cc8d4a012e287d387161a1858a789"
+    },
+    {
+      "path": "se-spec-review/references/two-axis-review.md",
+      "sha256": "609f63a1517d24601e4a145a211effd9dabe6637144a24cbf20b03acf322daba"
     },
     {
       "path": "se-system-design/SKILL.md",
@@ -205,14 +214,6 @@
     {
       "path": "se-technical-design/references/stages-3-5.md",
       "sha256": "c4398ddc063294f2d03f4a41543371526e89b95026f0fa3d918416494ae9bb19"
-    },
-    {
-      "path": "se-two-axis-review/SKILL.md",
-      "sha256": "1958afc8b2c5e753b91eff04bae44d2ca51525bd257475e10636a46176b94cec"
-    },
-    {
-      "path": "se-two-axis-review/references/smell-baseline.md",
-      "sha256": "0743b9ea5655f54895703fafc1c35ed1a5c7adadda9973c47ebc72814aef1ed1"
     },
     {
       "path": "se-work-order/SKILL.md",

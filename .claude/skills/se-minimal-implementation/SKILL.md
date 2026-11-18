@@ -34,6 +34,10 @@ description: 依工作單搜尋既有實作並用最小可運作變更完成需�
 - 交付物可運作，沒有 stub、placeholder 或核心 TODO。
 - diff 只包含必要變更，沒有 secrets 與無關檔案。
 
+## 完整做法
+
+五件不得省略的事、刻意簡化的 `DEBT:` 標記、過度工程審查與接縫的判準：讀 [references/minimal-change.md](references/minimal-change.md)。
+
 ## 反模式
 
 - 一開始新增框架、抽象層或依賴。

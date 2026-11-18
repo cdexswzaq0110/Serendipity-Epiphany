@@ -88,7 +88,7 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertEqual(core | (extended - core - set(retired)), installed)
         manifest = json.loads((self.dest / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual("flat", manifest["layout"])
-        self.assertEqual(sorted((extended & core) | set(retired)), sorted(manifest["skipped"]))
+        self.assertEqual(sorted((extended & core) | (set(retired) & extended)), sorted(manifest["skipped"]))
         # The core skill wins over its extended namesake.
         for name in extended & core:
             self.assertEqual(

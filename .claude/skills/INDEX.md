@@ -19,7 +19,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 要把產品契約轉成架構、元件與 API、資料模型、取捨與回滾 | `se-technical-design` | 不是 `se-system-design`——後者是整個系統的容量、擴展與架構文件（特例領域）；功能層級的技術設計用這個 |
 | 要把核准的需求交給另一個人、Agent 或下一個階段實作 | `se-work-order` | 不是 `se-scheduling`——work-order 定一張單的內容（穩定 AC 編號、驗證、範圍、不做事項），scheduling 決定怎麼切、派、平行與鎖 |
 | 專案詞彙混亂、AI 一直用錯名詞 | `se-context-language` | 只是「讀 CONTEXT.md 拿詞彙」不需要載入它，那是一行提示 |
-| 要寫程式 | `se-minimal-implementation` | 先問這件事需不需要模型，再爬最小實作階梯；舊版完整的過度工程審查與 `DEBT:` 債務帳在 `skills/extended/se-minimal-change/`（不安裝） |
+| 要寫程式 | `se-minimal-implementation` | 先問這件事需不需要模型，再爬最小實作階梯；過度工程審查與 `DEBT:` 債務帳在它的 `references/minimal-change.md` |
 | 有 bug、測試失敗、行為異常 | `se-debug` | 不是先猜著改——先要可重現的失敗 |
 | 變更完成要審查 | 先 `se-spec-review`，規格全部通過才 `se-quality-review` | 兩次分開做、品質審查不看規格審查的結論；不是 `se-minimal-implementation` 的自查——審查要碰到交付物本身 |
 | 要任務分解、派發、管平行、處理卡住的並行 | `se-scheduling` | 不是 `se-design`——design 產切片，scheduling 派切片 |
@@ -144,13 +144,14 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | `se-quality-review` | 規格通過後做有嚴重度、位置與理由的品質審查 |
 | `se-debug` | 用重現、假設、單一變因與回歸驗證定位問題 |
 
-被取代的 v1 留在 `skills/extended/`，需要完整舊流程時直接讀；**不安裝**到 `.claude/skills/`（清單在 `skills/extended/superseded.json`，同名的以核心為準）：
+2.1.0 把被核心取代的 v1 **併進核心**：原 skill 的完整內文原樣搬到核心 skill 的 `references/`，核心本體只留指標（Agora 注入本體、不注入 references；Claude Code 需要時才讀）。舊名稱列在 `skills/extended/superseded.json`，不會再被安裝：
 
-| v1 | 由誰取代 |
-|---|---|
-| se-minimal-change | `se-minimal-implementation` |
-| se-two-axis-review | `se-spec-review`＋`se-quality-review` |
-| se-debug、se-feasibility 的 v1 版本 | 同名的核心 skill |
+| v1 | 併入 | 完整內文 |
+|---|---|---|
+| se-minimal-change | `se-minimal-implementation` | `references/minimal-change.md` |
+| se-two-axis-review | `se-spec-review`、`se-quality-review` | `se-spec-review` 的 `references/two-axis-review.md`；smell 基線在 `se-quality-review` 的 `references/smell-baseline.md` |
+| se-debug（v1） | `se-debug` | `references/v1-debug.md` |
+| se-feasibility（v1） | `se-feasibility` | `references/v1-feasibility.md` |
 
 ## 擴充與來源
 

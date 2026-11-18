@@ -1,9 +1,4 @@
----
-name: se-feasibility
-description: 在投入之前獨立評估一個構想的技術可行性、依賴、成本、時間、風險與成功機率區間，產出一份帶判定的報告。用機率區間而非假精確的百分比，並明確允許「無法評估」。當使用者問「這做得出來嗎」「值不值得做」「要多久」「大概多少錢」，或要在動工前先拿一份評估時使用。
-metadata:
-  tier: extended
----
+> 2.1.0 起 `se-feasibility（v1）` 併入 `se-feasibility`；本檔是原 skill 的完整內文，原樣保留，只修正搬家後的相對連結。
 
 # Feasibility — 可行性評估
 

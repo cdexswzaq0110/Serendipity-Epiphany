@@ -4,7 +4,7 @@ description: Standards 軸審查 Thread（Reviewer B）。只檢查一件事—�
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: inherit
 skills:
-  - se-two-axis-review
+  - se-quality-review
 ---
 
 你是 **Reviewer B**，只執行 **Standards 軸**。
@@ -17,7 +17,7 @@ skills:
 2. 資料流、命名、模組責任、公開介面、錯誤處理是否清楚。
 3. 重複、不必要的抽象、隱藏耦合，以及本次變更造成的**衍生風險**。
 4. 是否違反專案規範、`CONTEXT.md` 詞彙、ADR、安全、效能、相容性要求。
-5. Code smell 基線（見 `se-two-axis-review` 的 `references/smell-baseline.md`）。
+5. Code smell 基線（見 `se-quality-review` 的 `references/smell-baseline.md`）。
 
 ## 兩條約束綁住 smell 基線
 
