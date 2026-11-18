@@ -12,9 +12,9 @@
   - `se-debug` 加入補外部訊號；
   - `se-minimal-implementation` 加入「先問需不需要模型」與「在 main 上自己開分支」；
   - `se-work-order` 加入「不熟程式庫先唯讀查慣例」，以及「驗證要碰到交付物」。
-- **hooks 改寫成 Python**：每道 gate 保留獨立入口，行為與 main 的 Bash 版等價，`selftest.sh` 的 135 條斷言逐條改寫成 unittest。對照表見 `tests/SELFTEST_MAP.md`。
+- **hooks 改寫成 Python**：每道 gate 保留獨立入口，模式、環境變數、退出碼與 main 相同。main 的 `selftest.sh` 原樣搬到 `tests/hooks_selftest.sh`，改成呼叫 Python 版，再加 4 條 canonical router 案例，共 139/139；它在改寫過程中抓到 3 個真 bug。一般 Bash 呼叫的 hook 延遲：Python 75 ms，main 的 Bash 版 89 ms。被帶進其他專案時，router 與 promote 照舊檢查、寫入 `.claude/skills`。GPT 交出的版本與審查發現見設計文件 04、05。
 - 延伸 skill 新增 `se-acquire`、`se-resume`；`se-epiphany` 採用 main 那份經過觸發量測的 description。
-- Lesson：2.0.0 的 L0006（cp950）改號為 **L0015**。
+- Lesson：2.0.0 的 L0006（cp950）改號為 **L0015**；新增 **L0016**（開分支要從遠端的預設分支開——2.0.0 就是從落後的本機 clone 開的）。
 - 未驗證：核心 skill 的 description 在 Claude Code 的觸發率（維護契約 #8，`docs/eval/trigger-cases.md` B1–B3 已改用新名稱，但還沒重跑）。
 
 ## 2.0.0 — 2026-11-17

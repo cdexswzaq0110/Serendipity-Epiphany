@@ -66,8 +66,8 @@ bash templates/_meta/bootstrap_check.sh .
 claude --plugin-dir "/path/to/Serendipity — Epiphany"
 ```
 
-拿到 20 個 skill ＋ 14 個 agent ＋ 8 道 hook，名稱前綴 `serendipity-epiphany:`。
-**拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【已確認：2026-09-23 實測 20 skills（含 se-resume）／14 agents 載入】
+拿到 25 個 skill（核心 9 個＋延伸 16 個）＋ 14 個 agent ＋ 8 道 hook，名稱前綴 `serendipity-epiphany:`。
+**拿不到 `rules/`**——常駐面是專案層的東西，plugin 帶不了。【2.1.0 未重測 plugin 載入；2026-09-23 實測 20 skills／14 agents 已確認】
 
 Windows：
 
@@ -132,7 +132,7 @@ AGENTS.md                  # 非 Claude Code agent（Codex、Gemini CLI…）的
 ├── RUNBOOK.md             # 四種執行路徑（A 直接執行／B 規劃／C 探索／D 蒐證）
 ├── ABLATION.md            # 常駐規則消融紀錄與失敗證據
 ├── rules/           (7)   # 6 條常駐＋維護契約（paths: 改動配置時才載入）
-├── skills/         (20)   # Coroutine 能力庫，按需載入
+├── skills/         (25)   # 同步產物（flat）：核心 9 個＋延伸 16 個，按需載入；來源在根目錄 skills/
 ├── skill-candidates/     # se-acquire 習得的候選，不自動載入，過閘才升級
 ├── tools/                # 能力自我模型、跨專案帳本、skill 升級閘、斷點續跑、經驗採礦
 ├── agents/         (14)   # Thread / Process 執行模板
@@ -351,16 +351,20 @@ Dev 與 QA 被大幅改變；**其餘八層幾乎沒變，因為那些是「定�
 
 ---
 
-## Skills（20 個 Coroutine）
+## Skills（25 個 Coroutine）
 
 ### 通用能力
 
 | 執行情境 | 載入 |
 | --- | --- |
+| 構想模糊，要先定問題、使用者、範圍與成功指標 | `se-problem-definition` |
 | 需求仍模糊，需要探索問題空間與系統邊界 | `se-design` |
 | 問題空間過大，需要定位下一個可回答問題 | `se-discovery` |
 | 需要壓力測試假設、找出缺漏或取得外部決策 | `se-clarify` |
 | 需要先判斷技術或產品可行性 | `se-feasibility` |
+| 問題已定，要寫使用者故事、可檢查的驗收條件與 UX 流程 | `se-product-contract` |
+| 要把產品契約轉成架構、API、資料模型與回滾 | `se-technical-design` |
+| 要把核准的需求交給別人或 Agent 實作（穩定 AC 編號） | `se-work-order` |
 | 專案術語、Domain Language 或命名不一致 | `se-context-language` |
 | 進入程式實作 | `se-minimal-implementation` |
 | Debug、定位 Root Cause | `se-debug` |

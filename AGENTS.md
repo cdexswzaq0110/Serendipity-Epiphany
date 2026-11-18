@@ -24,7 +24,7 @@ PreToolUse hook）。在其他 agent 上，那些會退化成「要你自己去�
 | 常駐規則（六條） | `.claude/rules/` |
 | 按需載入的能力 | 來源 `skills/`（核心 9 個＋`extended/`）；安裝後在 `.claude/skills/`，路由見 `.claude/skills/INDEX.md` |
 | Subagent 模板（14 個） | `.claude/agents/` |
-| 確定性 Gate（3 個 hook ＋ 自測） | `.claude/hooks/` |
+| 確定性 Gate（8 道 Python hook；自測在 `tests/hooks_selftest.sh`） | `.claude/hooks/` |
 | 領悟帳本 | `docs/lessons/` |
 | 為什麼每條規則存在 | `.claude/ABLATION.md`、`docs/DESIGN_RATIONALE.md` |
 
