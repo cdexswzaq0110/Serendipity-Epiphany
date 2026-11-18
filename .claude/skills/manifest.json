@@ -2,7 +2,7 @@
   "schema_version": 1,
   "bundle_version": "2.1.0",
   "source_repo": "https://github.com/cdexswzaq0110/Serendipity-Epiphany.git",
-  "source_commit": "76a6894a9a83a63076606308c6b0bee61c649b07",
+  "source_commit": "2c5b75e9858e27e64ea847aaf4001cc959979016",
   "source_dirty": true,
   "layout": "flat",
   "skipped": [],
@@ -81,7 +81,7 @@
     },
     {
       "path": "se-minimal-implementation/references/minimal-change.md",
-      "sha256": "8219e5575e7e95eb59abdb590ca900c812c18af65be9cf406e302a88d4a2865d"
+      "sha256": "5fc607fd591901580a0954c13f9a744cff8923f68a3ef2c0fc03f11720579239"
     },
     {
       "path": "se-ml-lifecycle/SKILL.md",
