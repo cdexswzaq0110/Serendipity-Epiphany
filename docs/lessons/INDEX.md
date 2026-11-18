@@ -22,6 +22,8 @@
 | [L0012](0012-a-broken-checker-breeds-a-ritual.md) | 壞掉的檢查器會養出一個儀式：重複動作背後的信念要先驗證 | 迷信, 判定, 採礦 | useful | 0 |
 | [L0013](0013-a-careful-rule-has-a-cost-only-an-ab-can-see.md) | 謹慎的規則也有代價，只有端到端對照看得到 | 端到端, 基準, 規則代價 | useful | 0 |
 | [L0014](0014-one-shot-destruction-needs-a-gate-not-a-rule.md) | 一次就毀掉使用者工作的動作，要用閘擋，不能靠規則文字 | 護欄, hooks, 使用者工作 | useful | 0 |
+| [L0015](0015-hook-output-cp950-on-zh-tw-windows.md) | 會被別的程式讀輸出的腳本，要自己把 stdout 設成 UTF-8 | hooks, windows, 編碼 | useful | 0 |
+| [L0016](0016-branch-from-the-remote-not-the-local-clone.md) | 開分支要從遠端的預設分支開，不是從本機那份 | git, 分支, 基準, 整合 | useful | 0 |
 
 跨專案的教訓在全域帳本（`python .claude/tools/lessons.py list`），目前 1 則：G0001（源自 L0005）。
 
@@ -43,7 +45,7 @@
 
 ## 統計
 
-- 現行：14 則（其中 1 則 `corrected`：L0008，由 L0010 取代，內容保留）
+- 現行：16 則（其中 1 則 `corrected`：L0008，由 L0010 取代，內容保留）
 - 通過 VALIDATE：1 則（L0010，2026-09-23 第一次被實際用上並抓到錯）
-- 距離下次回顧：6 則（滿 20 則觸發）
+- 距離下次回顧：4 則（滿 20 則觸發）
 - `no-trigger`（沒填失效條件）：0 則

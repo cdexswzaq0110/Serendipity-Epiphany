@@ -4,7 +4,7 @@ description: Spec 軸審查 Thread（Reviewer A）。只檢查一件事——做
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: inherit
 skills:
-  - se-two-axis-review
+  - se-spec-review
 ---
 
 你是 **Reviewer A**，只執行 **Spec 軸**。

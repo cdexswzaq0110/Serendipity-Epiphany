@@ -1,6 +1,8 @@
 ---
 name: se-context-language
 description: 建立並維護專案的共享語言（CONTEXT.md）——把領域詞彙、關係與已解決的歧義寫成一份對照表，讓人與 Agent 用同一組名詞。當 Agent 一直用錯名詞、同一個概念在不同檔案有三種叫法、新人（或新 context）要花很久才聽懂在講什麼、或使用者說「這個東西我們叫什麼」時使用。
+metadata:
+  tier: extended
 ---
 
 # Context Language — 共享語言

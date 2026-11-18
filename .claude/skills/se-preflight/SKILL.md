@@ -1,6 +1,8 @@
 ---
 name: se-preflight
 description: 在依賴任何外部能力之前先做一次前置檢查——把每種能力維護成「首選 ▸ 備選」的有序後端清單，真實探測而不只看命令存不存在，回報現在實際走哪一條、壞的怎麼修。當要用外部 CLI、MCP server、瀏覽器、API 或任何配額型資源、某個工具突然不能用、或在新機器上第一次跑這套流程時使用。
+metadata:
+  tier: extended
 ---
 
 # Capability Doctor — 前置檢查

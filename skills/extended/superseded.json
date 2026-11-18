@@ -1,0 +1,9 @@
+{
+  "se-minimal-change": [
+    "se-minimal-implementation"
+  ],
+  "se-two-axis-review": [
+    "se-spec-review",
+    "se-quality-review"
+  ]
+}

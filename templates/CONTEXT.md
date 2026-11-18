@@ -1,7 +1,7 @@
 # <專案名> 共享語言
 
 > 這份檔是這個專案的**共享記憶體區段**。人與 Agent 讀同一份定義。
-> 維護方式見 `.claude/skills/se-context-language`。
+> 維護方式見 `.claude/skills/extended/se-context-language`。
 > **不要一次寫完。** 詞彙在命名衝突、解釋超過兩句、歧義被戳破時才長出來。
 
 ## Language

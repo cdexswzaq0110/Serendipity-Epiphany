@@ -7,7 +7,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-branch.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_branch.py\"",
             "timeout": 5,
             "statusMessage": "檢查分支保護"
           }
@@ -20,7 +20,7 @@
             "type": "command",
             "if": "Bash(git commit*)",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-branch.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_branch.py\"",
             "timeout": 5,
             "statusMessage": "檢查分支保護"
           },
@@ -28,7 +28,7 @@
             "type": "command",
             "if": "Bash(git commit*)",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check-router.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check_router.py\"",
             "timeout": 10,
             "statusMessage": "檢查 Router 一致性"
           },
@@ -36,7 +36,7 @@
             "type": "command",
             "if": "Bash(git commit*)",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check-memory.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/check_memory.py\"",
             "timeout": 10,
             "statusMessage": "檢查記憶層准入"
           },
@@ -44,14 +44,14 @@
             "type": "command",
             "if": "Bash(git *)",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-critical.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_critical.py\"",
             "timeout": 5,
             "statusMessage": "檢查 backup tag"
           },
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-discard.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_discard.py\"",
             "timeout": 15
           }
         ]
@@ -63,14 +63,14 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard-done.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/guard_done.py\"",
             "timeout": 15,
             "statusMessage": "結束前自檢"
           },
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.py\"",
             "timeout": 15,
             "async": true
           }
@@ -84,7 +84,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/recall-lessons.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/recall_lessons.py\"",
             "timeout": 5,
             "statusMessage": "召回領悟帳本"
           }
@@ -96,7 +96,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.py\"",
             "timeout": 20,
             "statusMessage": "檢查斷點"
           }
@@ -110,7 +110,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.py\"",
             "timeout": 30,
             "async": true
           }
@@ -124,7 +124,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.py\"",
             "timeout": 30,
             "async": true
           }
@@ -137,7 +137,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.py\"",
             "timeout": 15,
             "async": true
           }
@@ -150,7 +150,7 @@
           {
             "type": "command",
             "shell": "bash",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.sh\"",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/.claude/hooks/checkpoint.py\"",
             "timeout": 15
           }
         ]

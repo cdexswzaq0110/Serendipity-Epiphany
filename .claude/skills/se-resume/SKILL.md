@@ -1,6 +1,8 @@
 ---
 name: se-resume
 description: 工作被中斷後的斷點續跑——上一段被用量上限、斷線、當機或手動中斷打斷時，先拿現實對照斷點再接著做：哪些未提交的變更是上一段留下的、哪些是之後別人改的、哪些驗證已經失效、哪些有副作用的步驟其實已經做完。也管長任務開工時怎麼留下可續跑的斷點。當上一段工作是被打斷的——使用者說「從上次停下的地方繼續」「剛剛斷掉了」「用量重置了」「再試一次」、開工時看到 [斷點] 提示——或要開始一段很長可能一次跑不完的工作時使用。上一回合正常結束後說的「繼續下一步」是照計畫往下做，不是續跑，不用這個。
+metadata:
+  tier: extended
 ---
 
 # Resume — 斷點續跑
@@ -103,7 +105,7 @@ python .claude/tools/checkpoint.py step add S2 "推上遠端" --done-when 'test 
 python .claude/tools/checkpoint.py step done S1
 
 # 驗證——證據綁定當下的工作樹指紋，樹一變就自動失效
-python .claude/tools/checkpoint.py verify -- bash .claude/hooks/selftest.sh
+python .claude/tools/checkpoint.py verify -- python -m unittest discover -s tests
 
 # 使用者拍板的決定——拿到答案就記
 python .claude/tools/checkpoint.py decide "非會員能不能退款" "不能"

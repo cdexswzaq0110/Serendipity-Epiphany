@@ -56,7 +56,7 @@
 
 ### ▸ 收尾
 
-`se-two-axis-review` 兩軸 → `se-branch-lifecycle` 開 PR → `se-epiphany` 留 Lesson。
+`se-spec-review` → 規格全過後 `se-quality-review` → `se-branch-lifecycle`；只有產生下一輪會再用到的領悟才用 `se-epiphany` 留 Lesson。
 
 **兩軸不合併看**：Standards 與 Spec 分開報、不排名。「規範全過但做錯東西」是最貴的失敗，合併就看不見。
 
@@ -137,4 +137,4 @@
 - 切片大小判準（「塞得進一個 Process」）是估的
 - 預算形狀（子任務數 × 2 次派發 ＋ 5 次 Supervisor 諮詢）是借來的，未在本地校準
 
-跑完第一輪回來改這份檔。它本來就該被實戰改寫——改完記得寫 Lesson。
+跑完第一輪回來改這份檔。它本來就該被實戰改寫——只有產生下一輪會再用到的領悟才寫 Lesson。

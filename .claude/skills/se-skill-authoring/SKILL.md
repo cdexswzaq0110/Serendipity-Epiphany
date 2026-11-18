@@ -1,6 +1,8 @@
 ---
 name: se-skill-authoring
 description: 撰寫與修改 Agent 會讀的文件——SKILL.md、CLAUDE.md、AGENTS.md，以及任何被指標指到的參考文件。管資訊層級、漸進揭露、完成判準、引導詞、修剪，以及一個 skill 出貨前要通過的觸發測試與品質門檻。當要新增或修改 skill、改動常駐提示、或某個 skill 該載入時沒載入時使用。
+metadata:
+  tier: extended
 ---
 
 # Skill Authoring — 寫給 Agent 看的文件
@@ -95,7 +97,7 @@ description: 撰寫與修改 Agent 會讀的文件——SKILL.md、CLAUDE.md、A
 
 **使用者調用的 skill 可以呼叫模型可調用的 skill，但不得呼叫另一個使用者調用的 skill。**
 
-依賴用 `/skill` 式的散文呼叫（「載入 `se-minimal-change`」），**不要**深層的 `../other-skill/FILE.md` 交叉引用。共用的參考文件住在擁有它的那個 skill 裡面，別的 skill 用調用它來取得材料。
+依賴用 `/skill` 式的散文呼叫（「載入 `se-minimal-implementation`」），**不要**深層的 `../other-skill/FILE.md` 交叉引用。共用的參考文件住在擁有它的那個 skill 裡面，別的 skill 用調用它來取得材料。
 
 ---
 

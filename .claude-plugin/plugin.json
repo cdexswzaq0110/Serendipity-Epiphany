@@ -1,7 +1,7 @@
 {
   "name": "serendipity-epiphany",
   "displayName": "Serendipity — Epiphany",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "An evidence-driven multi-agent engineering harness for Claude Code. Every conclusion carries an evidence grade; every resident rule must show a failure it prevents, or it gets deleted.",
   "author": {
     "name": "TerryHC",

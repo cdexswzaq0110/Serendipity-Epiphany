@@ -14,6 +14,8 @@ hits: 1
 
 # Gate 的預設失敗模式是「靜默放行」，所以要先證明它會擋
 
+> 2026-11-17 更新：現行 hooks 已改為 Python，入口與測試見 `.claude/hooks/*.py`、`tests/test_hooks.py`；下文 Bash 內容保留為當時事件證據。
+
 ## 觸發情境
 
 把一條自然語言規則機械化成 hook（或任何形式的 gate），尤其是在 Windows 上。

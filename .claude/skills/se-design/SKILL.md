@@ -1,6 +1,8 @@
 ---
 name: se-design
 description: 從模糊需求走到可派發的垂直切片——探索意圖、確認接縫、縱切成片，全程不中斷。同時提供深模組的設計詞彙（module、interface、depth、seam、adapter、leverage、locality）與接縫選擇規則。當需求還模糊要先探索、要規劃一個功能怎麼做、要決定測試接縫放哪、或要判斷一個抽象值不值得存在時使用。
+metadata:
+  tier: extended
 ---
 
 # Design — 探索到切片

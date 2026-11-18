@@ -1,6 +1,8 @@
 ---
 name: se-bootstrap
 description: 把這套 harness 帶進一個新專案——建版控、複製配置、問清楚四個 Phase 的問題、產出那個專案自己的 CLAUDE.md 與 CONTEXT.md，最後跑機械化檢查確認沒漏。當要在新專案啟用這套配置、剛複製完 .claude/ 不知道下一步、或使用者說「新專案要怎麼開始」「bootstrap 一下」時使用。
+metadata:
+  tier: extended
 ---
 
 # Bootstrap — 帶進新專案

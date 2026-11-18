@@ -1,6 +1,8 @@
 ---
 name: se-ml-lifecycle
 description: 機器學習專案端到端流程，七階段六道 Gate——問題定義、資料契約與切分、清洗與特徵、Pipeline 與 baseline、CV/OOF 與調參、模型可解釋性與風險、封裝上線與監控。核心是先定義、再驗證、最後自動化，且驗證設計錯了任何分數都沒意義。當要做 ML 專案、訓練或改進模型、處理資料切分與 leakage、選 metric、做特徵工程、比較候選模型、要解釋模型依賴什麼或某一筆預測為什麼是這個結果、或要把模型推上線時使用。
+metadata:
+  tier: extended
 ---
 
 # ML Lifecycle — 七階段六道 Gate

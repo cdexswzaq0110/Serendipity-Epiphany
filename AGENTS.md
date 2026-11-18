@@ -22,18 +22,18 @@ PreToolUse hook）。在其他 agent 上，那些會退化成「要你自己去�
 | 你要找 | 在哪 |
 |---|---|
 | 常駐規則（六條） | `.claude/rules/` |
-| 按需載入的能力（17 個） | `.claude/skills/`，路由見 `.claude/skills/INDEX.md` |
+| 按需載入的能力 | 來源 `skills/`（核心 9 個＋`extended/`）；安裝後在 `.claude/skills/`，路由見 `.claude/skills/INDEX.md` |
 | Subagent 模板（14 個） | `.claude/agents/` |
-| 確定性 Gate（3 個 hook ＋ 自測） | `.claude/hooks/` |
+| 確定性 Gate（8 道 Python hook；自測在 `tests/hooks_selftest.sh`） | `.claude/hooks/` |
 | 領悟帳本 | `docs/lessons/` |
 | 為什麼每條規則存在 | `.claude/ABLATION.md`、`docs/DESIGN_RATIONALE.md` |
 
 ## 在其他 agent 上跑得起來的部分
 
-`.claude/hooks/*.sh` 只依賴 bash ＋ git，不依賴 Claude Code。任何能在工具呼叫前
+`.claude/hooks/*.py` 只依賴 Python 3.11 標準庫 ＋ git，不依賴 Claude Code。任何能在工具呼叫前
 執行外部命令的 agent 都掛得上去——它們讀 stdin 的 JSON payload，用退出碼表達判定
 （2 = 擋下，1 = 提示，0 = 放行）。
 
-`templates/_meta/bootstrap_check.sh` 與 `docs/eval/run_eval.py` 同樣是獨立腳本。
+`templates/_meta/bootstrap_check.sh`、`docs/eval/run_eval.py` 與 `scripts/sync_skills.py` 同樣是獨立腳本。`.claude/skills/` 是同步產物：改 skill 改 `skills/`，再用 `scripts/sync_skills.py` build／install／check。
 
 `.claude/tools/` 下的五支 Python 腳本（能力自我模型、跨專案帳本、skill 升級閘、斷點續跑、經驗採礦）也不依賴 Claude Code——任何 agent 都能直接呼叫。斷點的**自動記錄**靠 Claude Code 的 hook；其他 agent 拿不到自動記錄，但 `checkpoint.py step／verify／decide／resume` 照樣能用。

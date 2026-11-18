@@ -40,8 +40,8 @@ Copy-Item ".\Serendipity — Epiphany\templates" -Destination "your-project\temp
 把 skill 目錄 symlink 到全域，**檔案實體留在專案內**（版控追得到），全域只放捷徑：
 
 ```bash
-ln -s "$(pwd)/.claude/skills/se-epiphany" ~/.claude/skills/se-epiphany
-ln -s "$(pwd)/.claude/skills/se-focus"    ~/.claude/skills/se-focus
+ln -s "$(pwd)/.claude/skills/extended/se-epiphany" ~/.claude/skills/se-epiphany
+ln -s "$(pwd)/.claude/skills/extended/se-focus"    ~/.claude/skills/se-focus
 ```
 
 ```powershell
@@ -49,7 +49,7 @@ ln -s "$(pwd)/.claude/skills/se-focus"    ~/.claude/skills/se-focus
 New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epiphany" -Target "$PWD\.claude\skills\se-epiphany"
 ```
 
-**建議全域共用的**：`se-epiphany`（領悟帳本要跨專案累積）、`se-focus`（輸出密度）、`se-minimal-change`。
+**建議全域共用的**：`se-epiphany`（領悟帳本要跨專案累積）、`se-focus`（輸出密度）、`se-minimal-implementation`。
 **建議留在專案內的**：其餘的——它們會被專案的實際情況改寫，改一處全域同步反而危險。
 
 ### 驗證裝好了
@@ -60,7 +60,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 /se-epiphany
 ```
 
-有反應就是裝好了。沒反應 → 檢查 `.claude/skills/se-epiphany/SKILL.md` 存在，且 frontmatter 的 `name` 與目錄名一致。
+有反應就是裝好了。沒反應 → 檢查 `.claude/skills/extended/se-epiphany/SKILL.md` 存在，且 frontmatter 的 `name` 與目錄名一致。
 
 ---
 
@@ -183,7 +183,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 #### ▸ 收尾
 
 ```
-載入 se-two-axis-review，基準點是 main。
+載入 se-spec-review，基準點是 main；規格全部通過再載入 se-quality-review。
 ```
 
 兩軸跑完 → `se-branch-lifecycle` 開 PR → `se-epiphany` 留 Lesson。
@@ -239,9 +239,9 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 | 「幫我想清楚」「戳破這個想法」「這要問誰」 | `se-clarify` |
 | 「這做得出來嗎」「值不值得」「要多久」「大概多少錢」 | `se-feasibility` |
 | 「這個東西我們叫什麼」「名詞好亂」 | `se-context-language` |
-| 「幫我實作」「加一個功能」 | `se-minimal-change` |
+| 「幫我實作」「加一個功能」 | `se-minimal-implementation` |
 | 「這裡有 bug」「測試掛了」「行為怪怪的」 | `se-debug` |
-| 「review 一下」「這樣可以嗎」「要開 PR 了」 | `se-two-axis-review` |
+| 「review 一下」「這樣可以嗎」「要開 PR 了」 | 先 `se-spec-review`，通過後 `se-quality-review` |
 | 「拆成幾個 Process」「可以平行嗎」「卡住了」 | `se-scheduling` |
 | 「這個工具能用嗎」「環境好像有問題」 | `se-preflight` |
 | 「commit」「推上去」「開 PR」 | `se-branch-lifecycle` |
@@ -264,7 +264,7 @@ New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE\.claude\skills\se-epipha
 
 `se-design`、`se-discovery`、`se-system-design`、`se-ml-lifecycle` 是**流程型**的，同一件事不要同時套兩個。
 
-方法型的（`se-minimal-change`、`se-focus`、`se-epiphany`）可以疊加。
+方法型的（`se-minimal-implementation`、`se-focus`、`se-epiphany`）可以疊加。
 
 ---
 

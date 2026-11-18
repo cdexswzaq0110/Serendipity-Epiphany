@@ -32,10 +32,12 @@ se-clarify      → 答案不在任何文件裡，在某個人身上
 
 | # | 使用者說的話 | 該載入 | 明確不該載入 | 來源 |
 |---|---|---|---|---|
-| B1 | 匯入 CSV 的時候一直報 encoding 錯誤，幫我找原因 | `se-debug` | `se-minimal-change` | `authored` |
-| B2 | 幫我在使用者註冊表單加一個手機號碼欄位 | `se-minimal-change` | `se-design`、`se-two-axis-review` | `authored` |
-| B3 | 我剛改完付款流程的重試邏輯，幫我 review 一下 | `se-two-axis-review` | `se-debug`、`code-review` | `authored` |
+| B1 | 匯入 CSV 的時候一直報 encoding 錯誤，幫我找原因 | `se-debug` | `se-minimal-implementation` | `authored` |
+| B2 | 幫我在使用者註冊表單加一個手機號碼欄位 | `se-minimal-implementation` | `se-design`、`se-spec-review` | `authored` |
+| B3 | 我剛改完付款流程的重試邏輯，幫我 review 一下 | `se-spec-review` | `se-debug`、`code-review` | `authored` |
 | B4 | 我要開分支做付款重試這個功能，做完開 PR | `se-branch-lifecycle` | `se-scheduling` | `authored` |
+
+> 2.1.0：`se-minimal-change` 併入 `se-minimal-implementation`、`se-two-axis-review` 併入 `se-spec-review`／`se-quality-review`，B1–B3 改用新名稱。新名稱的 description 還沒跑過這組案例【未驗證】。
 
 **⚠ B 組目前不可測。** 執行器只給 `Skill` 工具（理由見下），但 B 組全是**動作型**請求——修 bug、加欄位、review、開分支。模型沒有 Read/Grep 就看不到程式碼，於是回「把檔案給我」或「這個 repo 沒有付款程式碼」，從頭到尾不需要載入 skill。8 次全部「無」。
 

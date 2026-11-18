@@ -103,11 +103,11 @@ def hooks() -> list[dict]:
         cfg = json.loads((CLAUDE / "settings.json").read_text(encoding="utf-8"))
     except Exception:
         return []
-    by_script = {}  # 一支腳本掛在多個事件上仍是一道 hook（checkpoint.sh 掛六個）
+    by_script = {}  # 一支腳本掛在多個事件上仍是一道 hook（checkpoint.py 掛六個）
     for event, groups in cfg.get("hooks", {}).items():
         for g in groups:
             for h in g.get("hooks", []):
-                m = re.search(r"hooks/([\w-]+\.sh)", h.get("command", ""))
+                m = re.search(r"hooks/([\w-]+\.py)", h.get("command", ""))
                 if not m:
                     continue
                 entry = by_script.setdefault(m.group(1), {"script": m.group(1), "events": [], "mode": "?"})
@@ -116,7 +116,7 @@ def hooks() -> list[dict]:
     for entry in by_script.values():
         script = CLAUDE / "hooks" / entry["script"]
         if script.exists():
-            mm = re.search(r'MODE="\$\{[A-Z_]+:-(\w+)\}"', script.read_text(encoding="utf-8"))
+            mm = re.search(r'^DEFAULT_MODE\s*=\s*["\'](\w+)["\']', script.read_text(encoding="utf-8"), re.M)
             entry["mode"] = mm.group(1) if mm else "always"
     return list(by_script.values())
 

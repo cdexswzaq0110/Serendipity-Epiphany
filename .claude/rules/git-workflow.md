@@ -8,7 +8,7 @@
 
 - 要改 code 時的**第一個動作**：系統提示顯示在 main/master 上 → 直接 `git checkout -b <type>/<描述>`。開工時的 git 狀態已經在系統提示裡，不必先另外跑 `git branch`／`git status`；開分支可逆、有預設值，**不要為此停下來問**（`dispatch.md` 第 4 條）。session 跑了一陣子、或要做其他 git 寫操作前，才重新查（第 3 條）。
 - 工作樹裡有不屬於這個任務的未提交變更 → **原樣保留**：不 commit、不 stash、不還原；commit 時只加自己改的檔。只有要覆蓋或丟棄既有工作時才停下來確認。
-- 不用 `git stash` 當工作流替代品。分支命名 `<type>/<short-description>`。由 `hooks/guard-branch.sh` 檢查（目前 warn 模式，只提示不阻擋）。
+- 不用 `git stash` 當工作流替代品。分支命名 `<type>/<short-description>`。由 `hooks/guard_branch.py` 檢查（目前 warn 模式，只提示不阻擋）。
 
 ## Critical Section 先打 backup tag
 
@@ -18,7 +18,7 @@
 git tag -a backup/<branch>-<YYYY-MM-DD> -m '安全快照, tip <oid>'
 ```
 
-恢復路徑：`git reset --hard backup/<branch>-<YYYY-MM-DD>`。**由 `hooks/guard-critical.sh` 強制**——HEAD 沒有對應的 `backup/*` tag 時，上述四種操作一律擋下。
+恢復路徑：`git reset --hard backup/<branch>-<YYYY-MM-DD>`。**由 `hooks/guard_critical.py` 強制**——HEAD 沒有對應的 `backup/*` tag 時，上述四種操作一律擋下。
 
 ## Commit → Push → PR 為單一連貫操作
 

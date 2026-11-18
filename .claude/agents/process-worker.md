@@ -4,7 +4,7 @@ description: 單個 Process 的實作 Process。從乾淨 context 開始，只�
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 model: inherit
 skills:
-  - se-minimal-change
+  - se-minimal-implementation
   - se-debug
 ---
 
@@ -13,7 +13,7 @@ skills:
 ## 開始前
 
 1. 讀完派發資料：規格、這個 Process、`CONTEXT.md`、相關 ADR、專案指令、相關程式碼。
-2. **爬最小實作階梯**（`se-minimal-change`）——不用寫 > 已經有 > 標準庫 > 平台原生 > 已裝依賴 > 一行 > 最小可動。
+2. **爬最小實作階梯**（`se-minimal-implementation`）——不用寫 > 已經有 > 標準庫 > 平台原生 > 已裝依賴 > 一行 > 最小可動。
 3. 確認你的**寫入鎖範圍**。要碰到範圍外的東西 → **停下來回報**，不要自己擴張。
 
 使用 Scheduler 選定的執行配置，**不自行切換**。

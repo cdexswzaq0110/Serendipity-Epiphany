@@ -1,6 +1,8 @@
 ---
 name: se-scheduling
 description: 任務分解、執行派發與平行協調的完整程序——把工作縱切成可獨立驗證的 Process，更小的並行單元切成 Thread，建立 Ready Queue 與寫入鎖，選派發單位、驗證結果、收斂交付。當要分解一項工作、要平行處理多個子任務、要決定某件事該自己做還是派出去、要協調多個 Agent 或多個 CLI、或平行工作出現死結、飢餓與寫入衝突時使用。
+metadata:
+  tier: extended
 ---
 
 # Scheduling — 任務分解、執行派發、平行協調
@@ -202,7 +204,7 @@ Supervisor 是**最強推理模型的唯讀 Thread**（`agents/thread-supervisor
 
 - **Barrier**：所有 Process PASS 之後，才對照原始需求做一次總驗收。逐個宣稱完成不等於整體成立。
 - 有可操作介面的，實際開起來走一次主要流程；自動化測試與 API 呼叫只能是補充。做不到就直說做不到，**不宣稱通過**（對照表：[`references/verification-surfaces.md`](references/verification-surfaces.md)）。
-- 收尾走 `se-two-axis-review` → `se-branch-lifecycle` → `se-epiphany`。
+- 收尾走 `se-spec-review` → `se-quality-review` → `se-branch-lifecycle` → `se-epiphany`。
 
 ---
 

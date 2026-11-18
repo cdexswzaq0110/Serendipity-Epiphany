@@ -79,9 +79,9 @@ P4: DISPATCHED | opus-5/high | 鎖: src/auth/**
 | 想法太大、連要問什麼都不確定 | `se-discovery` |
 | 要被逼問到想清楚 | `se-clarify` |
 | 動手前想確認值不值得做 | `se-feasibility` |
-| 要寫程式 | `se-minimal-change` |
+| 要寫程式 | `se-minimal-implementation` |
 | 卡在 bug | `se-debug` |
-| 變更完成要審查 | `se-two-axis-review` |
+| 變更完成要審查 | 先 `se-spec-review`，通過後 `se-quality-review` |
 | 要任務分解、派發、管平行 | `se-scheduling` |
 | 外部工具／CLI／MCP 不確定能不能用 | `se-preflight` |
 | 收尾開 PR | `se-branch-lifecycle` |

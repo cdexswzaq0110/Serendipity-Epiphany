@@ -1,6 +1,8 @@
 ---
 name: se-branch-lifecycle
 description: 分支的一生——開始工作時開出隔離的分支或 worktree，結束時走 commit、push、PR 或 merge 並收乾淨。含 commit message 慣例、PR 前置檢查與 body 結構、糾纏歷史的恢復策略。當要開始一段需要隔離的工作、要收尾提交、要開 PR、或 git 歷史亂掉需要救回來時使用。
+metadata:
+  tier: extended
 ---
 
 # Branch Lifecycle — 分支的一生

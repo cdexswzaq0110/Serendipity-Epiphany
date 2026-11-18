@@ -142,4 +142,4 @@ QA     AI 可以生成測試案例
 
 判準一句：**這個角色不做，會由誰在什麼時候用什麼代價補？** 答得出「沒人、不用補」就跳過。
 
-完整流程見 [`skills/se-sdlc/SKILL.md`](skills/se-sdlc/SKILL.md)。
+完整流程見 [`skills/extended/se-sdlc/SKILL.md`](skills/extended/se-sdlc/SKILL.md)。

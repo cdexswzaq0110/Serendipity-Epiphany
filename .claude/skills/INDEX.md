@@ -2,20 +2,26 @@
 
 Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常駐。
 
+> 來源是 `skills/INDEX.md`（canonical）；安裝後在 `.claude/skills/INDEX.md`，本檔的相對連結以安裝位置為準。`.claude/skills/` 由 `scripts/sync_skills.py install --layout flat` 產生，不要直接修改。
+
 流程結構見 [../WORKFLOW.md](../WORKFLOW.md)；實際走查見 [../RUNBOOK.md](../RUNBOOK.md)；派發語彙見 [../EXECUTION_MODEL.md](../EXECUTION_MODEL.md)。
 
 ## 情境路由
 
 | 你在做什麼 | 載入 | 別選錯 |
 |---|---|---|
+| 構想還模糊：要定問題、目標使用者、範圍、成功指標與待確認假設 | `se-problem-definition` | 不是 `se-design`——這裡只定問題與成功標準、不出方案；要探索方案、定接縫才是 design |
 | 需求還模糊，要探索方案並定接縫 | `se-design` | 不是直接開寫——探索沒做完的實作會重寫 |
 | 想法太大、**連要問什麼都不確定** | `se-discovery` | 不是 `se-design`——後者探索一個你握得住的問題；discovery 給你握不住的那種，而且只產決策不產方案 |
 | 要被逼問到想清楚／想法要先被戳破／答案在別人身上 | `se-clarify` | 不是 `se-design`——clarify 只問不做，產的是共識不是計畫 |
 | 不確定值不值得做 | `se-feasibility` | 不是 `se-clarify`——後者釐清「要什麼」，前者判斷「做不做得到、划不划算」 |
+| 問題已定，要寫使用者故事、可逐條檢查的驗收條件、UX 流程與非功能需求 | `se-product-contract` | 不是 `se-sdlc`——sdlc 決定誰負責哪一層，contract 產出需求本身 |
+| 要把產品契約轉成架構、元件與 API、資料模型、取捨與回滾 | `se-technical-design` | 不是 `se-system-design`——後者是整個系統的容量、擴展與架構文件（特例領域）；功能層級的技術設計用這個 |
+| 要把核准的需求交給另一個人、Agent 或下一個階段實作 | `se-work-order` | 不是 `se-scheduling`——work-order 定一張單的內容（穩定 AC 編號、驗證、範圍、不做事項），scheduling 決定怎麼切、派、平行與鎖 |
 | 專案詞彙混亂、AI 一直用錯名詞 | `se-context-language` | 只是「讀 CONTEXT.md 拿詞彙」不需要載入它，那是一行提示 |
-| 要寫程式 | `se-minimal-change` | |
+| 要寫程式 | `se-minimal-implementation` | 先問這件事需不需要模型，再爬最小實作階梯；過度工程審查與 `DEBT:` 債務帳在它的 `references/minimal-change.md` |
 | 有 bug、測試失敗、行為異常 | `se-debug` | 不是先猜著改——先要可重現的失敗 |
-| 變更完成要審查 | `se-two-axis-review` | 不是 `se-minimal-change` 的過度工程審查——後者只管複雜度，正確性與安全明確在它範圍外 |
+| 變更完成要審查 | 先 `se-spec-review`，規格全部通過才 `se-quality-review` | 兩次分開做、品質審查不看規格審查的結論；不是 `se-minimal-implementation` 的自查——審查要碰到交付物本身 |
 | 要任務分解、派發、管平行、處理卡住的並行 | `se-scheduling` | 不是 `se-design`——design 產切片，scheduling 派切片 |
 | 外部 CLI／MCP／API 不確定能不能用 | `se-preflight` | |
 | 開分支、worktree、收尾開 PR、救亂掉的歷史 | `se-branch-lifecycle` | |
@@ -65,17 +71,23 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 
 | 類別 | Skill | 使用時機 |
 |---|---|---|
+| 問題定義 | `se-problem-definition` | 問題、使用者、範圍、成功指標、待確認假設（核心） |
+| 產品契約 | `se-product-contract` | 使用者故事、可檢查 AC、UX 流程、非功能需求（核心） |
+| 技術設計 | `se-technical-design` | 架構、API、資料模型、取捨、回滾、ADR（核心） |
+| 工作單 | `se-work-order` | 穩定 AC 編號、逐條驗證、範圍、不做事項、相依（核心） |
 | 探索與設計 | `se-design` | 模糊問題、方案探索、接縫選擇、垂直切片 |
 | 未知探索 | `se-discovery` | 太大又太模糊、一個 Process 裝不下的工作 |
 | 需求釐清 | `se-clarify` | 設計樹／施壓／問卷三模式 |
 | 可行性 | `se-feasibility` | 投入前的技術、成本、時間、風險評估 |
 | 共享語言 | `se-context-language` | 建立與維護 `CONTEXT.md` |
-| 最小變更 | `se-minimal-change` | 最小實作階梯、過度工程審查、`DEBT:` 債務帳 |
+| 最小實作 | `se-minimal-implementation` | 需不需要模型、最小實作階梯、禁止 stub、改完取得新的驗證證據（核心） |
 | 除錯 | `se-debug` | 紅→縮→猜→測→修→綠 |
-| 審查 | `se-two-axis-review` | Spec 軸與 Standards 軸雙軌 |
+| 規格審查 | `se-spec-review` | AC 逐條 pass／fail／cannot_verify，通過一定要有證據（核心） |
+| 品質審查 | `se-quality-review` | 規格全部通過後才做；每個發現標高／中／低、位置與理由（核心） |
 | 排程 | `se-scheduling` | 切片、Ready Queue、寫入鎖、派發與驗證 |
 | 前置檢查 | `se-preflight` | Connection Pool 的取得程序 |
 | 分支 | `se-branch-lifecycle` | worktree、commit、PR、歷史恢復 |
+| 習得 | `se-acquire` | 領域本身沒見過：承認沒有現成能力、借最近的方法、先定驗證，做完記成候選 skill |
 | 斷點續跑 | `se-resume` | 中斷後拿現實對照斷點：認領變更、重跑失效驗證、副作用先查再做 |
 | 輸出治理 | `se-focus` | 密度與收斂 |
 | 長期記憶 | `se-epiphany` | 捕捉／召回／回顧領悟帳本 |
@@ -103,7 +115,7 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 |---|---|
 | `se-focus` 要 `file:line`，`register.md` 要「用動作講機制」 | `register.md`「何時不可以白話」第一條：使用者要**定位**時不白話 |
 | `se-focus` 要簡短，`evidence-grades` 要標等級 | 等級不可省。省的是路徑、行號、推導過程 |
-| `se-minimal-change` 要最短 diff，`core-rules` 4 要驗證證據 | 階梯本身：非平凡邏輯必須留一個可跑的檢查 |
+| `se-minimal-implementation` 要最短 diff，`core-rules` 4 要驗證證據 | 階梯本身：非平凡邏輯必須留一個可跑的檢查 |
 | `se-scheduling` 要用滿並行，鎖規則要序列化 | 鎖優先。用滿的是**無衝突**的部分 |
 
 ## 責任檢查（新增內容前先判斷）
@@ -115,6 +127,31 @@ Skills 是 **Coroutine 庫**——任務語意命中才載入，不無條件常�
 | 需要獨立 context、工具或權限？ | Agent（Thread／Process），並預載現有 Skill |
 | 是確定、快速、低頻且無隱性狀態的自動化？ | 才考慮 Hook |
 | 曾被拒絕過？ | 先讀 `../.out-of-scope/` 對應檔再提案 |
+
+## 核心 9 個與被取代的 v1
+
+核心 9 個是 [Agora](https://github.com/cdexswzaq0110/Agora) 與 Serendipity-Epiphany-Codex 共用的最小方法集：Agora 依專案階段**確定性注入**（不靠模型自己載入），Codex 從同一個 bundle 同步。
+
+| 核心 | 何時用 |
+|---|---|
+| `se-problem-definition` | 收斂問題、使用者、範圍、成功指標與假設 |
+| `se-feasibility` | 投入前評估技術、資料、AI、成本、風險與安全 |
+| `se-product-contract` | 建立使用者故事、UX 流程、可檢查 AC 與非功能需求 |
+| `se-technical-design` | 設計架構、元件、API、資料模型、取捨與回滾 |
+| `se-work-order` | 產生含穩定 AC ID、驗證、範圍與相依的工作單 |
+| `se-minimal-implementation` | 依工作單做最小可運作實作並取得新驗證證據 |
+| `se-spec-review` | 對 AC 逐條做 pass／fail／cannot_verify 規格審查 |
+| `se-quality-review` | 規格通過後做有嚴重度、位置與理由的品質審查 |
+| `se-debug` | 用重現、假設、單一變因與回歸驗證定位問題 |
+
+2.1.0 把被核心取代的 v1 **併進核心**：原 skill 的完整內文原樣搬到核心 skill 的 `references/`，核心本體只留指標（Agora 注入本體、不注入 references；Claude Code 需要時才讀）。舊名稱列在 `skills/extended/superseded.json`，不會再被安裝：
+
+| v1 | 併入 | 完整內文 |
+|---|---|---|
+| se-minimal-change | `se-minimal-implementation` | `references/minimal-change.md` |
+| se-two-axis-review | `se-spec-review`、`se-quality-review` | `se-spec-review` 的 `references/two-axis-review.md`；smell 基線在 `se-quality-review` 的 `references/smell-baseline.md` |
+| se-debug（v1） | `se-debug` | `references/v1-debug.md` |
+| se-feasibility（v1） | `se-feasibility` | `references/v1-feasibility.md` |
 
 ## 擴充與來源
 
