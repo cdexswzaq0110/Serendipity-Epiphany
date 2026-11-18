@@ -6,6 +6,7 @@ tags: [windows, powershell, 編碼, 工具選擇]
 anchors:
   - .claude/rules/git-workflow.md
 supersedes:
+source: self-observed   # self-observed | user-stated | external
 hits: 0
 ---
 

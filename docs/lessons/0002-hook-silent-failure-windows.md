@@ -8,7 +8,8 @@ anchors:
   - .claude/settings.json
   - .claude/ABLATION.md
 supersedes:
-hits: 0
+source: self-observed   # self-observed | user-stated | external
+hits: 1
 ---
 
 # Gate 的預設失敗模式是「靜默放行」，所以要先證明它會擋

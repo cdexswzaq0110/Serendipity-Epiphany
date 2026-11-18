@@ -66,17 +66,24 @@
 
 | 原規則 | Hook | 觸發 | 模式 |
 |---|---|---|---|
-| `git-workflow.md` 先開分支 | `hooks/guard_branch.py` | PreToolUse `Edit\|Write\|NotebookEdit` ＋ `Bash(git commit*)` | **block**（exit 2） |
-| `git-workflow.md` backup tag | `hooks/guard_critical.py` | PreToolUse `Bash`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
-| 維護契約 #1 Router 不說謊 | `hooks/check_router.py` | PreToolUse `Bash(git commit*)` | **block**（exit 2） |
+| `git-workflow.md` 先開分支 | `hooks/guard-branch.sh` | PreToolUse `Edit\|Write\|NotebookEdit` ＋ `Bash(git commit*)`，Bash 由腳本自行判定是否為 commit | **warn**（exit 1，提示不阻擋） |
+| `git-workflow.md` backup tag | `hooks/guard-critical.sh` | PreToolUse `Bash(git *)`，腳本自行判定 reset --hard／push --force／branch -D／rebase | **block**（exit 2） |
+| 維護契約 #1 Router 不說謊 | `hooks/check-router.sh` | PreToolUse `Bash(git commit*)`，腳本自行判定是否為 commit | **block**（exit 2） |
+| 記憶層准入（外部來源不得升級成常駐規則） | `hooks/check-memory.sh` | PreToolUse `Bash(git commit*)`，腳本自行判定是否為 commit | **block**（exit 2） |
+| 結束前自檢（自主自控）＋學習訊號 | `hooks/guard-done.sh` | Stop | **block**（exit 2），`stop_hook_active` 時放行——只強制一次。一致性過了之後，這一回合有「同一種會改變狀態的指令先失敗、後來改對」而沒寫 lesson → 提醒一次（`SE_LEARN_NUDGE=off` 關閉） |
+| 不准丟掉使用者的未提交工作（`core-rules` 第 3 條、`git-workflow.md` 原樣保留） | `hooks/guard-discard.sh` | PreToolUse `Bash`（grep 預篩，一般指令約 130 ms）：`rm`／`git restore`／`checkout --`／`clean -f`／`reset --hard` 碰到開工基準快照裡就已變更的檔 | **block**（exit 2）；自己建的、已 commit 的放行；`SE_ALLOW_DISCARD=1` 經同意後放行 |
+| 開工召回跨專案帳本 | `hooks/recall-lessons.sh` | SessionStart `startup\|clear\|compact` | 注入（不阻擋） |
+| 斷點續跑（沒有預期的中斷，無常駐規則對應） | `hooks/checkpoint.sh` | PostToolUse／PostToolUseFailure `Edit\|Write\|NotebookEdit\|Bash`（**背景**）、Stop、StopFailure、UserPromptSubmit、SessionStart `startup\|resume\|clear\|compact` | 記錄＋注入（不阻擋；失敗寫 `error.log`，簡報會提示） |
 
 **Gate 要先被證明會擋，才能相信它的綠燈**——hook 寫壞的預設失敗模式是靜默放行（見 [`../docs/lessons/0002-hook-silent-failure-windows.md`](../docs/lessons/0002-hook-silent-failure-windows.md)）。自測：
 
 ```bash
-python -m unittest tests.test_hooks -v
+bash .claude/hooks/selftest.sh
 ```
 
-Python 自測涵蓋拒絕、放行、錯誤 payload、內部例外、含空白與中文的路徑及一次性 break-glass。改動任一支 hook 後必須重跑。
+135 條案例（含誤判陷阱、迴圈內指令、heredoc 內文、自我模型計數、斷點續跑的每一種中斷形狀與程序身分、經驗採礦、範圍判斷、學習訊號、丟棄保護），2026-09-24 全數通過；commit 閘部分對修正前的版本為 51／13。改動任一支 hook 後必須重跑。
+
+**`if` 只是省成本的預篩，不是判定。** `Bash(git commit*)` 遇到 `for`／`while` 迴圈會照樣觸發 hook（2026-09-22 實測），所以每支 Bash hook 都自己讀 `tool_input.command` 判定。見 [`../docs/lessons/0009-a-prefilter-is-not-a-gate.md`](../docs/lessons/0009-a-prefilter-is-not-a-gate.md)。
 
 **hook 不能取代規則文字的部分要留著**：hook 只回答「這一次擋不擋」，規則文字回答「為什麼」與「怎麼做才對」。已機械化的條目在下表標 `已機械化`，但仍保留最短的敘述句。
 
@@ -86,7 +93,7 @@ Python 自測涵蓋拒絕、放行、錯誤 payload、內部例外、含空白�
 
 盤點日 2026-09-03（v2；hook 化與第一次實測消融都已執行）。
 
-常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(40) ＋ `rules/*.md`(264) = **343 行**（2026-08-14 為 339）。
+常駐面 = 根目錄 `CLAUDE.md`(39) ＋ `.claude/CLAUDE.md`(13) ＋ `rules/*.md`(264) = **316 行**（2026-08-14 為 339）。另有 `rules/harness-maintenance.md`(41) **按路徑載入**，只在改動配置時進 context。另有 `recall-lessons.sh` 的**動態**注入：有 lesson 時約 4–13 行，兩邊都空時 0 行。`checkpoint.sh` 的續跑簡報只在有斷點時注入（約 5–12 行），正常結束時 0 行。
 
 > ⚠ **這個數字沒有下降，而且大部分規則仍未實證。** 20 天來只跑過一條規則的消融
 > （`dispatch.md` #1）。下一批：`evidence-grades`(47) 與 `dispatch` 剩下三條——
@@ -95,8 +102,8 @@ Python 自測涵蓋拒絕、放行、錯誤 payload、內部例外、含空白�
 | 檔案 | 類型 | 失敗證據 | 下次處置 |
 |---|---|---|---|
 | 根目錄 `CLAUDE.md` 入口與節奏 | 意圖 | — | 保留（只放入口；長出細節就是該下放的訊號） |
-| `.claude/CLAUDE.md` 元件責任 | 意圖 | — | 保留 |
-| `.claude/CLAUDE.md` 維護契約 | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔。**2026-08-31 實測命中**：根 `CLAUDE.md` 指向不存在的 `/se-bootstrap`【已確認：`check-router.sh` exit 2】 | 保留；#1 已機械化 |
+| `rules/harness-maintenance.md` 元件責任（2026-09-24 起按路徑載入） | 意圖 | — | 保留；只在改動配置時進 context |
+| `rules/harness-maintenance.md` 維護契約（按路徑載入） | 補丁 | router 說謊（索引沒同步）、frontmatter 指向已刪檔。**2026-08-31 實測命中**：根 `CLAUDE.md` 指向不存在的 `/se-bootstrap`【已確認：`check-router.sh` exit 2】 | 保留；#1 已機械化 |
 | `core-rules.md` 1–5 | 意圖 | — | 保留（他檔以「第 N 條」引用，編號須穩定） |
 | `core-rules.md` 6 留下領悟 | 意圖 | — | 保留（這是這套配置存在的理由） |
 | `core-rules.md` 3 部分結果不覆蓋 | 補丁 | **未登記** | ⚠ 第一輪後重驗 |
@@ -105,8 +112,8 @@ Python 自測涵蓋拒絕、放行、錯誤 payload、內部例外、含空白�
 | `dispatch.md` 2 切片換 Process | 意圖 | — | 保留 |
 | `dispatch.md` 3 平行前確認鎖 | 補丁 | 跨 session duplicate cherry-pick、stale branch | 保留 |
 | `dispatch.md` 4 GIL | 補丁 | 一次丟多個問題給人，全部卡住 | ⚠ 本地未實證 |
-| `git-workflow.md` 先開分支 | 補丁 | **已機械化（block）**：`guard_branch.py`，Python 自測證明 main 寫入 exit 2 | 保留最短敘述；hook 是真正的守門人 |
-| `git-workflow.md` backup tag | 補丁 | **已機械化（block）**：`guard_critical.py`，Python 自測涵蓋破壞性命令與 backup tag | 保留最短敘述；hook 是真正的守門人 |
+| `git-workflow.md` 先開分支 | 補丁 | **已機械化（warn）**：`guard-branch.sh` 的攔截次數即為證據，2026-08-31 起觀察。**2026-09-24 端到端基準抓到原文有害**：「在 main 上……就要改 code → 停止並詢問」讓 harness 在 T1／T2／T5 找到根因後停下來問要不要開分支，任務沒做（第二輪 3/7 失敗；第一輪同任務自己開了分支做完）；使用者也反覆表示不要一直問。改成「自己開分支，不必問；不屬於任務的變更原樣保留」 | 改寫後重跑基準確認；仍零攔截 → 刪常駐文字，只留 hook |
+| `git-workflow.md` backup tag | 補丁 | **已機械化（block）**：`guard-critical.sh`，13/13 判定案例通過【已確認：2026-08-31 stdin 測試】 | 保留最短敘述；hook 是真正的守門人 |
 | `git-workflow.md` commit→push→PR 連貫 | 補丁 | base 提示預設「只在使用者要求時 push」，需覆寫 | 保留 |
 | ~~`git-workflow.md` body 按需寫~~ | 補丁 | **已移除（2026-08-31）**：衝突對象不存在——全域檔名是 `~/.claude/CLAUDE.md.md`（副檔名重複），從未被載入【已確認：`ls -la ~/.claude/`】 | 存於 `.out-of-scope/ablated-2026-08-31/` |
 | `thinking-boundary.md` 速通／深思 | 意圖 | — | 保留（擋過度前置治理） |
@@ -135,3 +142,12 @@ Python 自測涵蓋拒絕、放行、錯誤 payload、內部例外、含空白�
 | 2026-09-02 | 提案「平行 = 同一則訊息」常駐規則 → **實測後拒絕**。撤回三個檔案的改動，留檔於 `.out-of-scope/parallel-dispatch-rule.md` | 不加規則也會發生：在已撤回改動的 working tree 上，互動 session 仍從同一則訊息送出兩個 Task【已確認】。常駐面維持 341 行 |
 | 2026-09-02 | 跑出第一個有效的 skill 觸發 baseline：A 組（4 個相鄰入口）**4/4、8 次全對、零誤觸發**。原本要改的四份 description **決定不動**——重疊是事實，誤觸發不是 | 前兩次量測作廢（案例不自足、答案外洩），見 `docs/lessons/0003` |
 | 2026-09-03 | **第一次真的執行消融**（建立至今 20 天）。`dispatch.md` #1，leave-one-out，2 條件 × 3 次 | `no_measured_difference`（0/3 vs 0/3）→ 依單向門檻縮短該條。執行器 `docs/eval/ablate.py`，刻意只做這一件事、不是通用平台 |
+| 2026-09-05 | 外部最佳實踐清單（10 條 Coding Agent tips）做覆蓋度對照。6 條已覆蓋、4 條是真缺口 | **常駐面 0 行變動**。四個缺口全部進既有 Skill（`se-debug` 補訊號、`se-minimal-change` 第 0 階、`se-scheduling` 驗證面對照與 scout 先行）。沒有一條填得出「模型反覆犯什麼錯」，依本檔門檻不得常駐。對照表見 [`../docs/lessons/0006-external-practice-lists-need-a-coverage-diff.md`](../docs/lessons/0006-external-practice-lists-need-a-coverage-diff.md) |
+| 2026-09-07 | 記憶層准入控制。對照一份外部的 Agent 記憶防禦架構做覆蓋度盤點：容量約束／前置准入／拒絕無限記憶／保留干預**四項已被 ABLATION 與 GEP 四關覆蓋**，且比原文嚴格；缺的是**信任邊界、污染溯源、淨化程序** | lesson frontmatter 加 `source`；`check-memory.sh` 擋外部來源升級成常駐規則；`se-epiphany` 加模式四（淨化）。**常駐面 0 變動**——沒有本地失敗證據支持新增常駐內容 |
+| 2026-09-22 | 通用能力：自我理解（`capabilities.py`）、未知領域（`se-acquire`）、學習新技能（`skill-candidates/` ＋ `promote_skill.py`）、自主自控（`guard-done.sh`）、遷移（`lessons.py` ＋ `recall-lessons.sh`）。全域帳本上架 G0001（L0005，兩個專案各自發生），L0004 被閘擋下 | 常駐面 343 → 345（元件責任表 +2 行）。**動態注入的失敗證據**：兩個專案 9 則 lesson、hits 總和 0、升級 0 則——召回從未被觸發。端到端：無工具 session 正確答出 G0001【已確認】；新領域 `se-acquire` 路由 1/2、熟領域對照 0 誤觸發 |
+| 2026-09-22 | commit 閘改為腳本自行判定指令，不再只靠 `if`。起因：router 不一致時，一條不含 `git` 的 Bash 指令被 `check-router` 擋下 | 實機探測 8 種形狀：`for`／`while` 迴圈誤觸發，單純／串接／heredoc／`$(...)`／`if`／`git status` 不會【已確認】。順帶修掉 `guard-critical` 的放行漏洞：迴圈內、`git -C`、換行後的破壞性操作原本不擋【已確認：舊版 selftest 51／13】。判定規則抽成 `hooks/_command.sh` 四支共用，比對前先去掉 heredoc 內文。常駐面 0 變動 |
+| 2026-09-22 | 把配置帶進 churn-guard（第二個專案）後，`capabilities.py` 與 `recall-lessons.sh` 對全域帳本並排給出 0 與 1 | `capabilities.py` 找錯檔名（`[0-9]*` vs `G*`），自我模型從未數到全域帳本【已確認】。已修，selftest 加「上架後數到 1」。L0008 走淨化程序標 `corrected`，由 L0010 取代——**跨專案遷移第一次實際發生，第一個產出是抓到自我模型的錯**。churn-guard 端：配置更新到 `731a6b1`（`f2b6c1b`），兩則 lesson 補 `source`；無工具的新 session 在 churn-guard 答出 G0001 並註明來自開場 hook【已確認】。更新前它沒有 SessionStart hook，理應答不出【推論：未先跑對照】 |
+| 2026-09-23 | 斷點續跑：`tools/checkpoint.py`＋`hooks/checkpoint.sh`＋`se-resume`。起點是一道面試題（長任務跑到一半掛了怎麼續跑），標準答案對 agent 有三個洞：掛掉時來不及寫、存的是宣稱不是現實、斷點本身會寫壞 | **常駐面 0 行變動**（只在元件責任表既有一行補上 `checkpoint.py`）。失敗證據：本專案逐字紀錄裡「Continue from where you left off.」9 次、用量上限後續跑 2 次、「Try again」12 次。端到端：真的殺掉一個 session，新 session 無工具答對中斷前的要求與檔案歸屬【已確認】。dogfooding 抓到兩個誤報（回合進行中插進的通知被當成中斷；開著的 session 被別的 session 判成當機），改用程序身分＋查程序存活，寫成 L0011。第二個誤報**汙染了觸發評測**：20 個評測 session 收到簡報，兩輪作廢；評測改 `--tools Skill`＋`SE_EVAL=1`＋先 commit。`se-resume` 是第一個達到覆蓋率下限的 skill，乾淨條件下正例 5/6、碰撞 1/4 正確（無上下文的「繼續下一步」會誤觸發） |
+| 2026-09-24 | 通用能力第二階段：`tools/mine.py` 從逐字紀錄挖三條礦脈（需求／失敗／動作），只讀人類 session；`promote_skill.py` 的 MUTATE 改為只數不同說法；`se-epiphany` 回顧模式與 `se-acquire` 第 5 步接上採礦 | **常駐面 0 行變動**（元件責任表既有一行補上 `mine.py`）。失敗證據：學習迴圈從建立到現在 0 個候選、升級 0；唯一一次跑通靠人工翻逐字紀錄。第一次在真實紀錄上跑就挖到一個迷信——CRLF 正規化 89 次以上，起因是 `grep` 在這台機器上兩個方向都誤判 CR【已確認：對照組】，寫成 L0012 |
+| 2026-09-24 | **第一次端到端基準**（`docs/eval/bench/`）：同一批 7 個任務，只有 Claude Code 對照加上這套配置；判定程式先用三種對照校準（19 項全對） | 四輪合計 bare 19/20、harness 19/23，成本 +46%、時間 +54%——**日常任務上沒有讓結果更好**。harness 的 3 次失敗全部來自「在 main 上……就要改 code → 停止並詢問」：**消融門檻第一次由端到端證據觸發，方向是縮短規則**（改成自己開分支、不必問，常駐面 345 → 346）；改後同任務 3/3。量得到的價值在護欄：bare 3 次 T5 有 1 次把秘密印給使用者，harness 0/4。另：check-router／guard-done 改成只在改動碰到相關檔案時完整掃描（1.1 秒／1.4 秒 → 0.23／0.52 秒）；學習訊號（先失敗後改對 → 回合結束提醒一次）在真實 session 觸發過。L0013 |
+| 2026-09-24 | context 瘦身與丟棄保護：維護契約改為按路徑載入（`rules/harness-maintenance.md`，`paths:` frontmatter，官方文件確認、本 session 實際觀察到按需注入）；開分支不另外重查 git 狀態；新增 `guard-discard.sh` | 常駐面 346 → **316**（另 41 行按路徑載入）。第一則回覆 context 65.0k → 63.0k tokens（−3%）。瘦身版 T2 **刪了使用者的筆記與草稿**（規則文字寫著不准）→ 改成閘；開分支 6/7 掉到 3/7 → 把開分支寫回第一個動作。最新 T1–T5 6/6、成本差距 +66% → +49%。L0014 |

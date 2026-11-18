@@ -115,7 +115,7 @@ class SyncSkillsTest(unittest.TestCase):
     def test_manifest_has_required_provenance(self) -> None:
         manifest = json.loads((self.bundle / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(1, manifest["schema_version"])
-        self.assertEqual("2.0.0", manifest["bundle_version"])
+        self.assertEqual((ROOT / "skills" / "VERSION").read_text(encoding="utf-8").strip(), manifest["bundle_version"])
         self.assertTrue(manifest["source_repo"])
         self.assertTrue(manifest["source_commit"])
 

@@ -7,7 +7,8 @@ anchors:
   - docs/eval/run_eval.py
   - .claude-plugin/plugin.json
 supersedes:
-hits: 0
+source: self-observed   # self-observed | user-stated | external
+hits: 1
 generalizes_to: 用自己寫的判定條件，去判斷一個自己不熟悉的系統輸出
 validated:
 ---

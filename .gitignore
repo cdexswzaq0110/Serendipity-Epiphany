@@ -17,3 +17,5 @@ desktop.ini
 
 # 執行時垃圾
 *.stackdump
+__pycache__/
+*.pyc

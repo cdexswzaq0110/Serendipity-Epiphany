@@ -1,148 +1,110 @@
 {
   "schema_version": 1,
-  "bundle_version": "2.0.0",
+  "bundle_version": "2.1.0",
   "source_repo": "https://github.com/cdexswzaq0110/Serendipity-Epiphany.git",
-  "source_commit": "9db0475096ffe57b29499ae7dcee27f02532f226",
+  "source_commit": "3233f5709e8a9ed917d5ec24aea8cb1171c70974",
+  "source_dirty": true,
+  "layout": "flat",
+  "skipped": [
+    "se-debug",
+    "se-feasibility"
+  ],
   "files": [
     {
-      "path": "extended/se-bootstrap/SKILL.md",
+      "path": "INDEX.md",
+      "sha256": "5863ba818ab39481bf649973e4ff2315174ad6a58044bb4a8001c4e640f4dafd"
+    },
+    {
+      "path": "VERSION",
+      "sha256": "c89b87c262e9d5ffd20e73aac74a1772adcc9f5a21682cc33adcf5086e5fef5c"
+    },
+    {
+      "path": "se-acquire/SKILL.md",
+      "sha256": "a07b8d8f8f2c560cdd2218ed1779786b7f18e9b65d93fa2ae63c888b80758c20"
+    },
+    {
+      "path": "se-bootstrap/SKILL.md",
       "sha256": "9e527839991d460a8c3770dc06c06cb7f07b69c06c33c85b393c51fc5367fe72"
     },
     {
-      "path": "extended/se-branch-lifecycle/SKILL.md",
-      "sha256": "cb265cfd4e24d03cab1b6b6a747b1d1e00047f37d9884b28cae8668c5fd4b081"
+      "path": "se-branch-lifecycle/SKILL.md",
+      "sha256": "8f944d4cedffc73f834cfc36e0d18fd32d87992e9516591976f9a217899ba9e7"
     },
     {
-      "path": "extended/se-clarify/SKILL.md",
+      "path": "se-clarify/SKILL.md",
       "sha256": "1caaf5351feb17fac52dcdb7807e41431f9dec3d0e9a937fc1983c5b96eea1fd"
     },
     {
-      "path": "extended/se-context-language/SKILL.md",
+      "path": "se-context-language/SKILL.md",
       "sha256": "8d1afad8478ed9dafb24ef8f322b03e899edc0672d460c1cba91868c5d26a0bb"
     },
     {
-      "path": "extended/se-debug/SKILL.md",
-      "sha256": "03d33bd651fcab09ce572b0486c7b5c2ce23a0dbbeb94b4f18ff405ca42abd57"
+      "path": "se-debug/SKILL.md",
+      "sha256": "bea8b611f9a99b19cb2d13360113b4857937fe98cc8e4fccd967ea1b42e855ba"
     },
     {
-      "path": "extended/se-design/SKILL.md",
+      "path": "se-design/SKILL.md",
       "sha256": "fa93b7bdba5b0ee560f4bd5c1f9707371e0fc6331b4cb91dd6ff9b2facbde698"
     },
     {
-      "path": "extended/se-discovery/SKILL.md",
+      "path": "se-discovery/SKILL.md",
       "sha256": "ac6991009f8796a22a72f851211abba1b91313f1a0763c6fdfba2831177551b8"
     },
     {
-      "path": "extended/se-epiphany/SKILL.md",
-      "sha256": "7dabb42fc36b5c6575094fde500150686c596aaae86857f497ecb4491cf29d64"
+      "path": "se-epiphany/SKILL.md",
+      "sha256": "63d7c199f0d5bf715497f77304743d3bfacae86b86b19f80232b49cb350aa5dd"
     },
     {
-      "path": "extended/se-feasibility/SKILL.md",
-      "sha256": "a1fbb3a648cc234e49f69e31e07a5cfa80f169f88f0e3fc1be122d3d77fa93dd"
+      "path": "se-epiphany/references/promotion-gates.md",
+      "sha256": "3fedf87046aab7effe4040ef6ed66983abfcfa362ce4eb7acdc74cc33d7cf8ba"
     },
     {
-      "path": "extended/se-focus/SKILL.md",
-      "sha256": "03420e4c2dcf72b22edb317be95b7425ef6850cf88f14909ce0337ba3c620a69"
-    },
-    {
-      "path": "extended/se-minimal-change/SKILL.md",
-      "sha256": "e5b7ce4eb1291cc44013a6e682e06712094612252d4f4d3f6cb3ab644ba3e313"
-    },
-    {
-      "path": "extended/se-ml-lifecycle/references/data-and-split.md",
-      "sha256": "7d8f542eea52551e8d235fbb083b0369dc62af19d46af484cb8117ecd8e02e34"
-    },
-    {
-      "path": "extended/se-ml-lifecycle/references/delivery-and-ops.md",
-      "sha256": "f5e1ae348cc4116559b1d14e89811d07080953b066c2aa4b5ad61205db0b3c2a"
-    },
-    {
-      "path": "extended/se-ml-lifecycle/references/interpretability.md",
-      "sha256": "d60fbfbc9e17dea0577d84d943ed4b033a7e63e2391bc1c7debc8920f6e19774"
-    },
-    {
-      "path": "extended/se-ml-lifecycle/references/modeling.md",
-      "sha256": "b48d07d86e314124a673c95bce48fc370bacecbf18e9b9551ef7d6fa39711bb5"
-    },
-    {
-      "path": "extended/se-ml-lifecycle/references/principles.md",
-      "sha256": "c0050abb5d560d229594d992bd56bb7bfdaf6e330a4daf9ed41ebd881aff7ee6"
-    },
-    {
-      "path": "extended/se-ml-lifecycle/SKILL.md",
-      "sha256": "b64bd95e95bd4cd4dd2ee625fca8d83e47ac74c4e0a32a25b0a85e6c4285e42d"
-    },
-    {
-      "path": "extended/se-preflight/SKILL.md",
-      "sha256": "89aa471003d66c179e25e2d94e5912b6537893f3eabc012647d6966a4c5c483d"
-    },
-    {
-      "path": "extended/se-scheduling/references/dispatch-contracts.md",
-      "sha256": "862f381a89eff76c7abd9d065a9c8c6e5a49849b931572f584d33320fa3bb9e8"
-    },
-    {
-      "path": "extended/se-scheduling/SKILL.md",
-      "sha256": "60c476554d2f22fcaa9dd3e3a5567165bc8ecca84d8738adf29809531e3e40de"
-    },
-    {
-      "path": "extended/se-sdlc/SKILL.md",
-      "sha256": "59324bed1103db30c4bf4899fb2b9a3e5bf4af20b1a645aa315cba8a9e4bb54b"
-    },
-    {
-      "path": "extended/se-skill-authoring/SKILL.md",
-      "sha256": "c43f7c11c155f5688b0ec55f59144c7a464501f9fd02b36cec1db9457010a286"
-    },
-    {
-      "path": "extended/se-system-design/references/data-layer.md",
-      "sha256": "08088d04e88b9457df9a5c157ec7129504bf8673b0b2bcdbca8f102b2d8536d3"
-    },
-    {
-      "path": "extended/se-system-design/references/deep-dive-patterns.md",
-      "sha256": "5c211a7cc21e1e4a49703504336a05c3b36e23ba59e3e41477354dfbd76a1f7b"
-    },
-    {
-      "path": "extended/se-system-design/references/deliverable-template.md",
-      "sha256": "efdd6d3b8594f64a9f57fa8795db34a453a6fc6e1fbceb9d793563747922ce44"
-    },
-    {
-      "path": "extended/se-system-design/references/estimation-tables.md",
-      "sha256": "8aa25c72f06db0aee652b997cae076970b9dd51416aeab87312086d5091e0d94"
-    },
-    {
-      "path": "extended/se-system-design/references/resilience-checklist.md",
-      "sha256": "924d1e152f04355c7299fc53b5b412a8d6be9730e7d207c8a19e1d26a43adf35"
-    },
-    {
-      "path": "extended/se-system-design/references/stages-3-5.md",
-      "sha256": "c4398ddc063294f2d03f4a41543371526e89b95026f0fa3d918416494ae9bb19"
-    },
-    {
-      "path": "extended/se-system-design/SKILL.md",
-      "sha256": "94adc005d3fe0a72ba07821c4aa342314709bf6cae7b9ac6effd8e3c1b642020"
-    },
-    {
-      "path": "extended/se-two-axis-review/references/smell-baseline.md",
-      "sha256": "0743b9ea5655f54895703fafc1c35ed1a5c7adadda9973c47ebc72814aef1ed1"
-    },
-    {
-      "path": "extended/se-two-axis-review/SKILL.md",
-      "sha256": "1958afc8b2c5e753b91eff04bae44d2ca51525bd257475e10636a46176b94cec"
-    },
-    {
-      "path": "INDEX.md",
-      "sha256": "b2715e0ebda96dee98595adb49415b2250f430d796b2481453a9cde7950ba3d0"
-    },
-    {
-      "path": "se-debug/SKILL.md",
-      "sha256": "5367d42771cd4e1ecb50d1573028a15ddaabc9736b70e5ea59dca8e2952d95ab"
+      "path": "se-epiphany/references/purge.md",
+      "sha256": "8bb6e53eab82587fb6f17bbdfcc92b0d82f630a9493925496e2f54c1825b1e76"
     },
     {
       "path": "se-feasibility/SKILL.md",
       "sha256": "1a2326a311bb6e62217cf694cd064c9a044e7cc222db295e8aacd93fa862e9b2"
     },
     {
+      "path": "se-focus/SKILL.md",
+      "sha256": "03420e4c2dcf72b22edb317be95b7425ef6850cf88f14909ce0337ba3c620a69"
+    },
+    {
+      "path": "se-minimal-change/SKILL.md",
+      "sha256": "72d146886cd812f42ea6024acc0251d978d2c3f69ce608488c13b6b718f81fdd"
+    },
+    {
       "path": "se-minimal-implementation/SKILL.md",
-      "sha256": "92f05df6fe68baa127dac0be5cea263c1b40de1d84964f4b75857abee4d1444d"
+      "sha256": "a4b3d64095805951bba72ea1aa832351a46daee4c6ae9b2bdbc681dd97eedd0c"
+    },
+    {
+      "path": "se-ml-lifecycle/SKILL.md",
+      "sha256": "b64bd95e95bd4cd4dd2ee625fca8d83e47ac74c4e0a32a25b0a85e6c4285e42d"
+    },
+    {
+      "path": "se-ml-lifecycle/references/data-and-split.md",
+      "sha256": "7d8f542eea52551e8d235fbb083b0369dc62af19d46af484cb8117ecd8e02e34"
+    },
+    {
+      "path": "se-ml-lifecycle/references/delivery-and-ops.md",
+      "sha256": "f5e1ae348cc4116559b1d14e89811d07080953b066c2aa4b5ad61205db0b3c2a"
+    },
+    {
+      "path": "se-ml-lifecycle/references/interpretability.md",
+      "sha256": "d60fbfbc9e17dea0577d84d943ed4b033a7e63e2391bc1c7debc8920f6e19774"
+    },
+    {
+      "path": "se-ml-lifecycle/references/modeling.md",
+      "sha256": "b48d07d86e314124a673c95bce48fc370bacecbf18e9b9551ef7d6fa39711bb5"
+    },
+    {
+      "path": "se-ml-lifecycle/references/principles.md",
+      "sha256": "c0050abb5d560d229594d992bd56bb7bfdaf6e330a4daf9ed41ebd881aff7ee6"
+    },
+    {
+      "path": "se-preflight/SKILL.md",
+      "sha256": "89aa471003d66c179e25e2d94e5912b6537893f3eabc012647d6966a4c5c483d"
     },
     {
       "path": "se-problem-definition/SKILL.md",
@@ -153,16 +115,72 @@
       "sha256": "47d94ca636d1d92728aa57e7f6924702d50a4537e538cb53578492c5eb21ce84"
     },
     {
-      "path": "se-quality-review/references/smell-baseline.md",
-      "sha256": "0743b9ea5655f54895703fafc1c35ed1a5c7adadda9973c47ebc72814aef1ed1"
-    },
-    {
       "path": "se-quality-review/SKILL.md",
       "sha256": "683e847b85cf059115a0f0d490031002564489ef5f748dee7f807e6f99b06b87"
     },
     {
+      "path": "se-quality-review/references/smell-baseline.md",
+      "sha256": "0743b9ea5655f54895703fafc1c35ed1a5c7adadda9973c47ebc72814aef1ed1"
+    },
+    {
+      "path": "se-resume/SKILL.md",
+      "sha256": "0d0cc5f8cf47041a2f0ce42d4bace459ea9d4da91afffbc9c8c74ab5d49f75a9"
+    },
+    {
+      "path": "se-scheduling/SKILL.md",
+      "sha256": "c88ae04fd765037541aaf1f3afeb5be5ad991fdb353d02218c699977323f1497"
+    },
+    {
+      "path": "se-scheduling/references/dispatch-contracts.md",
+      "sha256": "862f381a89eff76c7abd9d065a9c8c6e5a49849b931572f584d33320fa3bb9e8"
+    },
+    {
+      "path": "se-scheduling/references/verification-surfaces.md",
+      "sha256": "9d395c027ea518d102ac2d00c9b79fc78b3ce761aab148bdef7473921f8693a3"
+    },
+    {
+      "path": "se-sdlc/SKILL.md",
+      "sha256": "59324bed1103db30c4bf4899fb2b9a3e5bf4af20b1a645aa315cba8a9e4bb54b"
+    },
+    {
+      "path": "se-skill-authoring/SKILL.md",
+      "sha256": "c43f7c11c155f5688b0ec55f59144c7a464501f9fd02b36cec1db9457010a286"
+    },
+    {
       "path": "se-spec-review/SKILL.md",
       "sha256": "37f432b612ca216b87052b72ac4428b24fead08656d06b28edf0118c39f71355"
+    },
+    {
+      "path": "se-system-design/SKILL.md",
+      "sha256": "94adc005d3fe0a72ba07821c4aa342314709bf6cae7b9ac6effd8e3c1b642020"
+    },
+    {
+      "path": "se-system-design/references/data-layer.md",
+      "sha256": "08088d04e88b9457df9a5c157ec7129504bf8673b0b2bcdbca8f102b2d8536d3"
+    },
+    {
+      "path": "se-system-design/references/deep-dive-patterns.md",
+      "sha256": "5c211a7cc21e1e4a49703504336a05c3b36e23ba59e3e41477354dfbd76a1f7b"
+    },
+    {
+      "path": "se-system-design/references/deliverable-template.md",
+      "sha256": "efdd6d3b8594f64a9f57fa8795db34a453a6fc6e1fbceb9d793563747922ce44"
+    },
+    {
+      "path": "se-system-design/references/estimation-tables.md",
+      "sha256": "8aa25c72f06db0aee652b997cae076970b9dd51416aeab87312086d5091e0d94"
+    },
+    {
+      "path": "se-system-design/references/resilience-checklist.md",
+      "sha256": "924d1e152f04355c7299fc53b5b412a8d6be9730e7d207c8a19e1d26a43adf35"
+    },
+    {
+      "path": "se-system-design/references/stages-3-5.md",
+      "sha256": "c4398ddc063294f2d03f4a41543371526e89b95026f0fa3d918416494ae9bb19"
+    },
+    {
+      "path": "se-technical-design/SKILL.md",
+      "sha256": "b766a1e47329008b77f44d93ce5874f6f0599760defecc441de9ca2c1ef3938a"
     },
     {
       "path": "se-technical-design/references/data-layer.md",
@@ -189,17 +207,16 @@
       "sha256": "c4398ddc063294f2d03f4a41543371526e89b95026f0fa3d918416494ae9bb19"
     },
     {
-      "path": "se-technical-design/SKILL.md",
-      "sha256": "b766a1e47329008b77f44d93ce5874f6f0599760defecc441de9ca2c1ef3938a"
+      "path": "se-two-axis-review/SKILL.md",
+      "sha256": "1958afc8b2c5e753b91eff04bae44d2ca51525bd257475e10636a46176b94cec"
+    },
+    {
+      "path": "se-two-axis-review/references/smell-baseline.md",
+      "sha256": "0743b9ea5655f54895703fafc1c35ed1a5c7adadda9973c47ebc72814aef1ed1"
     },
     {
       "path": "se-work-order/SKILL.md",
-      "sha256": "1af6c19226d87f5c38d7cb391cdc05162448780d2e43c7085de7d1a254e9bea8"
-    },
-    {
-      "path": "VERSION",
-      "sha256": "c28fcca53637bc88e124af1725df13cb98c69dedefd62fb3cdbe1cdb6b760624"
+      "sha256": "a5e21c011a90555ec3a433ad15f646aec09619030da28ce73ef0cc611879a68a"
     }
-  ],
-  "source_dirty": true
+  ]
 }

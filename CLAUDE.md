@@ -1,25 +1,39 @@
 # Serendipity — Epiphany
 
-Claude Code 工程 harness：常駐規則、按需 skills、執行模板、確定性 gate 與領悟帳本。
+**機遇下，突然領悟學到的智慧。**
 
-## 入口
+這是一套 Claude Code 的工程 Harness——常駐約束、按需能力、派發模板、確定性 Gate 與驗證迴圈的集合。它假設你會反覆撞上同一類問題，所以除了「怎麼把事做完」，它同時管**怎麼把每次撞出來的領悟留下來**。
 
-| 要找什麼 | 文件 |
+## 開始一輪工作
+
+**沒有寫死的命令序列。** 能力按任務語意載入，或由你 `/skill-name` 明確啟動。
+
+| 要知道什麼 | 去哪 |
 |---|---|
-| canonical skills 與路由 | [`skills/INDEX.md`](skills/INDEX.md) |
-| 常駐規則 | [`.claude/rules/`](.claude/rules/) |
-| 一輪工作怎麼跑 | [`.claude/RUNBOOK.md`](.claude/RUNBOOK.md) |
-| 元件與責任 | [`.claude/WORKFLOW.md`](.claude/WORKFLOW.md) |
-| 規則的失敗證據與消融 | [`.claude/ABLATION.md`](.claude/ABLATION.md) |
-| 設計理由 | [`docs/DESIGN_RATIONALE.md`](docs/DESIGN_RATIONALE.md) |
+| 實際怎麼跑一輪：A 直接做／B 規劃一輪／C 先撥霧／D 先蒐證 | [.claude/RUNBOOK.md](.claude/RUNBOOK.md) |
+| 任務怎麼切、派給誰、怎麼同步（Process／Thread／Coroutine／Pool） | [.claude/EXECUTION_MODEL.md](.claude/EXECUTION_MODEL.md) |
+| 誰負責哪一層的正確性（PM／UX／SA／Architect／SD／DBA／Dev／QA／DevOps） | [.claude/ROLE_MODEL.md](.claude/ROLE_MODEL.md) |
+| Rules／Skills／Agents 三層怎麼一起運作 | [.claude/WORKFLOW.md](.claude/WORKFLOW.md) |
+| 哪個 Skill 何時載入、相似入口怎麼區辨 | [.claude/skills/INDEX.md](.claude/skills/INDEX.md) |
+| 改動這套配置本身時不能破壞什麼 | [.claude/rules/harness-maintenance.md](.claude/rules/harness-maintenance.md)（改動配置時自動載入） |
+| 這套配置的每一條規則為什麼存在 | [docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md) |
 
-## 常駐節奏
+## 預設節奏
 
-1. 先確認分支與工作樹；main、未提交變更或分支未指定時先停下確認。
-2. 每個結論標示證據等級：已確認／推論／候選／未知／未驗證。
-3. 有適用 skill 時先讀 canonical 方法，再執行與驗證。
-4. 修改必須以碰到交付物本身的新證據驗證；沒有驗證不得宣稱完成。
-5. 破壞性 Git 操作前建立指向目前 HEAD 的 `backup/*` tag。
-6. 只有產生下一輪會再用到的領悟時，才寫入 `docs/lessons/`。
+1. **先開分支再動 code**——在 main 上就自己開分支（可逆，不必問）；不屬於這個任務的未提交變更原樣保留，要覆蓋或丟棄既有工作時才停下來問。
+2. **寫程式前先爬最小實作階梯**——不用寫 > 已經有 > 標準庫 > 平台原生 > 已裝依賴 > 一行 > 最小可動（`se-minimal-implementation`）。
+3. **有適用的 Skill 先載入再行動**；同一件事不同時套多個流程型 Skill。
+4. **每個結論帶證據等級**——`已確認`／`推論`／`候選`／`未知`／`未驗證`，五選一，不留裸主張（`rules/evidence-grades.md`）。
+5. **派發前先選單位**——不需要隔離就 Coroutine（載 skill）；唯讀 fan-out 用 Thread；要寫工作樹或要乾淨 context 用 Process（`rules/dispatch.md`）。
+6. **雛型期走 happy path**——先能動、能驗證，不前置法規、權限、邊界案的窮舉。
+7. **收尾留一則 Lesson**——這一輪學到、而且下一輪會再用到的東西，寫進 `docs/lessons/`（`se-epiphany`）。
 
-`.claude/skills/` 是由 `skills/` 同步出的安裝產物；不要直接修改。同步與驗證方式見 README。
+先雛形 → 打掉 → 重構迭代是正常路徑，不是缺陷。衝突時，使用者直接要求的結果與 `.claude/rules/core-rules.md` 優先。
+
+## 帶進新專案
+
+複製 `.claude/` 與需要的 `templates/`，然後跑 `/se-bootstrap`，產出那個專案自己的 `CLAUDE.md` 與 `CONTEXT.md`，最後用 `templates/_meta/bootstrap_check.sh` 機械化驗收。
+
+也可以裝成 plugin（`claude --plugin-dir <這個 repo>`）——那會拿到 skills、agents 與 hooks，**但不含常駐規則**。
+
+**這一份不要整份複製過去**——它描述的是 Serendipity 本身。

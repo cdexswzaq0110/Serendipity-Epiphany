@@ -11,11 +11,14 @@ metadata:
 
 ## 開始
 
+開工時系統提示已經帶著分支與未提交變更，看那個就好；session 跑了一陣子才重新查：
+
 ```bash
 git branch --show-current && git status --short
 ```
 
-在 main 上、有未提交變更、或使用者沒指定分支 → **停下來問**。
+在 main 上 → **自己開分支再動**，不要為此停下來問（可逆、有預設值）。
+不屬於這個任務的未提交變更原樣保留，commit 時只加自己改的檔；要覆蓋或丟棄既有工作時才停下來確認。
 
 分支命名：`<type>/<short-description>`（`feat` / `fix` / `chore` / `refactor` / `docs`）。
 

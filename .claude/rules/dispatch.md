@@ -29,7 +29,7 @@ Ready Queue = `Depends on` 已全數完成的 Process。**能平行就全部立�
 
 **任何 git 寫操作前先驗證 ref 沒被別的 session 推進**：`git branch --show-current`、`git log --oneline -3`、`git status`。
 
-出現以下任一警訊就 **STOP 並詢問**：工作樹有不認得的變更、同 subject 不同 SHA 的 commit、分支 tip 與上次所見不同、出現未追蹤的 backup tag 或 sibling branch、HEAD 指向不認得的 commit。
+出現以下任一警訊就 **STOP 並詢問**：**你要寫的檔案**上有不認得的變更（旁邊的不認得變更原樣保留、繼續做）、同 subject 不同 SHA 的 commit、分支 tip 與上次所見不同、出現未追蹤的 backup tag 或 sibling branch、HEAD 指向不認得的 commit。
 
 寫入衝突**不是依賴**——標明衝突範圍讓排程器序列化，不要把它們串成 `Depends on` 鏈。
 

@@ -171,6 +171,7 @@ Pool 的意義是**有上限、可回收、不洩漏**。
 | 交接文字 | **IPC 訊息** | Process 之間唯一合法的傳值方式，必須可序列化且自足 |
 | `CONTEXT.md` | **共享記憶體區段** | 全體共用的命名與定義；改它等於改所有人的假設 |
 | `docs/lessons/` | **持久化儲存** | 跨 Process 存活，Process 死了它還在 |
+| `.git/serendipity/journal.jsonl` | **Journal（日誌式檔案系統）** | Process **沒有預期地死掉**時用的：hook 在死之前就寫好斷點，重啟時對照現實（fsck）再續跑，見 `se-resume` |
 | Context window | **記憶體** | 有上限，會 OOM |
 | Compact | **Swap** | 換出去再換回來會失真。能開新 Process 就不要 swap |
 
