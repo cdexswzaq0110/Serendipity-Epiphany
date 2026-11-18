@@ -24,6 +24,9 @@ for _stream in (sys.stdout, sys.stderr):
 
 SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
+# Extended skills whose job a core skill took over. Not installed by `--layout flat`.
+SUPERSEDED_NAME = "superseded.json"
+LAYOUTS = ("bundle", "flat")
 
 
 class BundleError(Exception):
@@ -162,12 +165,100 @@ def compare_manifests(bundle: Path, dest: Path) -> list[str]:
     bundle_manifest, bundle_errors = load_manifest(bundle)
     dest_manifest, dest_errors = load_manifest(dest)
     problems = [*(f"bundle：{p}" for p in bundle_errors), *(f"dest：{p}" for p in dest_errors)]
-    if not problems and bundle_manifest != dest_manifest:
-        problems.append("bundle 與 dest 的 manifest 不一致")
+    if problems or dest_manifest is None:
+        return problems
+    layout = dest_manifest.get("layout", "bundle")
+    if layout not in LAYOUTS:
+        return [f"dest：不支援的 layout：{layout!r}"]
+    try:
+        expected = expected_manifest(bundle, layout)
+    except BundleError as error:
+        return [f"bundle：{error}"]
+    if expected != dest_manifest:
+        problems.append(f"bundle 與 dest 的 manifest 不一致（layout={layout}）")
     return problems
 
 
-def install(bundle: Path, dest: Path) -> None:
+def superseded(bundle: Path) -> dict[str, list[str]]:
+    path = bundle / "extended" / SUPERSEDED_NAME
+    if not path.is_file():
+        return {}
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise BundleError(f"{SUPERSEDED_NAME} 格式錯誤：{error}") from error
+    if not isinstance(value, dict) or not all(
+        isinstance(k, str) and isinstance(v, list) and all(isinstance(x, str) for x in v) for k, v in value.items()
+    ):
+        raise BundleError(f"{SUPERSEDED_NAME} 必須是 {{\"舊名稱\": [\"取代它的核心 skill\", ...]}}")
+    return value
+
+
+def flat_plan(bundle: Path) -> tuple[list[tuple[str, str]], list[str]]:
+    """Map bundle-relative paths to flat paths: core skills and top-level files as they are,
+    extended skills lifted one level up. Core wins over an extended namesake; superseded
+    extended skills are left out. Returns (pairs, skipped skill names)."""
+    retired = superseded(bundle)
+    core = {p.name for p in bundle.iterdir() if p.is_dir() and p.name != "extended"}
+    pairs: list[tuple[str, str]] = []
+    skipped: list[str] = []
+    for path in sorted(p for p in bundle.rglob("*") if p.is_file() and p.name != MANIFEST_NAME):
+        relative = path.relative_to(bundle).as_posix()
+        parts = relative.split("/")
+        if parts[0] != "extended":
+            pairs.append((relative, relative))
+            continue
+        if len(parts) < 3:  # extended/superseded.json and other bookkeeping files
+            continue
+        name = parts[1]
+        if name in core or name in retired:
+            if name not in skipped:
+                skipped.append(name)
+            continue
+        pairs.append((relative, "/".join(parts[1:])))
+    for name in retired:
+        for replacement in retired[name]:
+            if replacement not in core:
+                raise BundleError(f"{SUPERSEDED_NAME}：{name} 的取代者 {replacement} 不是核心 skill")
+    return pairs, skipped
+
+
+def flat_manifest(bundle: Path) -> dict[str, Any]:
+    manifest, problems = load_manifest(bundle)
+    if manifest is None or problems:
+        raise BundleError("來源 manifest 無效：\n" + "\n".join(problems))
+    hashes = {item["path"]: item["sha256"] for item in manifest["files"]}
+    pairs, skipped = flat_plan(bundle)
+    result = {key: value for key, value in manifest.items() if key != "files"}
+    result["layout"] = "flat"
+    result["skipped"] = skipped
+    result["files"] = sorted(({"path": dst, "sha256": hashes[src]} for src, dst in pairs), key=lambda f: f["path"])
+    return result
+
+
+def expected_manifest(bundle: Path, layout: str) -> dict[str, Any]:
+    if layout == "flat":
+        return flat_manifest(bundle)
+    manifest, problems = load_manifest(bundle)
+    if manifest is None or problems:
+        raise BundleError("來源 manifest 無效：\n" + "\n".join(problems))
+    return manifest
+
+
+def stage_copy(bundle: Path, stage: Path, layout: str) -> None:
+    if layout == "bundle":
+        shutil.copytree(bundle, stage)
+        return
+    stage.mkdir()
+    pairs, _ = flat_plan(bundle)
+    for src, dst in pairs:
+        target = stage / dst
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(bundle / src, target)
+    write_json(stage / MANIFEST_NAME, flat_manifest(bundle))
+
+
+def install(bundle: Path, dest: Path, layout: str = "bundle") -> None:
     problems = validate(bundle)
     if problems:
         raise BundleError("來源 bundle 無效：\n" + "\n".join(problems))
@@ -177,7 +268,7 @@ def install(bundle: Path, dest: Path) -> None:
     backup = dest_parent / f".{dest.name}.backup-{os.getpid()}"
     try:
         shutil.rmtree(stage)
-        shutil.copytree(bundle, stage)
+        stage_copy(bundle, stage, layout)
         stage_problems = validate(stage)
         if stage_problems:
             raise BundleError("暫存副本驗證失敗：\n" + "\n".join(stage_problems))
@@ -219,6 +310,10 @@ def parser() -> argparse.ArgumentParser:
     install_parser = sub.add_parser("install")
     install_parser.add_argument("--bundle", type=Path, required=True)
     install_parser.add_argument("--dest", type=Path, required=True)
+    install_parser.add_argument(
+        "--layout", choices=LAYOUTS, default="bundle",
+        help="bundle：照 bundle 原樣（Agora 的 harness/se）；flat：每個 skill 一層（Claude Code 的 .claude/skills）",
+    )
     check_parser = sub.add_parser("check")
     check_parser.add_argument("--bundle", type=Path)
     check_parser.add_argument("--dest", type=Path, required=True)
@@ -232,7 +327,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "build":
             build(repo_root / "skills", args.out.resolve(), repo_root)
         elif args.command == "install":
-            install(args.bundle.resolve(), args.dest.resolve())
+            install(args.bundle.resolve(), args.dest.resolve(), args.layout)
         else:
             command_check(args.bundle.resolve() if args.bundle else None, args.dest.resolve())
     except BundleError as error:

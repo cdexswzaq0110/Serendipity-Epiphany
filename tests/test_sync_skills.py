@@ -71,6 +71,47 @@ class SyncSkillsTest(unittest.TestCase):
         self.assertEqual("old", marker.read_text(encoding="utf-8"))
         self.assertEqual(["old.txt"], [p.name for p in self.dest.iterdir()])
 
+    def test_flat_layout_puts_every_skill_one_level_deep(self) -> None:
+        # Claude Code only discovers .claude/skills/<name>/SKILL.md.
+        sync.install(self.bundle, self.dest, "flat")
+        self.assertEqual([], sync.validate(self.dest))
+        self.assertEqual([], sync.compare_manifests(self.bundle, self.dest))
+        self.assertFalse((self.dest / "extended").exists())
+        skill_files = list(self.dest.rglob("SKILL.md"))
+        self.assertTrue(skill_files)
+        for path in skill_files:
+            self.assertEqual(self.dest, path.parent.parent, path)
+        core = {p.name for p in (ROOT / "skills").iterdir() if p.is_dir() and p.name != "extended"}
+        retired = json.loads((ROOT / "skills" / "extended" / "superseded.json").read_text(encoding="utf-8"))
+        extended = {p.name for p in (ROOT / "skills" / "extended").iterdir() if p.is_dir()}
+        installed = {p.parent.name for p in skill_files}
+        self.assertEqual(core | (extended - core - set(retired)), installed)
+        manifest = json.loads((self.dest / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual("flat", manifest["layout"])
+        self.assertEqual(sorted((extended & core) | set(retired)), sorted(manifest["skipped"]))
+        # The core skill wins over its extended namesake.
+        for name in extended & core:
+            self.assertEqual(
+                (ROOT / "skills" / name / "SKILL.md").read_bytes(), (self.dest / name / "SKILL.md").read_bytes()
+            )
+
+    def test_flat_check_detects_tampering_and_layout_mismatch(self) -> None:
+        sync.install(self.bundle, self.dest, "flat")
+        target = next(p for p in self.dest.rglob("SKILL.md"))
+        target.write_text(target.read_text(encoding="utf-8") + "改", encoding="utf-8", newline="")
+        self.assertTrue(sync.validate(self.dest))
+        shutil.rmtree(self.dest)
+        sync.install(self.bundle, self.dest, "flat")
+        manifest = json.loads((self.dest / "manifest.json").read_text(encoding="utf-8"))
+        manifest["layout"] = "bundle"
+        sync.write_json(self.dest / "manifest.json", manifest)
+        self.assertTrue(sync.compare_manifests(self.bundle, self.dest))
+
+    def test_superseded_must_name_a_core_skill(self) -> None:
+        (self.bundle / "extended" / "superseded.json").write_text('{"se-focus": ["se-nope"]}', encoding="utf-8")
+        with self.assertRaises(sync.BundleError):
+            sync.flat_plan(self.bundle)
+
     def test_manifest_has_required_provenance(self) -> None:
         manifest = json.loads((self.bundle / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(1, manifest["schema_version"])
@@ -83,7 +124,7 @@ class SkillFormatTest(unittest.TestCase):
     def test_frontmatter_and_core_line_limits(self) -> None:
         core = [p for p in (ROOT / "skills").iterdir() if p.is_dir() and p.name != "extended"]
         self.assertEqual(9, len(core))
-        for directory in core + list((ROOT / "skills" / "extended").iterdir()):
+        for directory in core + [p for p in (ROOT / "skills" / "extended").iterdir() if p.is_dir()]:
             with self.subTest(skill=directory.name):
                 path = directory / "SKILL.md"
                 lines = path.read_text(encoding="utf-8").splitlines()
