@@ -105,7 +105,7 @@ python .claude/tools/checkpoint.py step add S2 "推上遠端" --done-when 'test 
 python .claude/tools/checkpoint.py step done S1
 
 # 驗證——證據綁定當下的工作樹指紋，樹一變就自動失效
-python .claude/tools/checkpoint.py verify -- bash .claude/hooks/selftest.sh
+python .claude/tools/checkpoint.py verify -- python -m unittest discover -s tests
 
 # 使用者拍板的決定——拿到答案就記
 python .claude/tools/checkpoint.py decide "非會員能不能退款" "不能"

@@ -47,8 +47,8 @@ class HookTest(unittest.TestCase):
 
     def test_branch_rejection_really_blocks(self) -> None:
         result = self.run_hook("guard_branch.py", {"tool_name": "Edit", "tool_input": {"file_path": "中文 路徑.py"}})
-        self.assertEqual(2, result.returncode)
-        self.assertIn("DENY", result.stderr)
+        self.assertEqual(1, result.returncode)
+        self.assertIn("guard-branch", result.stderr)
 
     def test_feature_branch_allows_write(self) -> None:
         self.git("checkout", "-b", "feat/test")
@@ -63,7 +63,7 @@ class HookTest(unittest.TestCase):
         self.assertEqual(0, result.returncode)
 
     def test_bad_payload_blocks_high_risk_but_allows_low_risk(self) -> None:
-        high = self.run_hook("guard_branch.py", '{bad "Edit"')
+        high = self.run_hook("guard_branch.py", '{bad "Edit" "secrets/key"')
         low = self.run_hook("guard_branch.py", "{bad harmless status")
         self.assertEqual(2, high.returncode)
         self.assertEqual(0, low.returncode)
@@ -86,7 +86,7 @@ class HookTest(unittest.TestCase):
         payload = {"tool_name": "Edit", "tool_input": {"file_path": "x"}}
         self.assertEqual(0, self.run_hook("guard_branch.py", payload).returncode)
         self.assertFalse(marker.exists())
-        self.assertEqual(2, self.run_hook("guard_branch.py", payload).returncode)
+        self.assertEqual(1, self.run_hook("guard_branch.py", payload).returncode)
 
 
 if __name__ == "__main__":

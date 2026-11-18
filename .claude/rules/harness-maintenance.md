@@ -26,14 +26,14 @@ paths:
 - `../docs/lessons/`：領悟帳本。這套配置的長期記憶，由 `se-epiphany` 維護。
 - `tools/`：**自我理解與學習的工具**——`capabilities.py`（能力自我模型，從原始碼生成）、`lessons.py`（跨專案帳本）、`promote_skill.py`（候選 skill 升級閘）、`checkpoint.py`（斷點續跑，日誌在 `.git/serendipity/`，不進版控）、`mine.py`（從逐字紀錄挖出重複——學習迴圈的第一步）。
 - `skill-candidates/`：`se-acquire` 習得的候選 skill。**不會自動載入**，過了升級閘才搬進 `skills/`。
-- `hooks/`：**確定性 Gate**——判定條件寫得成 shell 的規則放這裡，模型配不配合都會執行。清單見 [ABLATION.md](../ABLATION.md)「機械化優先」。
+- `hooks/`：**確定性 Gate**——只用 Python 3.11 標準庫；判定條件可程式化的規則放這裡，模型配不配合都會執行。清單見 [ABLATION.md](../ABLATION.md)「機械化優先」。
 - `.out-of-scope/`：已審視並拒絕的機制與理由；重新提案前先讀對應檔。
 - `../.claude-plugin/plugin.json`：**發佈面**。`claude --plugin-dir <repo>` 裝得起來，帶 skills／agents／hooks；**帶不了 `rules/`**（常駐面是專案層的東西）。
 - `../AGENTS.md`：非 Claude Code agent 的入口指標。只放指標與三條跨工具仍成立的約束，不重複內容。
 
 ## 維護契約（改動本配置時必須重新滿足的不變量）
 
-1. **Router 不說謊**：新增、改名、刪除 skill 或改變其定位時，必須同步更新 `skills/INDEX.md`。索引漏列新 skill、或仍導向已刪 skill，視為缺陷而非疏漏。**由 `hooks/check-router.sh` 在 `git commit` 前強制**（三向：目錄未列入索引／索引指向已刪 skill／常駐檔指向不存在的 skill）。
+1. **Router 不說謊**：新增、改名、刪除 skill 或改變其定位時，必須同步更新 `skills/INDEX.md`。索引漏列新 skill、或仍導向已刪 skill，視為缺陷而非疏漏。**由 `hooks/check_router.py` 在 `git commit` 前強制**（三向：目錄未列入索引／索引指向已刪 skill／常駐檔指向不存在的 skill）。
 2. **Frontmatter 與現實一致**：Skill 的 `description` 不得引用已退役的模板或檔名。
 3. **大型 skill 分層**：SKILL.md 超過約 200 行時拆 `references/`（漸進揭露），不整檔常駐。
 4. **來源可追**：新增第三方或社群 skill 必須在 `skills/INDEX.md` 記來源、授權與更新方式。

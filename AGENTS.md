@@ -30,7 +30,7 @@ PreToolUse hook）。在其他 agent 上，那些會退化成「要你自己去�
 
 ## 在其他 agent 上跑得起來的部分
 
-`.claude/hooks/*.sh` 只依賴 bash ＋ git，不依賴 Claude Code。任何能在工具呼叫前
+`.claude/hooks/*.py` 只依賴 Python 3.11 標準庫 ＋ git，不依賴 Claude Code。任何能在工具呼叫前
 執行外部命令的 agent 都掛得上去——它們讀 stdin 的 JSON payload，用退出碼表達判定
 （2 = 擋下，1 = 提示，0 = 放行）。
 

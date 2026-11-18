@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 # Gate 自測：確認每支 hook 在**該擋的時候真的擋**、該放的時候真的放。
 #
+# 2.1.0 起 hooks 是 Python；這份是 main（d13bacf）的 .claude/hooks/selftest.sh 原樣搬來，
+# 只把呼叫對象換成 .claude/hooks/*.py，案例與期望值不變，另外加上 canonical 模式的 router 案例。
+# 由 tests/test_hooks_selftest.py 執行（python -m unittest discover -s tests）。
+#
 # 為什麼要有這支：hook 寫壞的預設失敗模式是「靜默放行」——路徑錯、spawn 失敗、
 # 退出碼用錯，全部只產生 non-blocking error，動作照常執行。裝好不等於守得住，
 # 必須看過一次紅燈。詳見 docs/lessons/0002。
 #
-# 用法：bash .claude/hooks/selftest.sh
+# 用法：bash tests/hooks_selftest.sh
 set -uo pipefail
 
-ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 H="$ROOT/.claude/hooks"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -24,8 +28,9 @@ check() { # expected actual label
   fi
 }
 
-run() { # script payload -> exit code
-  printf '%s' "$2" | bash "$H/$1" >/dev/null 2>&1
+run() { # script payload -> exit code（舊名 guard-branch.sh → .claude/hooks/guard_branch.py）
+  local py="${1%.sh}"; py="${py//-/_}.py"
+  printf '%s' "$2" | python "$H/$py" >/dev/null 2>&1
   echo $?
 }
 
@@ -40,7 +45,7 @@ REPO="$TMP/repo"; mkdir -p "$REPO"
 export CLAUDE_PROJECT_DIR="$REPO"
 
 check 1 "$(run guard-branch.sh "$edit_payload")" "main（warn 模式）提示但不阻擋"
-check 2 "$(printf '%s' "$edit_payload" | SE_GUARD_BRANCH_MODE=block bash "$H/guard-branch.sh" >/dev/null 2>&1; echo $?)" \
+check 2 "$(printf '%s' "$edit_payload" | SE_GUARD_BRANCH_MODE=block python "$H/guard_branch.py" >/dev/null 2>&1; echo $?)" \
         "main（block 模式）阻擋"
 check 1 "$(run guard-branch.sh "$(bash_payload "git add . && git commit -m x")")" "main 上 Bash 的 git commit 也提示"
 check 0 "$(run guard-branch.sh "$(bash_payload "for i in 1; do echo \$i; done")")" "main 上不是 commit 的 Bash 迴圈放行"
@@ -76,9 +81,9 @@ for c in "git status" \
 done
 
 # 判定規則缺席時要往安全的方向失敗：guard-critical 擋，commit 閘退回一律檢查
-NOLIB="$TMP/nolib"; mkdir -p "$NOLIB"; cp "$H/guard-critical.sh" "$H/check-router.sh" "$NOLIB/"
-check 2 "$(printf '%s' "$(bash_payload "git status")" | bash "$NOLIB/guard-critical.sh" >/dev/null 2>&1; echo $?)" \
-        "缺 _command.sh 時 guard-critical 擋下"
+NOLIB="$TMP/nolib"; mkdir -p "$NOLIB"; cp "$H/guard_critical.py" "$H/check_router.py" "$NOLIB/"
+check 2 "$(printf '%s' "$(bash_payload "git status")" | python "$NOLIB/guard_critical.py" >/dev/null 2>&1; echo $?)" \
+        "缺 hooklib.py 時 guard-critical 擋下"
 
 ( cd "$REPO" && git tag -a "backup/selftest" -m snap )
 check 0 "$(run guard-critical.sh "$(bash_payload "git reset --hard HEAD~1")")" "已有指向 HEAD 的 backup tag 時放行"
@@ -107,8 +112,8 @@ for c in "for f in a; do git commit -m x; done" \
 done
 check 0 "$(run check-router.sh "$(bash_payload "python - <<'PY'\\nprint(1); git commit\\nPY")")" \
         "heredoc 內文提到 git commit 不算 commit"
-check 2 "$(printf '%s' "$(bash_payload "echo x")" | bash "$NOLIB/check-router.sh" >/dev/null 2>&1; echo $?)" \
-        "缺 _command.sh 時 check-router 退回一律檢查"
+check 2 "$(printf '%s' "$(bash_payload "echo x")" | python "$NOLIB/check_router.py" >/dev/null 2>&1; echo $?)" \
+        "缺 hooklib.py 時 check-router 往安全的方向失敗"
 
 printf '# INDEX\n\n- `se-a`\n- `se-b`\n' > "$FAKE/.claude/skills/INDEX.md"
 check 0 "$(run check-router.sh "$commit_payload")" "INDEX 與目錄一致"
@@ -129,6 +134,27 @@ echo y >> "$SC/app.py"
 check 0 "$(run check-router.sh "$commit_payload")" "改動沒碰到 skill／規則 → 跳過（既有的不一致不是這次造成的）"
 mkdir -p "$SC/.claude/skills/se-b"; echo "---" > "$SC/.claude/skills/se-b/SKILL.md"
 check 2 "$(run check-router.sh "$commit_payload")" "改動碰到 skills/ → 完整掃描，照擋"
+
+# canonical 模式（2.1.0）：有 skills/ 與 scripts/sync_skills.py 的專案，以 skills/ 為準，並檢查 .claude/skills 的投影
+CN="$TMP/canon"; mkdir -p "$CN/skills/se-a" "$CN/skills/extended/se-b" "$CN/scripts"
+cp "$ROOT/scripts/sync_skills.py" "$CN/scripts/"
+printf -- '---\nname: se-a\ndescription: a\n---\n' > "$CN/skills/se-a/SKILL.md"
+printf -- '---\nname: se-b\ndescription: b\n---\n' > "$CN/skills/extended/se-b/SKILL.md"
+printf '1.0.0\n' > "$CN/skills/VERSION"; printf '# INDEX\n\n- `se-a`\n- `se-b`\n' > "$CN/skills/INDEX.md"
+( cd "$CN" && git init -q -b main . && git remote add origin https://example.invalid/se.git && git add -A \
+  && git -c user.name=t -c user.email=t@t commit -qm base ) >/dev/null 2>&1
+cninstall() { ( cd "$CN" && rm -rf "$TMP/cnb" && python scripts/sync_skills.py build --out "$TMP/cnb" \
+  && python scripts/sync_skills.py install --bundle "$TMP/cnb" --dest .claude/skills --layout flat ) >/dev/null 2>&1; }
+cninstall
+export CLAUDE_PROJECT_DIR="$CN"
+check 0 "$(run check-router.sh "$commit_payload")" "canonical：skills/、INDEX 與 flat 投影一致"
+printf '# INDEX\n\n- `se-a`\n' > "$CN/skills/INDEX.md"; cninstall
+check 2 "$(run check-router.sh "$commit_payload")" "canonical：延伸 skill 沒列進 skills/INDEX.md"
+printf '# INDEX\n\n- `se-a`\n- `se-b`\n' > "$CN/skills/INDEX.md"; cninstall
+echo "改" >> "$CN/.claude/skills/se-b/SKILL.md"
+check 2 "$(run check-router.sh "$commit_payload")" "canonical：直接改了 .claude/skills（同步產物）"
+cninstall; echo "新內容" >> "$CN/skills/se-a/SKILL.md"
+check 2 "$(run check-router.sh "$commit_payload")" "canonical：改了 skills/ 卻沒重新同步"
 
 export CLAUDE_PROJECT_DIR="$ROOT"
 check 0 "$(run check-router.sh "$commit_payload")" "本專案目前狀態一致"
@@ -186,10 +212,9 @@ check 0 "$(run check-memory.sh "$commit_payload")" "本專案帳本目前狀態�
 # ---------- guard-done（自主自控）----------
 echo "guard-done"
 GD="$TMP/gd"; mkdir -p "$GD/.claude/skills/se-a" "$GD/.claude/skills/se-orphan" "$GD/.claude/hooks" "$GD/docs/lessons"
-cp "$H/check-router.sh" "$H/check-memory.sh" "$H/_command.sh" "$GD/.claude/hooks/"
 printf '# INDEX\n\n- `se-a`\n' > "$GD/.claude/skills/INDEX.md"
 printf '# 索引\n' > "$GD/docs/lessons/INDEX.md"
-stop() { printf '{"stop_hook_active":%s}' "$1" | CLAUDE_PROJECT_DIR="$2" bash "$H/guard-done.sh" >/dev/null 2>&1; echo $?; }
+stop() { printf '{"stop_hook_active":%s}' "$1" | CLAUDE_PROJECT_DIR="$2" python "$H/guard_done.py" >/dev/null 2>&1; echo $?; }
 check 2 "$(stop false "$GD")" "配置不一致 → 不准結束，繼續修"
 check 0 "$(stop true "$GD")" "已被擋過一次 → 放行（自控邊界，防無限迴圈）"
 printf '# INDEX\n\n- `se-a`\n- `se-orphan`\n' > "$GD/.claude/skills/INDEX.md"
@@ -200,7 +225,7 @@ check 0 "$(stop false "$TMP")" "非本配置的目錄 → 放行"
 echo "recall-lessons"
 RL="$TMP/rl"; mkdir -p "$RL/proj/docs/lessons" "$RL/home/lessons"
 recall() { printf '{"source":"startup"}' | CLAUDE_PROJECT_DIR="$1" SERENDIPITY_HOME="$2" \
-  bash "$H/recall-lessons.sh" 2>/dev/null | grep -c . ; }
+  python "$H/recall_lessons.py" 2>/dev/null | grep -c . ; }
 check 0 "$(recall "$RL/proj" "$RL/nohome")" "兩邊都空 → 完全安靜，不佔 context"
 printf '| [G0001](G0001-x.md) | 跨專案教訓 | 類別 | A、B |\n' > "$RL/home/lessons/INDEX.md"
 n=$(recall "$RL/proj" "$RL/home")
@@ -221,7 +246,7 @@ check 0 "$(promote "$LH/src/ok.md" --seen-in A --seen-in B)" "兩個專案、有
 check 1 "$(SERENDIPITY_HOME="$LH/home" python "$ROOT/.claude/tools/capabilities.py" --json 2>/dev/null \
   | python -c 'import json,sys; print(json.load(sys.stdin)["verified"]["lessons"]["global"])' 2>/dev/null)" \
   "自我模型數得到剛上架的那則（與 recall-lessons 一致）"
-check "$(grep -o 'hooks/[a-z-]*\.sh' "$ROOT/.claude/settings.json" | sort -u | wc -l | tr -d ' ')" \
+check "$(grep -o 'hooks/[a-z_]*\.py' "$ROOT/.claude/settings.json" | sort -u | wc -l | tr -d ' ')" \
   "$(python "$ROOT/.claude/tools/capabilities.py" --json 2>/dev/null \
      | python -c 'import json,sys; print(len(json.load(sys.stdin)["can_do"]["hooks"]))' 2>/dev/null)" \
   "自我模型的 hook 數＝設定檔實際註冊的腳本數（一支掛多個事件只算一道）"
@@ -304,14 +329,14 @@ CKN=$(cygpath -m "$CK" 2>/dev/null || printf '%s' "$CK")
 ckenv() { if [ -n "${CKPID:-}" ]; then CLAUDE_PID="$CKPID" "$@"; else env -u CLAUDE_PID "$@"; fi; }
 ck() {  # ck <事件> <session> [額外欄位] → 記錄器的 stdout
   printf '{"hook_event_name":"%s","session_id":"%s","cwd":"%s"%s}' "$1" "$2" "$CKN" "${3:-}" \
-    | ckenv bash "$H/checkpoint.sh" 2>/dev/null
+    | ckenv python "$H/checkpoint.py" 2>/dev/null
 }
 ckcli() { ( cd "$CK" && ckenv python "$CKPY" "$@" 2>&1 ); }
 CKPID=""
 has() { printf '%s' "$1" | grep -q -- "$2" && echo yes || echo no; }
 
-check 0 "$(printf 'not json' | bash "$H/checkpoint.sh" >/dev/null 2>&1; echo $?)" "壞掉的 payload → 記錄器不擋工作（exit 0）"
-check 0 "$(printf '{"hook_event_name":"Stop","cwd":"%s"}' "$TMP" | bash "$H/checkpoint.sh" >/dev/null 2>&1; echo $?)" "不在 git repo → 放行"
+check 0 "$(printf 'not json' | python "$H/checkpoint.py" >/dev/null 2>&1; echo $?)" "壞掉的 payload → 記錄器不擋工作（exit 0）"
+check 0 "$(printf '{"hook_event_name":"Stop","cwd":"%s"}' "$TMP" | python "$H/checkpoint.py" >/dev/null 2>&1; echo $?)" "不在 git repo → 放行"
 
 ck UserPromptSubmit AAAAAAAA ',"prompt":"把付款重試做完並開 PR"' >/dev/null
 ( cd "$CK" && echo b > b.txt && echo a2 > a.txt )
@@ -399,7 +424,7 @@ check no "$( [ -s "$CK/.git/serendipity/error.log" ] && echo yes || echo no)" "�
 echo "learned"
 LN="$TMP/ln"; mkdir -p "$LN/docs/lessons" "$LN/.claude/skills" "$LN/.claude/hooks" "$LN/.claude/tools"
 printf '# INDEX\n' > "$LN/.claude/skills/INDEX.md"; printf '# 索引\n' > "$LN/docs/lessons/INDEX.md"
-cp "$H/check-router.sh" "$H/check-memory.sh" "$H/_command.sh" "$H/guard-done.sh" "$LN/.claude/hooks/"
+cp "$H/check_router.py" "$H/check_memory.py" "$H/hooklib.py" "$H/guard_done.py" "$LN/.claude/hooks/"
 cp "$ROOT/.claude/tools/checkpoint.py" "$LN/.claude/tools/"
 ( cd "$LN" && git init -q -b main . && git add -A && git -c user.name=t -c user.email=t@t commit -qm base ) >/dev/null 2>&1
 LNN=$(cygpath -m "$LN" 2>/dev/null || printf '%s' "$LN")
@@ -417,7 +442,7 @@ bashev PostToolUseFailure "git commit -m x" "commit 被拒：訊息要以 [SHOP-
 bashev PostToolUse "git commit -m '[SHOP-1] x'" ""
 check 3 "$(lnlearned)" "同一種會改變狀態的指令先失敗後改對 → 學習訊號"
 gd() { printf '{"stop_hook_active":%s}' "$1" | CLAUDE_PROJECT_DIR="$LN" CLAUDE_PID=4242 SE_EVAL="${2:-}" \
-  bash "$LN/.claude/hooks/guard-done.sh" >/dev/null 2>&1; echo $?; }
+  python "$LN/.claude/hooks/guard_done.py" >/dev/null 2>&1; echo $?; }
 check 2 "$(gd false)" "回合結束時提醒一次要不要留 lesson"
 check 0 "$(gd true)" "已經提醒過（stop_hook_active）→ 放行，不無限迴圈"
 check 0 "$(gd false 1)" "觸發評測（SE_EVAL）不提醒"
@@ -437,7 +462,7 @@ printf '{"hook_event_name":"SessionStart","session_id":"DDDD","cwd":"%s","source
   | CLAUDE_PID=5151 python "$ROOT/.claude/tools/checkpoint.py" record >/dev/null 2>&1
 mkdir -p "$DS/build"; echo out > "$DS/build/out.txt"   # 開工之後 agent 自己產生的
 disc() { printf '{"tool_name":"Bash","tool_input":{"command":"%s"},"cwd":"%s"}' "$1" "$DSN" \
-  | CLAUDE_PID=5151 bash "$H/guard-discard.sh" >/dev/null 2>&1; echo $?; }
+  | CLAUDE_PID=5151 python "$H/guard_discard.py" >/dev/null 2>&1; echo $?; }
 for c in "rm -rf scratch/" "git restore README.md" "git checkout -- README.md" "git clean -fd" "git reset --hard" \
          "cd scratch && rm idea.py"; do
   check 2 "$(disc "$c")" "開工前就存在的變更 → 擋：$c"

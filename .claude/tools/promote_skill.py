@@ -23,6 +23,7 @@ import argparse
 import re
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 for _s in (sys.stdout, sys.stderr):
@@ -33,8 +34,11 @@ for _s in (sys.stdout, sys.stderr):
 
 ROOT = Path(__file__).resolve().parents[2]
 CAND = ROOT / ".claude" / "skill-candidates"
-SKILLS = ROOT / ".claude" / "skills"
-INDEX = SKILLS / "INDEX.md"
+# Serendipity 本身：寫 canonical skills/extended/ 再同步；被 /se-bootstrap 帶進的專案只有 .claude/，照舊寫 .claude/skills/
+CANONICAL = (ROOT / "skills" / "INDEX.md").is_file() and (ROOT / "scripts" / "sync_skills.py").is_file()
+SKILLS = ROOT / "skills" / "extended" if CANONICAL else ROOT / ".claude" / "skills"
+INDEX = ROOT / "skills" / "INDEX.md" if CANONICAL else ROOT / ".claude" / "skills" / "INDEX.md"
+INSTALLED = ROOT / ".claude" / "skills"
 INDEPENDENT = {"session-trace", "user-prompt"}
 FLOOR = 3
 
@@ -115,13 +119,37 @@ def main() -> int:
         print(f"✓ {a.name} 四道閘全過（dry-run，未搬移）")
         return 0
 
-    shutil.move(str(CAND / a.name), str(SKILLS / a.name))
-    fm = _frontmatter((SKILLS / a.name / "SKILL.md").read_text(encoding="utf-8"))
-    summary = re.split(r"[——。]", fm["description"])[0][:40]
-    with open(INDEX, "a", encoding="utf-8", newline="\n") as fh:
-        fh.write(f"\n| {summary} | `{a.name}` | 由 se-acquire 習得，升級於 promote_skill.py |\n")
-    print(f"✓ {a.name} 已升級：.claude/skills/{a.name}/，並寫入 INDEX.md")
-    print("  下一步：git commit——check-router.sh 會再驗一次 INDEX 與目錄一致")
+    target = SKILLS / a.name
+    before_index = INDEX.read_bytes()
+    try:
+        shutil.copytree(CAND / a.name, target)
+        fm = _frontmatter((target / "SKILL.md").read_text(encoding="utf-8"))
+        summary = re.split(r"[——。]", fm["description"])[0][:40]
+        with open(INDEX, "a", encoding="utf-8", newline="\n") as fh:
+            fh.write(f"\n| {summary} | `{a.name}` | 由 se-acquire 習得，升級於 promote_skill.py |\n")
+        if not CANONICAL:
+            shutil.rmtree(CAND / a.name)
+            print(f"✓ {a.name} 已升級：.claude/skills/{a.name}/，並寫入 INDEX.md")
+            print("  下一步：git commit——check_router.py 會再驗一次 INDEX 與目錄一致")
+            return 0
+        with tempfile.TemporaryDirectory(prefix="se-promote-") as tmp:
+            bundle = Path(tmp) / "bundle"
+            sys.path.insert(0, str(ROOT / "scripts"))
+            import sync_skills
+            sync_skills.build(ROOT / "skills", bundle, ROOT)
+            problems = sync_skills.validate(bundle)
+            if problems:
+                raise RuntimeError("暫存 bundle 驗證失敗：" + "; ".join(problems))
+            sync_skills.install(bundle, INSTALLED, "flat")
+        shutil.rmtree(CAND / a.name)
+    except Exception as error:
+        if target.exists():
+            shutil.rmtree(target)
+        INDEX.write_bytes(before_index)
+        print(f"✗ 升級失敗，canonical 已回滾：{error}", file=sys.stderr)
+        return 2
+    print(f"✓ {a.name} 已升級：skills/extended/{a.name}/，並安裝 flat projection")
+    print("  下一步：git commit——check_router.py 會再驗一次 INDEX 與目錄一致")
     return 0
 
 

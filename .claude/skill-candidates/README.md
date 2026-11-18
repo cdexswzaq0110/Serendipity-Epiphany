@@ -29,7 +29,7 @@ python .claude/tools/promote_skill.py <名稱>              # 檢查並升級
 | MUTATE | `evals/trigger-cases.md` 至少 **3 條獨立來源**正例。照 description 寫的案例不算 |
 | SOLIDIFY | 名稱不與既有 skill 衝突 |
 
-四道全過才搬進 `skills/` 並寫入 `INDEX.md`。之後 `git commit` 時 `check-router.sh` 會再驗一次。
+四道全過才搬進 `skills/` 並寫入 `INDEX.md`。之後 `git commit` 時 `check_router.py` 會再驗一次。
 
 ## 候選的格式
 
